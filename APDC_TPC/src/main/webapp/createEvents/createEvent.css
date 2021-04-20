@@ -1,0 +1,48 @@
+.create_events{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.addEvt_frm{
+    display: flex;
+    flex-direction: column;
+}
+
+.addEvt_frm{
+    width: 400px;
+}
+.gmap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.gmap_img{
+    width: 60%;
+    height: auto;
+}
+
+.doPad{
+    padding: 10px 10px;
+}
+.doMarg{
+    margin: 10px 10px;
+}
+
+.crt_inp{
+    height: 30px;
+    font-size: 20px;
+    padding: 2px 2px;
+}
+.sbt_crt_btn{
+    width: 130px;
+    align-self: center;
+    background-color: green;
+    color: #fff;
+    font-weight: bold;
+}
+
+.evnt_desc{
+    resize: vertical;
+    font-size: 25px;
+}

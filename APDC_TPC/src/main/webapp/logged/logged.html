@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="logged.css">
+    <link rel="stylesheet" href="../createEvents/createEvent.css">
+
+    <title>Document</title>
+</head>
+<body>
+    <nav class="nav_logged">
+        <span id="name_sp" class="nv_el adt">DANIEL JOAO</span>
+        <span id="email_sp" class="nv_el adt">DANIEL@GMAIL.COM</span>
+
+        <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
+        <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
+    </nav>
+    <nav class="nav_logged">
+        <button id="showInfo">MY INFOS</button>
+        <button id="other_info" name="gbo">OTHER USER INFO</button>
+        <!--
+            <button id="disable_user">DISABLE USERS</button>
+            <button id="change_pwd">CHANGE PASSWORD</button>
+        -->
+        <button id="create_events_btn">CREATE EVENTS</button>
+        <button id="">UPCOMING EVENTS</button>
+        <button id="">FINISHED EVENTS</button>
+    </nav>
+    <div class="main_body">
+        <h1>WELCOME TO THE PLACE WHERE WELCOME IS WELCOME</h1>
+        <div class="main_body_son2">
+            <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
+            <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
+                <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
+                <div class="info_div">
+                    <label>PERFIL:</label>
+                    <div class="sp_attr kj"></div>
+                </div>
+                <div class="info_div">
+                    <label>TELEFONE FIXO:</label>
+                    <div class="sp_attr"></div>
+                </div>
+                <div class="info_div">
+                    <label>TELEFONE MOVEL:</label>
+                    <div class="sp_attr"></div>
+                </div>
+                <div class="info_div">
+                    <label>MORADA:</label>
+                    <div class="sp_attr"></div>
+                </div>
+                <div class="info_div">
+                    <label>MORADA COMPLEMENTAR:</label>
+                    <div class="sp_attr"></div>
+                </div>
+                <div class="info_div">
+                    <label>LOCALIDADE:</label>
+                    <div class="sp_attr"></div>
+                </div>
+                <button id="upDate">UPDATE</button>
+            </div>
+            <!--OTHER USER INFORMATION-->
+            <div class="view_user dispn" id="view_user">
+                <div class="sec_name">VIEWING OTHER USER</div>
+                <form class="form_ele" id="form_ele">
+                    <label for="oth_email">EMAIL</label>
+                    <input id="oth_email">
+                    <button>GO</button>
+                </form>
+                <div class="srch_parent">
+                    <span>SEARCH RESULTS</span>
+                    <div class="srch_res">
+
+                        <div class="srch_attr">
+                            <span class="srch_attr_nam">Name:</span>
+                            <span class="srch_attr_val"></span>
+                        </div>
+                        <div class="srch_attr">
+                            <span class="srch_attr_nam">Email:</span>
+                            <span class="srch_attr_val"></span>
+                        </div>
+                        <div class="srch_attr">
+                            <span class="srch_attr_nam">Role:</span>
+                            <span class="srch_attr_val"></span>
+                        </div>
+                        <div class="srch_attr">
+                            <span class="srch_attr_nam">State:</span>
+                            <span class="srch_attr_val"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--EVENT CREATION-->
+            <div class="view_user dispn" id="create_events">
+                <di class="create_events">
+                    <form class="addEvt_frm" id="addEvt_frm">
+                        <label>Event Name</label>
+                        <input class="crt_inp" type="text" name="inp_data" class="txt_inpt">
+                        <label>Event Description</label>
+                        <textarea class="evnt_desc" name="inp_data"></textarea>
+                        <label >Goals</label>
+                        <input class="crt_inp" name="inp_data" type="text">
+                        <label >Location</label>
+                        <input class="crt_inp" name="inp_data" type="text">
+                        <label>Meeting Place</label>
+                        <input class="crt_inp" name="inp_data" type="text">
+                        <label >Start Date</label>
+                        <input class="crt_inp" name="inp_data" type="date">
+                        <label >End Date</label>
+                        <input class="crt_inp" name="inp_data" type="date">
+                        <label>Duration In Hours</label>
+                        <input class="crt_inp" name="inp_data" type="time" min="1" max="24">
+                        <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
+                    </form>
+                    <div class="gmap" id="gmap">
+                        <img class="gmap_img" src="../imgs/google-maps-apk.jpg">
+                    </div>
+                </di>
+                
+                    
+
+            </div>
+
+        </div>
+
+    </div>
+    <script src="logged.js"></script>
+    <script src="../createEvents/createEvent.js"></script>
+
+</body>
+</html>

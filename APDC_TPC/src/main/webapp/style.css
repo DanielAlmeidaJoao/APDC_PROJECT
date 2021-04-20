@@ -1,0 +1,38 @@
+body{
+    background-color: green;
+}
+
+input{
+  color: white;
+  background-color: blue;
+}
+
+.login_btn{
+  width: auto;
+  background-color: red;
+  font-size: 20px;
+  color: white;
+  padding: 5px 5px;
+}
+/** REGISTER */
+.reg_form, .reg_response{
+  display: flex;
+ /* justify-content: center; */
+  flex-direction: column;
+  justify-self: center;
+  width: 20%;
+  margin: 5% auto;
+}
+
+
+
+.reg_form button{
+  width: 25%;
+  align-self: center;
+}
+
+.reg_response{
+  border: 1px solid red;
+  width: 400px;
+  height: 400px;
+}
