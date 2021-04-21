@@ -8,31 +8,19 @@ function showCreateEventBlock() {
 
 function getEventCreationObject(name, description,goals,location,meetingPlace,startingDate,endingDate,duration) {
     /*
-    return {
-        name:name,
-        description:description,
-        goals: goals,
-        location: location,
-        meetingPlace: meetingPlace,
-        startingDate: startingDate,
-        endingDate:endingDate,
-        duration:duration,
-        token:"ola"
-    } */
-    /*
         name, description, goals, location,
         meetingPlace, startDate, endDate, duration, token;
     */
     let ff = {
-        name:"das",
-        description:"das",
-        goals: "da",
-        location: "dsa",
-        meetingPlace: "aa",
-        startDate: "As",
-        endDate:"dsa",
-        duration:"ds",
-        token:"ola"
+        name:name,
+        description:description,
+        goals: goals,
+        location:location,
+        meetingPlace:meetingPlace,
+        startDate:startingDate,
+        endDate:endingDate,
+        duration:duration,
+        token:token
     }
     return ff;
 }

@@ -172,10 +172,12 @@ function isLogged() {
     }
     console.log("I AM GBO "+gbo);
     token = localStorage.getItem("token");
-    if(token==null){
-        localStorage.clear();
-       window.location.href="/register.html";
-    }
+    /**
+     *     if(token==null){
+            localStorage.clear();
+            window.location.href="/register.html";
+            }
+     */
 }
 /**** SECOND NAV BUTTONS                                     */
 const dispb="dispb";
@@ -211,7 +213,7 @@ function handShowButtons() {
         hideAllBlocksButOne("change_pwd_block");
     }*/
 }
-//isLogged();
+isLogged();
 updateNavAttribues();
 updateAttributes();
 logOff();
