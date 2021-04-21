@@ -2,7 +2,7 @@ package apdc.events.utils;
 
 public class EventData {
 
-	private String name, description, goals, location,
+	String name, description, goals, location,
 	meetingPlace, startDate, endDate, duration, token;
 	public String getToken() {
 		return token;
@@ -61,5 +61,4 @@ public class EventData {
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
-
 }

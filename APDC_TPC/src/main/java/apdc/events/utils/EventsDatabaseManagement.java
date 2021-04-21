@@ -3,8 +3,10 @@ package apdc.events.utils;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Transaction;
+
+import java.util.logging.Logger;
+
 import com.google.cloud.datastore.Datastore;
-import com.google.gson.Gson;
 
 public class EventsDatabaseManagement {
 
@@ -18,30 +20,38 @@ public class EventsDatabaseManagement {
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
 	private static final String DURATION="DURATION";
-	
+	private static final Logger LOG = Logger.getLogger(EventsDatabaseManagement.class.getName());
+
 	public EventsDatabaseManagement() {
 	}
-	public void createEvent(Datastore datastore, EventData event,String email) {
-		int result=-1;		
+	public static String createEvent(Datastore datastore, EventData et,String email) {
 		//Generate automatically a key
+		LOG.severe("GOING TO CREATE EVENT!!!");
+
+		String result="";
 		com.google.cloud.datastore.Key eventKey=datastore.allocateId(datastore.newKeyFactory()
 				.addAncestors(PathElement.of(USERS,email))
 				.setKind(EVENTS).newKey());
 		Transaction txn = datastore.newTransaction();
 		  try {
-			  /**
-			   * TODO
-			   * Entity event;
-			event=Entity.newBuilder(eventKey)
-					
-			txn.put(event);
+			Entity ev=Entity.newBuilder(eventKey)
+					.set(NAME,et.getName())
+					.set(DESCRIPTION,et.getDescription())
+					.set(GOAL,et.getGoals())
+					.set(LOCATION,et.getLocation())
+					.set(MEETING_PLACE,et.getMeetingPlace())
+					.set(START_DATE,et.getStartDate())
+					.set(END_DATE,et.getEndDate())
+					.set(DURATION,et.getDuration())
+					.build();
+			txn.put(ev);
 		    txn.commit();
-		    result=1;
-			   * 
-			   */
-			
+		    result="1";
 		  }catch(Exception e) {
+			  result="-1";
+			  LOG.severe(e.getLocalizedMessage());
+			  e.printStackTrace();
 		  }
-		  return;
+		  return result;
 	}
 }
