@@ -3,7 +3,6 @@ function showCreateEventBlock() {
     createEvent.onclick=()=>{
         hideAllBlocksButOne("create_events");
     }
-    console.log("OLA, WORKING!");
 }
 
 function getEventCreationObject(name, description,goals,location,meetingPlace,startingDate,endingDate,duration) {
@@ -39,7 +38,7 @@ function handleCreateEventSubmitForm() {
         let data = getFrontEndInputs();
         //console.log(data);
         data = JSON.stringify(data);
-        uploadData(data);
+        uploadData(data,sbmt);
         console.log(data);
         return false;
     }
@@ -47,7 +46,7 @@ function handleCreateEventSubmitForm() {
 showCreateEventBlock();
 handleCreateEventSubmitForm();
 
-function uploadData(datas) {
+function uploadData(datas,formEle) {
     fetch('/rest/events/create', {
     method: 'POST', // or 'PUT'
     headers: {
@@ -57,6 +56,7 @@ function uploadData(datas) {
     })
     .then(response => response.json())
     .then(data => {
+        formEle.reset();
         console.log('Success:', data);
     })
     .catch((error) => {

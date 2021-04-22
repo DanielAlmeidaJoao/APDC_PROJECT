@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="logged.css">
     <link rel="stylesheet" href="../createEvents/createEvent.css">
-
-    <title>Document</title>
+    <link rel="stylesheet" href="../getEvents/getEvent.css">
+    <title>Who am I</title>
 </head>
 <body>
     <nav class="nav_logged">
@@ -25,7 +25,7 @@
             <button id="change_pwd">CHANGE PASSWORD</button>
         -->
         <button id="create_events_btn">CREATE EVENTS</button>
-        <button id="">UPCOMING EVENTS</button>
+        <button id="get_evts_btn">UPCOMING EVENTS</button>
         <button id="">FINISHED EVENTS</button>
     </nav>
     <div class="main_body">
@@ -117,9 +117,29 @@
                         <img class="gmap_img" src="../imgs/google-maps-apk.jpg">
                     </div>
                 </di>
-                
-                    
+            </div>
 
+            <!--EVENT GET EVENTS-->
+            <div class="view_user dispn" id="show_events_blk">
+                <div class="show_events">
+                    <div>
+                        <span>Name</span>
+                        <div>Description</div>
+                        <div>Goals</div>
+                    </div>
+                    <div>
+                        <span>Location</span>
+                        <span>Meeting Point</span>
+                    </div>
+                    <div>
+                        <span>Start Date</span>
+                        <span>End Date</span>
+                    </div>
+                    <div>
+                        <span>Start Time</span>
+                        <span>End Time</span>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -127,6 +147,6 @@
     </div>
     <script src="logged.js"></script>
     <script src="../createEvents/createEvent.js"></script>
-
+    <script src="../getEvents/getEvent.js"></script>
 </body>
 </html>
