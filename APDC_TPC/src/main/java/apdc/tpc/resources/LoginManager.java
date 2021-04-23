@@ -1,9 +1,5 @@
 package apdc.tpc.resources;
 
-import java.util.HashMap;
-
-
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,14 +19,13 @@ import com.google.gson.Gson;
 import com.google.cloud.datastore.Entity;
 
 import apdc.tpc.utils.AdditionalAttributes;
-import apdc.tpc.utils.AuthToken;
-import apdc.tpc.utils.AuthenticateUser;
 import apdc.tpc.utils.ChangeOtherUser;
 import apdc.tpc.utils.LoggedObject;
 import apdc.tpc.utils.LoginData;
 import apdc.tpc.utils.RegisterData;
 import apdc.tpc.utils.StorageMethods;
 import apdc.tpc.utils.UserInfo;
+import apdc.tpc.utils.tokens.HandleTokens;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -40,9 +35,7 @@ public class LoginManager {
 	private static final Logger LOG = Logger.getLogger(LoginManager.class.getName());
 	public static final Datastore datastore =	DatastoreOptions.getDefaultInstance().getService();
 
-	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL
-	private static final Map<String,AuthToken> tokens = new HashMap<>();
-	
+	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();
 
 	@GET
@@ -56,20 +49,7 @@ public class LoginManager {
 		}
 		return Response.ok().entity(g.toJson(rs)).build();
 	}
-	private String validToken(String token) {
-		//long now;
-		//AuthToken tk = tokens.get(token);
-		return AuthenticateUser.validateToken(datastore,token);
-	}
-	private String registerToken(String email) {
-		String token=null;
-		AuthToken tk = new AuthToken(email);
-		tokens.put(tk.tokenID,tk);
-		if(AuthenticateUser.insertToken(datastore,tk)>0) {
-			token=tk.tokenID;
-		}
-		return token;
-	}
+
 	@POST
 	@Path("/op1")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -79,7 +59,7 @@ public class LoginManager {
 		Response res=null;
 		LoggedObject lo = StorageMethods.addUser(datastore,data,g);
 		if(lo.getStatus().equals("1")) {
-			String token=registerToken(lo.getEmail());
+			String token=HandleTokens.generateToken(lo.getEmail());
 			if(token!=null) {
 				lo.setStatus("1");
 				lo.setToken(token);
@@ -107,7 +87,7 @@ public class LoginManager {
 				//AuthToken at = new AuthToken(user.getString("email"));
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString("name"));
-				lo.setToken(registerToken(lo.getEmail()));
+				lo.setToken(HandleTokens.generateToken(lo.getEmail()));
 				if(lo.getToken()==null) {
 					lo.setStatus("2");
 				}else {
@@ -137,10 +117,9 @@ public class LoginManager {
 		}else {
 			LOG.severe("PQ GOING AWEL");
 		}
-		String email = AuthenticateUser.validateToken(datastore,ads.getEmail());
+		String email = HandleTokens.validateToken(ads.getEmail());
 		String result = "-2";
 		
-		ads.setEmail(validToken(ads.getEmail()));
 		if(email!=null) {
 			ads.setEmail(email);
 			result=""+StorageMethods.addUserAdditionalInformation(datastore, ads);
@@ -154,7 +133,8 @@ public class LoginManager {
 	@Path("/op7/{token}")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
 	public Response doLogout(@PathParam("token") String token) {
-		int result = AuthenticateUser.removeToken(datastore,token);
+		HandleTokens.destroyToken(token);
+		int result =1;
 		return Response.ok().entity(result).build();
 	}
 	@POST
@@ -162,14 +142,15 @@ public class LoginManager {
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doRemove(LoginData data) {
-		String tk = AuthenticateUser.validateToken(datastore,data.getEmail());
+		String token= data.getEmail();
+		String tk = HandleTokens.validateToken(data.getEmail());
 		String res="";
 		if(tk==null) {
 			res="SESSION EXPIRED!";
 		}else {
 			data.setEmail(tk);
 			if (StorageMethods.removeUser(datastore, data)>0) {
-				AuthenticateUser.removeToken(datastore,tk);
+				HandleTokens.destroyToken(token);
 				res="REMOVED WITH SUCCESS!";
 			}else {
 				res="THERE WAS AN ERROR!";
@@ -200,7 +181,7 @@ public class LoginManager {
 		LOG.severe(data.toString());
 		String u = StorageMethods.disableUser(datastore,data);
 		if(u.equals("2")) {
-			AuthenticateUser.removeTokens(datastore,data.getEmail());
+			HandleTokens.destroyToken(data.getEmail());
 		}
 		return Response.ok().entity(u).build();
 	}
@@ -214,7 +195,7 @@ public class LoginManager {
 	       password: newPass,
 	       email: token,
 		 */
-		String email = validToken(data.getEmail());
+		String email = HandleTokens.validateToken(data.getEmail());
 		if(email!=null) {
 			email = StorageMethods.updatePassword(datastore, email,data.getPassword(),data.getName()); //result
 		}else {

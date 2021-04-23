@@ -1,12 +1,18 @@
 package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.tpc.resources.LoginManager;
+
 import java.util.logging.Logger;
 
+import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
 public class EventsDatabaseManagement {
@@ -58,8 +64,32 @@ public class EventsDatabaseManagement {
 		  }
 		  return result;
 	}
-	public static StringValue svNoIndex(String par) {
+	public static StringValue noIndexProperties(String par, Cursor pageCursor) {
 		return StringValue.newBuilder(par)
 		.setExcludeFromIndexes(true).build();
+	}
+	/**
+	 * Caution: Be careful when passing a cursor to a client, such as in a web form.
+	 * Although the client cannot change the cursor value to access results outside of the original query,
+	 *  it is possible for it to decode the cursor to expose information about result entities,
+	 *  such as the project ID, entity kind, key name or numeric ID, ancestor keys,
+	 *  and properties used in the query's filters and sort orders.
+	 *  If you don't want users to have access to that information,
+	 *  you can encrypt the cursor, or store it and provide the user with an opaque key
+	 * @param pageSize
+	 * @param pageCursor
+	 */
+	public static void fetchEvent(int pageSize, String pageCursor) {
+		EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder().setKind("Task")
+			    .setLimit(pageSize);
+			if (pageCursor != null) {
+			  queryBuilder.setStartCursor(null);
+			}
+			QueryResults<Entity> tasks = LoginManager.datastore.run(queryBuilder.build());
+			while (tasks.hasNext()) {
+			  Entity task = tasks.next();
+			  // do something with the task
+			}
+			Cursor nextPageCursor = tasks.getCursorAfter();
 	}
 }

@@ -11,6 +11,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
+import apdc.tpc.utils.tokens.HandleTokens;
+
 public class StorageMethods {
 
 	private static final String PASSWORD = "password";
@@ -49,7 +51,7 @@ public class StorageMethods {
 		//data.password -> other user email
 		UserInfo u = new UserInfo();
 		try {
-			String loggedUser = AuthenticateUser.validateToken(datastore,data.getEmail());
+			String loggedUser = HandleTokens.validateToken(data.getEmail());
 			if(loggedUser==null) {
 				u.setStatus("-1");//MUST LOGIN AGAIN
 				return u;
@@ -156,7 +158,7 @@ public class StorageMethods {
 		Transaction txn=null;
 		String result="-1";
 		try {
-			String loggedUser = AuthenticateUser.validateToken(datastore,data.getToken());
+			String loggedUser = HandleTokens.validateToken(data.getToken());
 			LOG.severe("OK-1");
 			if(loggedUser==null) {
 				return result;
