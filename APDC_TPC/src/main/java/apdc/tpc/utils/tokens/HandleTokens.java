@@ -1,7 +1,11 @@
 package apdc.tpc.utils.tokens;
 
 import java.io.UnsupportedEncodingException;
+
 import java.util.Date;
+
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -19,7 +23,7 @@ public class HandleTokens {
 	}
 
 	public static String generateToken(String email) {
-		Date date = new Date(System.currentTimeMillis()+(THIRTY_MINUTES/30));
+		Date date = new Date(System.currentTimeMillis()+(THIRTY_MINUTES));
 		String jwt=null;
 		try {
 			jwt = Jwts.builder()
@@ -74,6 +78,13 @@ public class HandleTokens {
 		Claims claims = getClaims(token);
 		claims.clear();
 		claims.setExpiration(null);
+	}
+	
+	public static NewCookie makeCookie(String name,String value) {
+		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
+		Cookie ck = new Cookie(name, value);
+		NewCookie nk = new NewCookie(ck,null,-1,null,true,true);
+		return nk;
 	}
 	
 	public static void main(String [] args) {

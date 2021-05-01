@@ -21,6 +21,7 @@ function getEventCreationObject(name, description,goals,location,meetingPlace,st
         duration:duration,
         token:token
     }
+    
     return ff;
 }
 function getValue(formElement) {
@@ -43,8 +44,6 @@ function handleCreateEventSubmitForm() {
         return false;
     }
 }
-showCreateEventBlock();
-handleCreateEventSubmitForm();
 
 function uploadData(datas,formEle) {
     fetch('/rest/events/create', {
@@ -63,3 +62,6 @@ function uploadData(datas,formEle) {
         console.error('Error:', error);
     });
 }
+
+showCreateEventBlock();
+handleCreateEventSubmitForm();

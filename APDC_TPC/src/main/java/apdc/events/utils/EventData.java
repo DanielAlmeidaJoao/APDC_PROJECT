@@ -20,6 +20,8 @@ public class EventData {
 		this.name = name;
 	}
 	public String getDescription() {
+		//String unsafe = "<p><a href='http://example.com/' onclick='stealCookies()'>Link</a></p>";
+		//String safe = Jsoup.clean(unsafe, Whitelist.basic());
 		return description;
 	}
 	public void setDescription(String description) {

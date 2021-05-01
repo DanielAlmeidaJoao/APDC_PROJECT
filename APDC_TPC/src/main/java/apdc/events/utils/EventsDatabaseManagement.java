@@ -1,6 +1,7 @@
 package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
+
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
@@ -8,8 +9,10 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
-import apdc.tpc.resources.LoginManager;
+import apdc.utils.conts.Constants;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Cursor;
@@ -27,6 +30,8 @@ public class EventsDatabaseManagement {
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
 	private static final String DURATION="DURATION";
+	private static final int PAGESIGE = 12;
+	private static final int TWO= 2;
 	private static final Logger LOG = Logger.getLogger(EventsDatabaseManagement.class.getName());
 
 	public EventsDatabaseManagement() {
@@ -36,7 +41,8 @@ public class EventsDatabaseManagement {
 		LOG.severe("GOING TO CREATE EVENT!!! -> "+email);
 
 		String result="";
-		
+		//SAVE TIMESTAMPS Timestamp tp = Timestamp.of(date);
+
 		  try {
 		  com.google.cloud.datastore.Key eventKey=datastore.allocateId(datastore.newKeyFactory()
 					.addAncestors(PathElement.of(USERS,email))
@@ -85,11 +91,56 @@ public class EventsDatabaseManagement {
 			if (pageCursor != null) {
 			  queryBuilder.setStartCursor(null);
 			}
-			QueryResults<Entity> tasks = LoginManager.datastore.run(queryBuilder.build());
+			QueryResults<Entity> tasks = Constants.datastore.run(queryBuilder.build());
 			while (tasks.hasNext()) {
-			  Entity task = tasks.next();
+			  //Entity task = tasks.next();
 			  // do something with the task
 			}
-			Cursor nextPageCursor = tasks.getCursorAfter();
+			//com.google.appengine.api.datastore.Cursor nextPageCursor = tasks.getCursorAfter();
+			//String encodedCursor = original.toWebSafeString();
+	}
+	
+	public static String [] getEvents(String startCursor) {
+		String [] results = new String[TWO];
+		Cursor startcursor=null;
+		Query<Entity> query=null;
+		
+		if (startCursor!=null) {
+	      startcursor = Cursor.fromUrlSafe(startCursor);
+	      query = Query.newEntityQueryBuilder()
+				    .setKind(EVENTS)
+				    .setLimit(PAGESIGE).setStartCursor(startcursor)
+				    .build();
+	    }else {
+	    	query= Query.newEntityQueryBuilder()
+				    .setKind(EVENTS)
+				    .setLimit(PAGESIGE)
+				    .build();
+	    }
+
+		QueryResults<Entity> tasks = Constants.datastore.run(query);
+		
+	    Entity e;
+		List<EventData> events = new LinkedList<>();
+		
+		while(tasks.hasNext()) {
+			e = tasks.next();
+			events.add(getEvent(e));
+		}
+		results[0]=Constants.g.toJson(events);
+		results[1]=tasks.getCursorAfter().toUrlSafe();
+		return results;
+	}
+	public static EventData getEvent(Entity en) {
+		EventData ed = new  EventData();
+		ed.setDescription(en.getString(DESCRIPTION));
+		ed.setDuration(en.getString(DURATION));
+		ed.setEndDate(en.getString(END_DATE));
+		ed.setGoals(en.getString(GOAL));
+		ed.setLocation(en.getString(LOCATION));
+		ed.setMeetingPlace(en.getString(MEETING_PLACE));
+		ed.setName(en.getString(NAME));
+		ed.setStartDate(en.getString(START_DATE));
+		return ed;
 	}
 }
