@@ -5,7 +5,7 @@ public class EventData {
 	String name, description, goals, location,
 	meetingPlace, startDate, endDate, duration, token;
 	public String getToken() {
-		return token;
+		return token; //ola
 	}
 	public void setToken(String token) {
 		this.token = token;
