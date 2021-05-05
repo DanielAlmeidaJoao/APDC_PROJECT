@@ -131,18 +131,18 @@ function removeAccount() {
 }
 function sendLogOff() {
     let spanText= document.getElementById("rs_sn");
-        let xmlHttpReq = getHttpXmlRequest();
-        xmlHttpReq.onreadystatechange = function(){
-            if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-                let rt = xmlHttpReq.responseText;
-                alert(rt+" result");
-                localStorage.clear();
-                window.location.href="/register.html";
-            }
+    let xmlHttpReq = getHttpXmlRequest();
+    xmlHttpReq.onreadystatechange = function(){
+        if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
+            let rt = xmlHttpReq.responseText;
+            localStorage.clear();
         }
-        xmlHttpReq.open("GET","../rest/login/op7/"+token,true);
-        xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-        xmlHttpReq.send();
+    }
+    xmlHttpReq.open("GET","../rest/login/op7",true);
+    xmlHttpReq.setRequestHeader("Content-Type", "application/json");
+    xmlHttpReq.send();
+
+    window.location.href="/";
 }
 function deleteAccount(obj) {
     let spanText= document.getElementById("rs_sn");
@@ -152,7 +152,7 @@ function deleteAccount(obj) {
                 let rt = xmlHttpReq.responseText;
                 alert(rt+" result");
                 localStorage.clear();
-                window.location.href="/register.html";
+                window.location.href="/";
             }
         }
         xmlHttpReq.open("POST","../rest/login/op8",true);

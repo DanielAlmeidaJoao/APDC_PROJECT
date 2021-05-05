@@ -30,7 +30,7 @@ public class EventsDatabaseManagement {
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
 	private static final String DURATION="DURATION";
-	private static final int PAGESIGE = 12;
+	private static final int PAGESIGE = 6;
 	private static final int TWO= 2;
 	private static final Logger LOG = Logger.getLogger(EventsDatabaseManagement.class.getName());
 
@@ -133,6 +133,7 @@ public class EventsDatabaseManagement {
 	}
 	public static EventData getEvent(Entity en) {
 		EventData ed = new  EventData();
+		ed.setEventId(en.getKey().getId());
 		ed.setDescription(en.getString(DESCRIPTION));
 		ed.setDuration(en.getString(DURATION));
 		ed.setEndDate(en.getString(END_DATE));

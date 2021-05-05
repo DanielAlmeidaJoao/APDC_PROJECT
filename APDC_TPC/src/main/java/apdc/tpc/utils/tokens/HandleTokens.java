@@ -1,19 +1,15 @@
 package apdc.tpc.utils.tokens;
 
 import java.io.UnsupportedEncodingException;
-
 import java.util.Date;
 
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 
+import apdc.utils.conts.Constants;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 
 public class HandleTokens {
 	private static final long THIRTY_MINUTES=30*60000;
@@ -40,12 +36,14 @@ public class HandleTokens {
 		}
 		return jwt;
 	}
-	private static Claims getClaims(String token){
+	private static Claims getClaims(String token) throws Exception{
 		Claims claims=null;
+		claims = Jwts.parser()
+				  .setSigningKey("secret".getBytes("UTF-8")) //a strong key must come here
+				  .parseClaimsJws(token).getBody();
+		/*
 		try {
-			claims = Jwts.parser()
-			  .setSigningKey("secret".getBytes("UTF-8")) //a strong key must come here
-			  .parseClaimsJws(token).getBody();
+			
 		} catch (ExpiredJwtException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,30 +62,42 @@ public class HandleTokens {
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		//assertEquals(scope, "self groups/admins");
 		return claims;
 	}
-	public static String validateToken(String token) {
+	public static String validateToken(String token) throws Exception {
 		String userid = (String) getClaims(token).get("userid");
 		//assertEquals(scope, "self groups/admins");
 		return userid;
 	}
 	
 	public static void destroyToken(String token) {
-		Claims claims = getClaims(token);
-		claims.clear();
-		claims.setExpiration(null);
+		try {
+			Claims claims = getClaims(token);
+			claims.clear();
+			claims.setExpiration(null);
+		}catch(Exception e) {
+			
+		}
+
 	}
 	
-	public static NewCookie makeCookie(String name,String value) {
+	public static NewCookie makeCookie(String name,String value,String domain) {
 		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
-		Cookie ck = new Cookie(name, value);
+		Cookie ck = new Cookie(name, value, "/", domain);
 		NewCookie nk = new NewCookie(ck,null,-1,null,true,true);
+		return nk;
+	}
+	public static NewCookie destroyCookie(String name,String value) {
+		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
+		Cookie ck = new Cookie(name,value);
+		NewCookie nk = new NewCookie(ck,null,Constants.ZERO,null,true,true);
 		return nk;
 	}
 	
 	public static void main(String [] args) {
+		/*
 		String token = generateToken("daniel");
 		System.out.println(token);
 		System.out.println("Going to sleep...");
@@ -95,6 +105,6 @@ public class HandleTokens {
 		System.out.println(validateToken(token));
 		destroyToken(token);
 		System.out.println("DESTROYED!");
-		System.out.println(validateToken(token));
+		System.out.println(validateToken(token)); */
 	}
 }

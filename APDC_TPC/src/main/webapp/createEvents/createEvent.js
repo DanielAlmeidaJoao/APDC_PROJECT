@@ -8,7 +8,7 @@ function showCreateEventBlock() {
 function getEventCreationObject(name, description,goals,location,meetingPlace,startingDate,endingDate,duration) {
     /*
         name, description, goals, location,
-        meetingPlace, startDate, endDate, duration, token;
+        meetingPlace, startDate, endDate, duration;
     */
     let ff = {
         name:name,
@@ -19,9 +19,7 @@ function getEventCreationObject(name, description,goals,location,meetingPlace,st
         startDate:startingDate,
         endDate:endingDate,
         duration:duration,
-        token:token
-    }
-    
+    }    
     return ff;
 }
 function getValue(formElement) {

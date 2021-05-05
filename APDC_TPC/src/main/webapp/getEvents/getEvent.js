@@ -11,7 +11,7 @@ function handleGetEventsButton() {
     };
 }
 function loadEvents() {
-    let path = `/rest/events/view/${token}`;
+    let path = `/rest/events/view`;
     console.log("GOING TO FETCH EVENTS!!");
     console.log(path);
     fetch(path)
@@ -37,6 +37,9 @@ function makeElement(elementType,valueAtt) {
     let div11 = document.createElement(elementType);
     div11.textContent = valueAtt;
     return div11;
+}
+function removeEventButton() {
+    
 }
 function makeEventBlock(eventObj) {
     /*
@@ -75,8 +78,15 @@ function makeEventBlock(eventObj) {
     parBlock.appendChild(div44);
 
     parBlock.setAttribute("class","evt_disp");
+    parBlock.setAttribute("id",eventObj.eventId);
 
-    return parBlock;
+    let grandPa = document.createElement("div");
+    let btn = document.createElement("button");
+
+    grandPa.appendChild(parBlock);
+    grandPa.appendChild(btn);
+
+    return grandPa;
 }
 showGetEventsBlock();
 handleGetEventsButton();

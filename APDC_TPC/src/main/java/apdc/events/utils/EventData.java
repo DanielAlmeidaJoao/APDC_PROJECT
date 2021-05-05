@@ -3,16 +3,19 @@ package apdc.events.utils;
 public class EventData {
 
 	String name, description, goals, location,
-	meetingPlace, startDate, endDate, duration, token;
-	public String getToken() {
-		return token; //ola
+	meetingPlace, startDate, endDate, duration;
+	long eventId;
+
+	public EventData() {}
+
+	public long getEventId() {
+		return eventId;
 	}
-	public void setToken(String token) {
-		this.token = token;
+
+	public void setEventId(long eventId) {
+		this.eventId = eventId;
 	}
-	public EventData() {
-		// TODO Auto-generated constructor stub
-	}
+
 	public String getName() {
 		return name;
 	}

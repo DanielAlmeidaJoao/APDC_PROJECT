@@ -6,7 +6,8 @@ import com.google.gson.Gson;
 
 public interface Constants {
 	
-	public static final String COOKIE_NAME ="token";
+	public static final int ZERO = 0;
+	public static final String COOKIE_TOKEN ="token";
 	public static final String GET_EVENT_CURSOR_CK ="crsck";
 
 	public static final Gson g = new Gson();

@@ -1,10 +1,5 @@
 package apdc.tpc.resources;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,12 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
@@ -84,7 +77,7 @@ public class LoginManager {
 	@Path("/op2")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doLogin(@CookieParam(Constants.COOKIE_NAME) String value, LoginData data) {
+	public Response doLogin(@Context HttpHeaders httpHeaders, @CookieParam(Constants.COOKIE_TOKEN) String value, LoginData data) {
 		String res=null;
 		LoggedObject lo = new LoggedObject();
 		NewCookie k=null;
@@ -94,7 +87,8 @@ public class LoginManager {
 				lo.setStatus("0");
 			}else{
 				//AuthToken at = new AuthToken(user.getString("email"));
-				k = HandleTokens.makeCookie(Constants.COOKIE_NAME,HandleTokens.generateToken(data.getEmail()));
+			    String domain = httpHeaders.getHeaderString("host");
+				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(data.getEmail()),domain);
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString("name"));
 				lo.setToken(HandleTokens.generateToken(lo.getEmail()));
@@ -128,7 +122,12 @@ public class LoginManager {
 		}else {
 			LOG.severe("PQ GOING AWEL");
 		}
-		String email = HandleTokens.validateToken(ads.getEmail());
+		String email = null;
+		try {
+			email = HandleTokens.validateToken(ads.getEmail());
+		}catch(Exception e) {
+			
+		}
 		String result = "-2";
 		
 		if(email!=null) {
@@ -141,13 +140,16 @@ public class LoginManager {
 	}
 
 	@GET
-	@Path("/op7/{token}")
+	@Path("/op7")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
 	//@Context HttpHeaders headers
-	public Response doLogout(@PathParam("token") String token) {
-		HandleTokens.destroyToken(token);	    	    
+	public Response doLogout() {
+		//HandleTokens.destroyToken(token);
+	    NewCookie tokenCookie = HandleTokens.destroyCookie(Constants.COOKIE_TOKEN,"");
+	    NewCookie eventOffsetCookie = HandleTokens.destroyCookie(Constants.GET_EVENT_CURSOR_CK,"");
+
 		int result =1;
-		return Response.ok().entity(result).build();
+		return Response.ok().cookie(tokenCookie,eventOffsetCookie).entity(result).build();
 	}
 	@POST
 	@Path("/op8")
@@ -155,7 +157,12 @@ public class LoginManager {
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doRemove(LoginData data) {
 		String token= data.getEmail();
-		String tk = HandleTokens.validateToken(data.getEmail());
+		String tk =null;
+		try {
+			 tk= HandleTokens.validateToken(data.getEmail());
+		}catch (Exception e) {
+			
+		}
 		String res="";
 		if(tk==null) {
 			res="SESSION EXPIRED!";
@@ -193,7 +200,11 @@ public class LoginManager {
 		LOG.severe(data.toString());
 		String u = StorageMethods.disableUser(Constants.datastore,data);
 		if(u.equals("2")) {
-			HandleTokens.destroyToken(data.getEmail());
+			try {
+				HandleTokens.destroyToken(data.getEmail());
+			}catch(Exception e) {
+				
+			}
 		}
 		return Response.ok().entity(u).build();
 	}
@@ -207,7 +218,12 @@ public class LoginManager {
 	       password: newPass,
 	       email: token,
 		 */
-		String email = HandleTokens.validateToken(data.getEmail());
+		String email=null;
+		try {
+			email = HandleTokens.validateToken(data.getEmail());
+		}catch(Exception e) {
+			
+		}
 		if(email!=null) {
 			email = StorageMethods.updatePassword(Constants.datastore, email,data.getPassword(),data.getName()); //result
 		}else {
