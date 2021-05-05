@@ -2,19 +2,26 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
-import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
@@ -29,39 +36,44 @@ public class EventsDatabaseManagement {
 	private static final String MEETING_PLACE="MEETING_PLACE";
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
-	private static final String DURATION="DURATION";
 	private static final int PAGESIGE = 6;
 	private static final int TWO= 2;
 	private static final Logger LOG = Logger.getLogger(EventsDatabaseManagement.class.getName());
 
 	public EventsDatabaseManagement() {
 	}
+	/**
+	 * creates and stores an event into the database
+	 * @param datastore datastore object
+	 * @param et event to create into the database
+	 * @param email id of the user performing the operation
+	 * @return
+	 */
 	public static String createEvent(Datastore datastore, EventData et,String email) {
 		//Generate automatically a key
 		LOG.severe("GOING TO CREATE EVENT!!! -> "+email);
 
 		String result="";
-		//SAVE TIMESTAMPS Timestamp tp = Timestamp.of(date);
-
+		Transaction txn=null;
 		  try {
 		  com.google.cloud.datastore.Key eventKey=datastore.allocateId(datastore.newKeyFactory()
 					.addAncestors(PathElement.of(USERS,email))
 					.setKind(EVENTS).newKey());
-			Transaction txn = datastore.newTransaction();
+			txn = datastore.newTransaction();
 			Entity ev=Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
 					.set(GOAL,et.getGoals())
 					.set(LOCATION,et.getLocation())
 					.set(MEETING_PLACE,et.getMeetingPlace())
-					.set(START_DATE,et.getStartDate())
-					.set(END_DATE,et.getEndDate())
-					.set(DURATION,et.getDuration())
+					.set(START_DATE,makeTimeStamp(et.getStartDate()))
+					.set(END_DATE,makeTimeStamp(et.getEndDate()))
 					.build();
 			txn.put(ev);
 		    txn.commit();
 		    result="1";
 		  }catch(Exception e) {
+			  StorageMethods.rollBack(txn);
 			  result="-1";
 			  LOG.severe("ERRRORR");
 			  LOG.severe(e.getLocalizedMessage());
@@ -70,7 +82,33 @@ public class EventsDatabaseManagement {
 		  }
 		  return result;
 	}
-	public static StringValue noIndexProperties(String par, Cursor pageCursor) {
+	/**
+	 * creates a google timestamp object from the string of a date representation
+	 * @param date the date to be converted to a timestamp
+	 * @return a timestamp of the input date
+	 * @throws ParseException an exception case the operation fails
+	 */
+	private static Timestamp makeTimeStamp(String date) throws ParseException {
+		LOG.severe("SAVING DATES <----------------> "+date);
+	    Date dat=new SimpleDateFormat(Constants.DATE_FORMAT).parse(date);
+		Timestamp start = Timestamp.of(dat);
+		return start;
+	}
+	/**
+	 * from a timestamp, gets the string date representation
+	 * @param t - the required timestamp
+	 * @return string date from the timestamp
+	 */
+	private static String revertTimeStamp(Timestamp t){
+		String rr = new SimpleDateFormat(Constants.DATE_FORMAT).format(t.toDate());
+		return rr;
+	}
+	/**This methods says that a certain property must not be indexed. TO CHECK LATER
+	 * 
+	 * @param par
+	 * @return
+	 */
+	public static StringValue noIndexProperties(String par) {
 		return StringValue.newBuilder(par)
 		.setExcludeFromIndexes(true).build();
 	}
@@ -84,22 +122,8 @@ public class EventsDatabaseManagement {
 	 *  you can encrypt the cursor, or store it and provide the user with an opaque key
 	 * @param pageSize
 	 * @param pageCursor
+	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static void fetchEvent(int pageSize, String pageCursor) {
-		EntityQuery.Builder queryBuilder = Query.newEntityQueryBuilder().setKind("Task")
-			    .setLimit(pageSize);
-			if (pageCursor != null) {
-			  queryBuilder.setStartCursor(null);
-			}
-			QueryResults<Entity> tasks = Constants.datastore.run(queryBuilder.build());
-			while (tasks.hasNext()) {
-			  //Entity task = tasks.next();
-			  // do something with the task
-			}
-			//com.google.appengine.api.datastore.Cursor nextPageCursor = tasks.getCursorAfter();
-			//String encodedCursor = original.toWebSafeString();
-	}
-	
 	public static String [] getEvents(String startCursor) {
 		String [] results = new String[TWO];
 		Cursor startcursor=null;
@@ -117,12 +141,10 @@ public class EventsDatabaseManagement {
 				    .setLimit(PAGESIGE)
 				    .build();
 	    }
-
 		QueryResults<Entity> tasks = Constants.datastore.run(query);
 		
 	    Entity e;
 		List<EventData> events = new LinkedList<>();
-		
 		while(tasks.hasNext()) {
 			e = tasks.next();
 			events.add(getEvent(e));
@@ -131,17 +153,56 @@ public class EventsDatabaseManagement {
 		results[1]=tasks.getCursorAfter().toUrlSafe();
 		return results;
 	}
-	public static EventData getEvent(Entity en) {
+	/**
+	 * deletes an event
+	 * @param eventId the event to be deleted
+	 * @param email email of the user performing the operation
+	 */
+	public static void deleteEvent (String eventId, String email) throws WebApplicationException{
+		Datastore datastore = Constants.datastore;
+		long event = Long.parseLong(eventId);
+		 com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
+					.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
+		 
+		Transaction txn=null;
+		try {
+			txn = datastore.newTransaction();
+			txn = datastore.newTransaction();
+			txn.delete(eventKey);
+		    txn.commit();
+		}catch(Exception e) {
+			LOG.severe(e.getLocalizedMessage());
+			StorageMethods.rollBack(txn);
+			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	/***
+	 * Converts an entity event to an object event that'll be sent to the frontend
+	 * @param en the entity
+	 * @return an event of type EventData
+	 */
+	private static EventData getEvent(Entity en) {
 		EventData ed = new  EventData();
+		Entity parentEntity = Constants.datastore.get(en.getKey().getParent());
 		ed.setEventId(en.getKey().getId());
 		ed.setDescription(en.getString(DESCRIPTION));
-		ed.setDuration(en.getString(DURATION));
-		ed.setEndDate(en.getString(END_DATE));
+		ed.setEndDate(revertTimeStamp(en.getTimestamp(END_DATE)));
 		ed.setGoals(en.getString(GOAL));
 		ed.setLocation(en.getString(LOCATION));
 		ed.setMeetingPlace(en.getString(MEETING_PLACE));
 		ed.setName(en.getString(NAME));
-		ed.setStartDate(en.getString(START_DATE));
+		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
+		ed.setOrganizer(parentEntity.getString(Constants.NAME_PROPERTY));
 		return ed;
 	}
+	/*
+	 * An ancestor query limits its results to the specified entity and its descendants.
+	 * This example returns all Task entities that have the specified TaskList entity as an ancestor
+	public void mayBeImportant() {
+		Query<Entity> query = Query.newEntityQueryBuilder()
+			    .setKind("Task")
+			    .setFilter(PropertyFilter.hasAncestor(
+			        datastore.newKeyFactory().setKind("TaskList").newKey("default")))
+			    .build();ConceptsTest.java
+	}*/
 }

@@ -141,15 +141,14 @@ public class LoginManager {
 
 	@GET
 	@Path("/op7")
-	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
+	//@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
 	//@Context HttpHeaders headers
 	public Response doLogout() {
 		//HandleTokens.destroyToken(token);
-	    NewCookie tokenCookie = HandleTokens.destroyCookie(Constants.COOKIE_TOKEN,"");
-	    NewCookie eventOffsetCookie = HandleTokens.destroyCookie(Constants.GET_EVENT_CURSOR_CK,"");
-
-		int result =1;
-		return Response.ok().cookie(tokenCookie,eventOffsetCookie).entity(result).build();
+	    NewCookie tokenCookie = HandleTokens.destroyCookie(Constants.COOKIE_TOKEN);
+	    NewCookie eventOffsetCookie = HandleTokens.destroyCookie(Constants.GET_EVENT_CURSOR_CK);
+		//int result =1;
+		return Response.ok().cookie(tokenCookie,eventOffsetCookie).build();
 	}
 	@POST
 	@Path("/op8")

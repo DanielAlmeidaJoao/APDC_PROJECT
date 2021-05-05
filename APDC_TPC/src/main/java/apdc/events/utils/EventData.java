@@ -2,8 +2,15 @@ package apdc.events.utils;
 
 public class EventData {
 
+	public String getOrganizer() {
+		return organizer;
+	}
+
+	public void setOrganizer(String organizer) {
+		this.organizer = organizer;
+	}
 	String name, description, goals, location,
-	meetingPlace, startDate, endDate, duration;
+	meetingPlace, startDate, endDate, organizer;
 	long eventId;
 
 	public EventData() {}
@@ -59,11 +66,5 @@ public class EventData {
 	}
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
-	}
-	public String getDuration() {
-		return duration;
-	}
-	public void setDuration(String duration) {
-		this.duration = duration;
 	}
 }

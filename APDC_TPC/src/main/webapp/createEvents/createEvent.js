@@ -5,7 +5,8 @@ function showCreateEventBlock() {
     }
 }
 
-function getEventCreationObject(name, description,goals,location,meetingPlace,startingDate,endingDate,duration) {
+function getEventCreationObject(name, description,goals,location,
+    meetingPlace,startingDate,endingDate,startTime,endTime) {
     /*
         name, description, goals, location,
         meetingPlace, startDate, endDate, duration;
@@ -16,9 +17,8 @@ function getEventCreationObject(name, description,goals,location,meetingPlace,st
         goals: goals,
         location:location,
         meetingPlace:meetingPlace,
-        startDate:startingDate,
-        endDate:endingDate,
-        duration:duration,
+        startDate:startingDate+" "+startTime,
+        endDate:endingDate+" "+endTime,
     }    
     return ff;
 }
@@ -28,7 +28,9 @@ function getValue(formElement) {
 function getFrontEndInputs() {
     let datas = document.getElementsByName("inp_data");
     //TODO -> check if there are invalid inputs
-    return getEventCreationObject(getValue(datas[0]),getValue(datas[1]),getValue(datas[2]),getValue(datas[3]),getValue(datas[4]),getValue(datas[5]),getValue(datas[6]),getValue(datas[7]));
+    return getEventCreationObject(getValue(datas[0]),getValue(datas[1]),
+    getValue(datas[2]),getValue(datas[3]),getValue(datas[4]),getValue(datas[5])
+    ,getValue(datas[6]),getValue(datas[7]),getValue(datas[8]));
 }
 
 function handleCreateEventSubmitForm() {
@@ -54,6 +56,11 @@ function uploadData(datas,formEle) {
     .then(response => response.json())
     .then(data => {
         formEle.reset();
+        if(data=="1"){
+            alert("EVENT CREATED SUCCESSFULLY!");
+        }else{
+            alert("SOMETHING WENT WRONG, CALL GOD!");
+        }
         console.log('Success:', data);
     })
     .catch((error) => {

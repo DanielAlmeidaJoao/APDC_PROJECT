@@ -1,12 +1,12 @@
 package apdc.tpc.utils.tokens;
 
 import java.io.UnsupportedEncodingException;
+
 import java.util.Date;
 
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 
-import apdc.utils.conts.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -89,10 +89,10 @@ public class HandleTokens {
 		NewCookie nk = new NewCookie(ck,null,-1,null,true,true);
 		return nk;
 	}
-	public static NewCookie destroyCookie(String name,String value) {
+	public static NewCookie destroyCookie(String name) {
 		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
-		Cookie ck = new Cookie(name,value);
-		NewCookie nk = new NewCookie(ck,null,Constants.ZERO,null,true,true);
+		Cookie ck = new Cookie(name,"", "/", null);
+		NewCookie nk = new NewCookie(ck,null,-1,null,false,false);
 		return nk;
 	}
 	

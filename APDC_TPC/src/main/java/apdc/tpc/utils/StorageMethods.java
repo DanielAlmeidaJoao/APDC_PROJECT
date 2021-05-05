@@ -12,15 +12,13 @@ import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import apdc.tpc.utils.tokens.HandleTokens;
+import apdc.utils.conts.Constants;
 
 public class StorageMethods {
 
 	private static final String PASSWORD = "password";
 
 	private static final String STATE = "state";
-
-	private static final String NAME = "name";
-
 	//ROLES
 	private static final String ROLE = "role";
 
@@ -65,7 +63,7 @@ public class StorageMethods {
 					person = datastore.get(userKey2);
 					if(person!=null) {
 						u.setEmail(data.getPassword());
-						u.setName(person.getString(NAME));
+						u.setName(person.getString(Constants.NAME_PROPERTY));
 						u.setRole(person.getString(ROLE));
 						u.setState(person.getString(STATE));
 						u.setStatus("1");
@@ -185,7 +183,7 @@ public class StorageMethods {
 							LOG.severe("OK-9");
 							victim = Entity.newBuilder(userKey2)
 									.set(PASSWORD,victim.getString(PASSWORD))
-									.set(NAME,victim.getString(NAME))
+									.set(Constants.NAME_PROPERTY,victim.getString(Constants.NAME_PROPERTY))
 									.set(ROLE,dt.getEmail())
 									.set(STATE,dt.getPassword())
 									.build();
@@ -243,7 +241,7 @@ public class StorageMethods {
 				txn = datastore.newTransaction();
 			    person = Entity.newBuilder(userKey)
 						.set(PASSWORD,data.getPassword())
-						.set(NAME,data.getName())
+						.set(Constants.NAME_PROPERTY,data.getName())
 						.set(ROLE,USER)
 						.set(STATE,ENABLED)
 						.build();
@@ -359,7 +357,7 @@ public class StorageMethods {
 			if(isEnabled(person)&&oldPass.equals(person.getString(PASSWORD))) {
 			    person = Entity.newBuilder(userKey)
 						.set(PASSWORD,newPassword)
-						.set(NAME,person.getString(NAME))
+						.set(Constants.NAME_PROPERTY,person.getString(Constants.NAME_PROPERTY))
 						.set(ROLE,person.getString(ROLE))
 						.set(STATE,person.getString(STATE))
 						.build();

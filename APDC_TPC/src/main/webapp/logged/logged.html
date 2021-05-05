@@ -26,6 +26,7 @@
         -->
         <button id="create_events_btn">CREATE EVENTS</button>
         <button id="get_evts_btn">UPCOMING EVENTS</button>
+        <button id="get_evts_btn">EDIT EVENTS</button>
         <button id="">FINISHED EVENTS</button>
     </nav>
     <div class="main_body">
@@ -106,11 +107,13 @@
                         <label>Meeting Place</label>
                         <input class="crt_inp" name="inp_data" type="text">
                         <label >Start Date</label>
-                        <input class="crt_inp" name="inp_data" type="text">
-                        <label >End Date</label>
-                        <input class="crt_inp" name="inp_data" type="text">
-                        <label>Duration In Hours</label>
-                        <input class="crt_inp" name="inp_data" type="text" min="1" max="24">
+                        <input class="crt_inp" name="inp_data" type="date">
+                        <label>End Date</label>
+                        <input class="crt_inp" name="inp_data" type="date">
+                        <label>StartTime</label>
+                        <input class="crt_inp" name="inp_data" type="time">
+                        <label>EndTime</label>
+                        <input class="crt_inp" name="inp_data" type="time">
                         <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
                     </form>
                     <div class="gmap" id="gmap">

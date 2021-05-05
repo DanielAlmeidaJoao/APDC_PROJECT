@@ -136,13 +136,12 @@ function sendLogOff() {
         if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
             let rt = xmlHttpReq.responseText;
             localStorage.clear();
+            window.location.href="/";
         }
     }
     xmlHttpReq.open("GET","../rest/login/op7",true);
     xmlHttpReq.setRequestHeader("Content-Type", "application/json");
     xmlHttpReq.send();
-
-    window.location.href="/";
 }
 function deleteAccount(obj) {
     let spanText= document.getElementById("rs_sn");

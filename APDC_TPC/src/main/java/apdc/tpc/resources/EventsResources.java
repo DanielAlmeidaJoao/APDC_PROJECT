@@ -1,11 +1,15 @@
 package apdc.tpc.resources;
 
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
@@ -25,6 +29,8 @@ public class EventsResources {
 	//private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 	@Context
 	private HttpServletRequest httpRequest;
+	private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
+
 	public EventsResources() {
 	}
 	/**
@@ -45,14 +51,15 @@ public class EventsResources {
 			response = Response.ok().entity(Constants.g.toJson(result)).build();
 		}catch(Exception e) {
 			response = Response.status(Status.FORBIDDEN).build();
-
 		}
 		return response;
 	}
+
 	/**
-	 * 
-	 * @param nElements number of elements loaded so far
-	 * @return a response object with the object data requested
+	 * loads all registered events 
+	 * @param value offset value stored in the specified cookie
+	 * @param token session token stored in the specified token
+	 * @return 200 if the operation is success
 	 */
 	@GET
 	@Path("/view")
@@ -69,7 +76,28 @@ public class EventsResources {
 		}catch(Exception e) {
 			resp = Response.status(Status.FORBIDDEN).build();
 		}
+		return resp;
+	}
+	/**
+	 * deletes a particular event 
+	 * @param eventId the event to be deleted
+	 * @param token the logged user token to verify if the user is has permission to do so
+	 * @return
+	 */
+	@DELETE
+	@Path("/delete/{eventId}")
+	public Response doDeleteEvent(@PathParam(Constants.EVENT_ID) String eventId, @CookieParam(Constants.COOKIE_TOKEN) String token) {
+		Response resp;
+		LOG.severe("GOING TO REMOVE THIS EVENT "+eventId);
+		resp = Response.ok().build();
 		
+		try {
+			String email = HandleTokens.validateToken(token);
+			EventsDatabaseManagement.deleteEvent(eventId,email);
+			resp = Response.ok().build();
+		}catch(Exception e) {
+			resp = Response.status(Status.FORBIDDEN).build();
+		}
 		return resp;
 	}
 }

@@ -1,3 +1,6 @@
+const NO_CONTENT = 204;
+const OKOK = 200;
+const RMV_EVENT_TEXT = "REMOVE";
 function showGetEventsBlock() {
     let createEvent = document.getElementById("get_evts_btn");
     createEvent.onclick=()=>{
@@ -38,7 +41,28 @@ function makeElement(elementType,valueAtt) {
     div11.textContent = valueAtt;
     return div11;
 }
-function removeEventButton() {
+function deleteEvent(eventId,btn) {
+    fetch('/rest/events/delete/'+eventId,{method:'DELETE'})
+    .then(response =>{
+        console.log(response.status+" i am status code");
+        if(response.status==OKOK){
+            alert("EventDeleted!");
+            btn.parentElement.remove();
+        }else{
+            alert("You have no authorization!");
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+function removeEventButton(eventId) {
+    let rmv = document.createElement("button");
+    rmv.textContent=RMV_EVENT_TEXT;
+    rmv.onclick=()=>{
+        deleteEvent(eventId,rmv);
+    }
+    return rmv;
     
 }
 function makeEventBlock(eventObj) {
@@ -51,10 +75,10 @@ function makeEventBlock(eventObj) {
     let descriptionDiv = document.createElement("div");
     let goalDiv = document.createElement("div");
 
+    div11.appendChild(makeElement("span","EVENT-ORGANIZER: "+eventObj.organizer));
     div11.appendChild(makeElement("span",eventObj.name));
     div11.appendChild(makeElement("div",eventObj.description));
     div11.appendChild(makeElement("div",eventObj.goals));
-
     ////////////
 
     let div22 = document.createElement("div");
@@ -67,24 +91,18 @@ function makeEventBlock(eventObj) {
     div33.appendChild(makeElement("span",eventObj.endDate));
 
     ////////////
-    let div44 = document.createElement("div");
-    div44.appendChild(makeElement("span",eventObj.duration));
-
 
     let parBlock = document.createElement("div");
     parBlock.appendChild(div11);
     parBlock.appendChild(div22);
     parBlock.appendChild(div33);
-    parBlock.appendChild(div44);
 
     parBlock.setAttribute("class","evt_disp");
-    parBlock.setAttribute("id",eventObj.eventId);
 
     let grandPa = document.createElement("div");
-    let btn = document.createElement("button");
 
     grandPa.appendChild(parBlock);
-    grandPa.appendChild(btn);
+    grandPa.appendChild(removeEventButton(eventObj.eventId));
 
     return grandPa;
 }
