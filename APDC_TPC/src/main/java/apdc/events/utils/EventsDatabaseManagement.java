@@ -2,6 +2,7 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
+
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -11,6 +12,8 @@ import com.google.cloud.datastore.Transaction;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,10 +21,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.Timestamp;
+import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
@@ -42,6 +49,33 @@ public class EventsDatabaseManagement {
 
 	public EventsDatabaseManagement() {
 	}
+	private static String getPartString(HttpServletRequest httpRequest) {
+		try {
+			Part p = httpRequest.getPart("evd");
+			byte [] b = new byte[(int) p.getSize()];
+			InputStream is = p.getInputStream();
+			is.read(b);
+			String h = new String(b);
+			return h;
+		} catch (IOException | ServletException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	private static Blob getImageBlob(HttpServletRequest httpRequest, String part) {
+		try {
+			Part p = httpRequest.getPart(part);
+			InputStream uploadedInputStream = httpRequest.getPart(part).getInputStream();
+			byte [] b = new byte[(int) p.getSize()];
+			uploadedInputStream.read(b);
+			Blob blob = Blob.copyFrom(b);
+			return blob;
+		} catch (IOException | ServletException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -49,10 +83,24 @@ public class EventsDatabaseManagement {
 	 * @param email id of the user performing the operation
 	 * @return
 	 */
-	public static String createEvent(Datastore datastore, EventData et,String email) {
+	public static String createEvent(Datastore datastore,HttpServletRequest httpRequest,String email) {
 		//Generate automatically a key
 		LOG.severe("GOING TO CREATE EVENT!!! -> "+email);
+		String hhh = getPartString(httpRequest);
+		if(hhh!=null) {
+			System.out.println(hhh);
+			return null;
+		}else {
+			System.out.println("NULLLL");
+			if(hhh==null) {
+				return null;
+			}
+		}
+		EventData et = Constants.g.fromJson(hhh,EventData.class);
 
+		Blob b = getImageBlob(httpRequest,"imgs");
+
+	
 		String result="";
 		Transaction txn=null;
 		  try {
@@ -68,7 +116,8 @@ public class EventsDatabaseManagement {
 					.set(MEETING_PLACE,et.getMeetingPlace())
 					.set(START_DATE,makeTimeStamp(et.getStartDate()))
 					.set(END_DATE,makeTimeStamp(et.getEndDate()))
-					.build();
+					.set("imgs",b)
+					.build();			
 			txn.put(ev);
 		    txn.commit();
 		    result="1";
@@ -145,7 +194,7 @@ public class EventsDatabaseManagement {
 		
 	    Entity e;
 		List<EventData> events = new LinkedList<>();
-		while(tasks.hasNext()) {
+		while(tasks.hasNext()){
 			e = tasks.next();
 			events.add(getEvent(e));
 		}

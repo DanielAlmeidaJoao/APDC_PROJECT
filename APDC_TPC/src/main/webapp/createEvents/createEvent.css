@@ -6,22 +6,36 @@
 
 .addEvt_frm{
     display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.evnt_atrs{
+    display: flex;
     flex-direction: column;
 }
-
 .addEvt_frm{
-    width: 400px;
+    width: auto;
 }
 .gmap{
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
 }
 .gmap_img{
     width: 60%;
     height: auto;
 }
-
+.imgs{
+    display: flex;
+    flex-direction: column;
+    height:500px;
+    width: 400px;
+    overflow-y: scroll;
+}
+.admg img{
+    width: 400px;
+    height: 400px;
+}
 .doPad{
     padding: 10px 10px;
 }

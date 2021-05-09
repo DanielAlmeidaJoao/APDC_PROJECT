@@ -96,29 +96,37 @@
             <div class="view_user dispn" id="create_events">
                 <di class="create_events">
                     <form class="addEvt_frm" id="addEvt_frm">
-                        <label>Event Name</label>
-                        <input class="crt_inp" type="text" name="inp_data" class="txt_inpt">
-                        <label>Event Description</label>
-                        <textarea class="evnt_desc" name="inp_data"></textarea>
-                        <label >Goals</label>
-                        <input class="crt_inp" name="inp_data" type="text">
-                        <label >Location</label>
-                        <input class="crt_inp" name="inp_data" type="text">
-                        <label>Meeting Place</label>
-                        <input class="crt_inp" name="inp_data" type="text">
-                        <label >Start Date</label>
-                        <input class="crt_inp" name="inp_data" type="date">
-                        <label>End Date</label>
-                        <input class="crt_inp" name="inp_data" type="date">
-                        <label>StartTime</label>
-                        <input class="crt_inp" name="inp_data" type="time">
-                        <label>EndTime</label>
-                        <input class="crt_inp" name="inp_data" type="time">
-                        <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
+                        <div class="evnt_atrs">
+                            <label>Event Name</label>
+                            <input class="crt_inp" type="text" name="inp_data" class="txt_inpt">
+                            <label>Event Description</label>
+                            <textarea class="evnt_desc" name="inp_data"></textarea>
+                            <label >Goals</label>
+                            <input class="crt_inp" name="inp_data" type="text">
+                            <label >Location</label>
+                            <input class="crt_inp" name="inp_data" type="text">
+                            <label>Meeting Place</label>
+                            <input class="crt_inp" name="inp_data" type="text">
+                            <label >Start Date</label>
+                            <input class="crt_inp" name="inp_data" type="date">
+                            <label>End Date</label>
+                            <input class="crt_inp" name="inp_data" type="date">
+                            <label>StartTime</label>
+                            <input class="crt_inp" name="inp_data" type="time">
+                            <label>EndTime</label>
+                            <input class="crt_inp" name="inp_data" type="time">
+                            <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
+                        </div>
+                        <div class="gmap" id="gmap">
+                            <p>
+                                Select a file : <input id="gtimg" type="file" name="file" size="45" accept="image/*"/>
+                            </p>
+                            <div class="imgs" id="imgs_dv">
+
+                            </div>
+                            <input type="submit" value="Upload It"/>
+                        </div>
                     </form>
-                    <div class="gmap" id="gmap">
-                        <img class="gmap_img" src="../imgs/google-maps-apk.jpg">
-                    </div>
                 </di>
             </div>
 

@@ -35,11 +35,16 @@ function getFrontEndInputs() {
 
 function handleCreateEventSubmitForm() {
     let sbmt = document.getElementById("addEvt_frm");
-    sbmt.onsubmit=()=>{
+    sbmt.onsubmit=(e)=>{
+        e.preventDefault();
         let data = getFrontEndInputs();
         //console.log(data);
         data = JSON.stringify(data);
-        uploadData(data,sbmt);
+        data = makeFormData(data);
+        if(data!=null){
+            //uploadPictures(data,formEle);
+            uploadData(data,sbmt);
+        }
         console.log(data);
         return false;
     }
@@ -48,9 +53,6 @@ function handleCreateEventSubmitForm() {
 function uploadData(datas,formEle) {
     fetch('/rest/events/create', {
     method: 'POST', // or 'PUT'
-    headers: {
-        'Content-Type': 'application/json',
-    },
     body:datas
     })
     .then(response => response.json())
@@ -68,5 +70,61 @@ function uploadData(datas,formEle) {
     });
 }
 
+function makeImgDiv(result,caption) {
+    let ppp = document.createElement("div");
+ 
+    let imgele = document.createElement("img");
+    imgele.setAttribute("src",result);
+    imgele.setAttribute("alt",caption);
+
+    let rmv = document.createElement("button");
+    rmv.textContent="Remover";
+    rmv.onclick=()=>{
+        ppp.remove();
+    }
+    ppp.appendChild(imgele);
+    ppp.appendChild(rmv);
+    ppp.setAttribute("class","admg");
+    return ppp;
+}
+function handleImages(){
+    let uploadImg = document.getElementById("gtimg");
+    let caption = document.getElementById("cpt");
+
+    uploadImg.onchange=function(){
+        const file = this.files[0];
+        if(file){
+            const reader = new FileReader();
+            const imgparnt = document.getElementById("imgs_dv");
+            reader.onload=function () {
+                imgparnt.appendChild(makeImgDiv(this.result,file.name));
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+}
+function makeFormData(evd){
+	let formData = new FormData();	
+	formData.append("evd",evd);
+	let imgs = document.getElementById("imgs_dv").children;
+    let elem;
+    let arr = new Array();
+
+    for(let x=0;x<imgs.length;x++){
+        elem=imgs[x].firstChild;
+        if(elem.tagName=='IMG'){
+            arr.push(elem);
+        }else{
+            alert("INVALID DATA!");
+            return null;
+        }
+    }
+    if(arr.length>0){
+        arr = JSON.stringify(arr);
+        formData.append("imgs",arr);
+    }
+	return formData;
+}
 showCreateEventBlock();
 handleCreateEventSubmitForm();
+handleImages();

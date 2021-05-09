@@ -12,7 +12,7 @@ public interface Constants {
 	public static final String GET_EVENT_CURSOR_CK ="crsck";
 	public static final String EVENT_ID = "eventId";
 	
-	
+	public static final String EVENT_FORMDATA_KEY="evd";
 	///
 	public static final String NAME_PROPERTY = "name";
 	public static final String DATE_FORMAT = "yyyy-mm-dd HH:mm"; 

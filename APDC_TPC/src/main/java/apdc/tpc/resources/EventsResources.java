@@ -1,8 +1,19 @@
 package apdc.tpc.resources;
 
+import java.io.File;
+
+
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
@@ -17,9 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import com.google.cloud.datastore.Datastore;
-import apdc.events.utils.EventData;
 import apdc.events.utils.EventsDatabaseManagement;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
@@ -33,6 +42,19 @@ public class EventsResources {
 
 	public EventsResources() {
 	}
+	private static String getPartString(HttpServletRequest httpRequest) {
+		try {
+			Part p = httpRequest.getPart("evd");
+			byte [] b = new byte[(int) p.getSize()];
+			InputStream is = p.getInputStream();
+			is.read(b);
+			String h = new String(b);
+			return h;
+		} catch (IOException | ServletException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	/**
 	 * creates a new event
 	 * @param data JSON object with the information to create a new event
@@ -40,21 +62,73 @@ public class EventsResources {
 	 */
 	@POST
 	@Path("/create")
-	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value, EventData data){
+	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		Response response;
 		Datastore ds = Constants.datastore;
 		try {
-			String email = HandleTokens.validateToken(value);
-			String result = EventsDatabaseManagement.createEvent(ds,data,email);
+			//String email = HandleTokens.validateToken(value);
+			String email ="daniel";
+			String result = EventsDatabaseManagement.createEvent(ds,httpRequest,email);
 			response = Response.ok().entity(Constants.g.toJson(result)).build();
 		}catch(Exception e) {
 			response = Response.status(Status.FORBIDDEN).build();
 		}
 		return response;
 	}
+	@POST
+	@Path("/images")
+	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
+	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
+	public Response doImages(){
+		try {
+			System.out.println("GOING TO SAVE IMAGS!");
+			Part p = httpRequest.getPart("path");
+			InputStream uploadedInputStream = httpRequest.getPart("file").getInputStream();
+			System.out.println(p.toString());
+			System.out.println(p.getContentType());
+			byte [] b = new byte[(int) p.getSize()];
+			p.getInputStream().read(b);
+			String h = new String(b);
+			System.out.println("I AM JEAN-CLAUD VAN DAMME!");
+			System.out.println("I AM HELLO "+h);
+			writeToFile( uploadedInputStream,h);
+		} catch (IOException | ServletException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*
+		InputStream uploadedInputStream;
+        FormDataContentDisposition fileDetail;
+        String path;
+		LOG.severe("PATH -------> "+path);
+		System.out.println("I AM JEAN-CLAUD VAN DAMME!");
+		System.out.println(fileDetail);
+		writeToFile( uploadedInputStream,"daniel");*/
+		return Response.status(200).entity("FENDER WILL NEVER HAVE THE INFORMATION!").build();
+	}
+	// save uploaded file to new location
+	private void writeToFile(InputStream uploadedInputStream,String uploadedFileLocation) {
 
+	    try {
+	        OutputStream out;
+	        int read = 0;
+	        byte[] bytes = new byte[1024];
+	        File f = new File("C:\\Users\\djoao\\Desktop\\"+uploadedFileLocation);
+	        out =new FileOutputStream(f) ;
+	        while ((read = uploadedInputStream.read(bytes)) != -1) {
+	            out.write(bytes, 0, read);
+	        }
+	        out.flush();
+	        out.close();
+	    } catch (IOException e) {
+
+	        e.printStackTrace();
+	    }
+
+
+	   }
 	/**
 	 * loads all registered events 
 	 * @param value offset value stored in the specified cookie
