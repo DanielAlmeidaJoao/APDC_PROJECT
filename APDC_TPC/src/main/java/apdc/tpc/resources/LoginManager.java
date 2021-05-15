@@ -88,6 +88,7 @@ public class LoginManager {
 			}else{
 				//AuthToken at = new AuthToken(user.getString("email"));
 			    String domain = httpHeaders.getHeaderString("host");
+			    domain=null;
 				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(data.getEmail()),domain);
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString("name"));
@@ -145,6 +146,7 @@ public class LoginManager {
 	//@Context HttpHeaders headers
 	public Response doLogout() {
 		//HandleTokens.destroyToken(token);
+		/*headers.getCookies().forEach( (k,v)->{});*/
 	    NewCookie tokenCookie = HandleTokens.destroyCookie(Constants.COOKIE_TOKEN);
 	    NewCookie eventOffsetCookie = HandleTokens.destroyCookie(Constants.GET_EVENT_CURSOR_CK);
 		//int result =1;
@@ -183,7 +185,7 @@ public class LoginManager {
 	public Response doSpy(LoginData data) {
 		//email -> token
 		//password -> other user email
-		UserInfo u = StorageMethods.getOtherUser(Constants.datastore, data);
+		UserInfo u = StorageMethods.getOtherUser(Constants.datastore,data);
 		return Response.ok().entity(g.toJson(u)).build();
 	}
 	

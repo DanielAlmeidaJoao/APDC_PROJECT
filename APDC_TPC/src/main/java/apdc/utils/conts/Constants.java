@@ -13,9 +13,15 @@ public interface Constants {
 	public static final String EVENT_ID = "eventId";
 	
 	public static final String EVENT_FORMDATA_KEY="evd";
+	public static final String EVENT_PICS_FORMDATA_KEY="imgs";
+	
+	public static final int MAX_IMAGES_PER_EVENTS=5;
+
 	///
 	public static final String NAME_PROPERTY = "name";
 	public static final String DATE_FORMAT = "yyyy-mm-dd HH:mm"; 
+	
+	public static final String ID="ID";
 
 	public static final Gson g = new Gson();
 	public static final Datastore datastore =	DatastoreOptions.getDefaultInstance().getService();

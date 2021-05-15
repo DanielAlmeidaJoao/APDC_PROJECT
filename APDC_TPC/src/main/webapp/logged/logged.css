@@ -1,6 +1,7 @@
 body{
     margin: 0px;
     padding: 0px;
+    background-color:  rgb(180, 170, 170);
 }
 .nav_logged{
     display: flex;
@@ -70,15 +71,23 @@ body{
     margin: 10px 10px;
     padding: 10px 10px;
 }
+
 .dispn{
     display: none;
 }
 .dispb{
     display: block;
 }
-
 .disable_user{
     display: flex;
     flex-direction: column;
     width: 500px;
+}
+.mpd{
+    display: block;
+    width: 60%;
+    margin-left: 23.5%;
+}
+.hdmap{
+    display: none;
 }

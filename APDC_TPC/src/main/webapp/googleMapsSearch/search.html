@@ -7,18 +7,28 @@
     <script src="search.js"></script>
   </head>
   <body>
-    <input
-      id="pac-input"
-      class="controls"
-      type="text"
-      placeholder="Search Box"
-    />
+    <div class="srchs">
+      <input
+        id="pac-input"
+        class="controls pac"
+        type="text"
+        placeholder="Origin"
+      />
+      <input
+        id="pac-input2"
+        class="controls pac"
+        type="text"
+        placeholder="Destination"
+      />
+    </div>
+    
     <div id="map"></div>
 
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFX3fLDfA9S_2jCvSRFtQXcKZBh5J-CJA&callback=initAutocomplete&libraries=places&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initAutocomplete&libraries=places&v=weekly"
       async
-    ></script>
+    >
+  </script>
   </body>
 </html>

@@ -1,8 +1,72 @@
+/**
+display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+*/
+.ve{
+    flex-direction: column;
+}
 .show_events{
+    border: 2px solid blue;
+    width: 800px;
     height: auto;
 }
 
 .evt_disp{
+    display: flex;
     margin: 10px 10px;
     border: 4px solid red;
+}
+.one_ev{
+    width: 100%;
+}
+.blk_desc{
+    width: 600px
+}
+.dlfx{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mgpd{
+    margin: 10px 10px;
+    padding: 10px 10px;
+}
+.abt_orzr{
+    justify-content: flex-start;
+    margin: 10px 10px;
+    border-bottom: 1px dotted rgb(43, 41, 41);
+}
+.orgd{
+    margin-right: 5px;
+}
+.abt_evt{
+    flex-direction: column;
+}
+.mrd{
+    display: flex;
+    justify-content: space-around;
+}
+.mrdso{
+    padding: 5px 5px;
+    font-weight: bold;
+}
+.desc_txt{
+    word-break: break-word;
+}
+.rmv_evt{
+    display: flex;
+    align-self: flex-end;
+    justify-content: flex-end;
+    justify-self: flex-end;
+}
+.evnts_pcs{
+    width: 500px;
+    max-height: 500px;
+    /*overflow-y: scroll;*/
+}
+.evnts_pcs img{
+    width: 99.9%;
+    height: auto;
 }

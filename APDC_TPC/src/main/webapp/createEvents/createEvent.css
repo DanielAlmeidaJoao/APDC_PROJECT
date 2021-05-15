@@ -2,6 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 
 .addEvt_frm{
@@ -59,4 +60,6 @@
 .evnt_desc{
     resize: vertical;
     font-size: 25px;
+    height: 200px;
+    width: 400px;
 }

@@ -8,12 +8,14 @@
     <link rel="stylesheet" href="../createEvents/createEvent.css">
     <link rel="stylesheet" href="../getEvents/getEvent.css">
     <title>Who am I</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <link rel="stylesheet" type="text/css" href="../createEvents/direction.css" />
+    <script src="../createEvents/direction.js"></script>
 </head>
 <body>
     <nav class="nav_logged">
         <span id="name_sp" class="nv_el adt">DANIEL JOAO</span>
         <span id="email_sp" class="nv_el adt">DANIEL@GMAIL.COM</span>
-
         <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
         <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
     </nav>
@@ -30,8 +32,36 @@
         <button id="">FINISHED EVENTS</button>
     </nav>
     <div class="main_body">
-        <h1>WELCOME TO THE PLACE WHERE WELCOME IS WELCOME</h1>
+        <h1>WELCOME TO SAVING LIFES</h1>
         <div class="main_body_son2">
+            <div id="map_div" class="mpd hdmap">
+                <div style="display: block">
+                    <div class="srchs">
+                        <input id="origin-input" class="controls" type="text" placeholder="Enter an origin location"/>
+                        <input id="destination-input" class="controls" type="text" placeholder="Enter a destination location"/>
+                    </div>
+                    <div id="mode-selector" class="controls">
+                      <input type="radio" name="type" id="changemode-walking" checked="checked"/>
+                      <label for="changemode-walking">Walking</label>
+              
+                      <input type="radio" name="type" id="changemode-transit" />
+                      <label for="changemode-transit">Transit</label>
+              
+                      <input type="radio" name="type" id="changemode-driving" />
+                      <label for="changemode-driving">Driving</label>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+                <script
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initMap&libraries=places&v=weekly"
+                async
+                ></script>
+                <div id="edist">
+                    <label>Estimated Distance</label>
+                    <span></span>
+                </div>
+            </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
             <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
                 <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
@@ -96,72 +126,107 @@
             <div class="view_user dispn" id="create_events">
                 <di class="create_events">
                     <form class="addEvt_frm" id="addEvt_frm">
-                        <div class="evnt_atrs">
+                        <!--name, description, goals, volunteers,location,
+                            meetingPlace, startDate, endDate, duration;
+                        -->
+                        <div class="evnt_atrs" id="inp_data">
                             <label>Event Name</label>
-                            <input class="crt_inp" type="text" name="inp_data" class="txt_inpt">
+                            <input class="crt_inp" type="text" name="name" class="txt_inpt">
                             <label>Event Description</label>
-                            <textarea class="evnt_desc" name="inp_data"></textarea>
+                            <textarea class="evnt_desc" name="description"></textarea>
                             <label >Goals</label>
-                            <input class="crt_inp" name="inp_data" type="text">
-                            <label >Location</label>
-                            <input class="crt_inp" name="inp_data" type="text">
-                            <label>Meeting Place</label>
-                            <input class="crt_inp" name="inp_data" type="text">
+                            <input class="crt_inp" name="goals" type="text">
+                            <label >Number of volunteers</label>
+                            <input class="crt_inp" name="volunteers" type="number">
                             <label >Start Date</label>
-                            <input class="crt_inp" name="inp_data" type="date">
+                            <input class="crt_inp" name="startDate" type="date">
                             <label>End Date</label>
-                            <input class="crt_inp" name="inp_data" type="date">
+                            <input class="crt_inp" name="endDate" type="date">
                             <label>StartTime</label>
-                            <input class="crt_inp" name="inp_data" type="time">
+                            <input class="crt_inp" name="startTime" type="time">
                             <label>EndTime</label>
-                            <input class="crt_inp" name="inp_data" type="time">
-                            <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
+                            <input class="crt_inp" name="endTime" type="time">
                         </div>
                         <div class="gmap" id="gmap">
                             <p>
-                                Select a file : <input id="gtimg" type="file" name="file" size="45" accept="image/*"/>
+                                Select an image : <input id="gtimg" type="file" size="45" accept="image/*"/>
                             </p>
                             <div class="imgs" id="imgs_dv">
-
                             </div>
-                            <input type="submit" value="Upload It"/>
+                            <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
                         </div>
                     </form>
                 </di>
             </div>
 
             <!--EVENT GET EVENTS-->
-            <div class="view_user dispn" id="show_events_blk">
-                <div class="show_events" id="events_blk">
-                    <div class="evt_disp">
-                        <div>
-                            <div>
-                                <span>Name</span>
-                                <div>Description</div>
-                                <div>Goals</div>
-                            </div>
-                            <div>
-                                <span>Location</span>
-                                <span>Meeting Point</span>
-                            </div>
-                            <div>
-                                <span>Start Date</span>
-                                <span>End Date</span>
-                            </div>
-                            <div>
-                                <span>Start Time</span>
-                                <span>End Time</span>
-                            </div>
-                        </div>
-                        <div>
-                            <button>REMOVE</button>
-                        </div>
-                        
-                    </div>
-                </div>
+            <div class="dispn" id="show_events_blk">
+                <div class="view_user dlfx ve">
+                    <div class="show_events" id="events_blk">
+                        <div class="one_ev">
+                            <div class="dlfx evt_disp">
+                                <div class="blk_desc">
+                                    <div class="dlfx mgpd abt_orzr">
+                                        <div class="orgd" >organiser profile picture</div>
+                                        <div class="orgd">Daniel de Almeida Joao</div>
+                                    </div>
+                                    <div  class="dlfx mgpd abt_evt">
+                                        <h2>Title</h2>
+                                        <div class="desc_txt">Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                                            Nulla sed risus ullamcorper, ultrices ex at, ultrices nisi. 
+                                            Vestibulum in venenatis ante. Suspendisse et interdum nunc. 
+                                            Ut porttitor orci gravida rhoncus vulputate. Maecenas rutrum 
+                                            accumsan nisi, eu sollicitudin lorem. Sed vehicula tristique leo 
+                                            sed luctus. Proin id urna ex. Cras feugiat arcu a lacus fermentum, 
+                                            id mattis libero gravida. Morbi a lobortis ipsum, eu sollicitudin 
+                                            lectus. Aenean at dui ut dui porttitor volutpat non nec eros. Donec 
+                                            condimentum condimentum magna et ultrices. Mauris vitae interdum lectus. 
+                                            Donec sit amet congue neque. Etiam magna mi, gravida sit amet
+                                            lectus sit amet, volutpat mollis justo. Suspendisse potenti.
+                                        </div>
+                                        <div class="dlfx mgpd abt_evt" >
+                                            <div class="mrd plc">
+                                                <div class="mrdso">De:</div>
+                                                <div class="mrdso">Setubal</div>
+                                            </div>
+                                            <div class="mrd plc">
+                                                <div class="mrdso">Onde:</div>
+                                                <div class="mrdso">Faro</div>
+                                            </div>
+                                            <button id="sotm">Show On The Map</button>
+                                            <div class="mrd dte">
+                                                <div class="mrdso">Data:</div>
+                                                <div class="mrdso">21 de Abril 18:45 - 16 de Junho 20:00</div>
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <span>Voluntarios</span>
+                                                    <span>14</span>
+                                                </div>
+                                                <div>
+                                                    <span>Interessados</span>
+                                                    <span>7</span>
+                                                    <button>Estou Interessado</button>
+                                                </div>
+                                            </div>
 
-                <button id="load_mr">LOAD MORE</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="evnts_pcs">
+                                    <img src="../imgs/Screen-Shot-2015-07-13-at-1.53.34-PM.png">
+                                </div>
+                            </div>
+                            <div class="rmv_evt">
+                                <button>EDIT</button>
+                                <button>REMOVE</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="load_mr">LOAD MORE</button>
+                </div>
             </div>
+            
 
         </div>
 
@@ -169,5 +234,6 @@
     <script src="logged.js"></script>
     <script src="../createEvents/createEvent.js"></script>
     <script src="../getEvents/getEvent.js"></script>
+    <script src="../getEvents/editEvent.js"></script>
 </body>
 </html>

@@ -194,11 +194,13 @@ function handShowButtons() {
 
     showInfo.onclick=()=>{
         hideAllBlocksButOne("my_inf");
+        hideMap();
     }
-
+    /*
     showOtherUser.onclick=()=>{
         hideAllBlocksButOne("view_user");
-    }
+        hideMap();
+    }*/
 
     /*
     let disableUser = document.getElementById("disable_user");

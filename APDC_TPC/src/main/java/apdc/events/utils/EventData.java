@@ -2,6 +2,45 @@ package apdc.events.utils;
 
 public class EventData {
 
+	String name, description, goals, location,
+	meetingPlace, startDate, endDate, organizer, startTime, endTime, images;
+	long eventId, volunteers;
+	//volunteers is long because I am unable to fetch integer value from datastore without casting.
+	/*
+	description: ""
+		endDate: ""
+		endTime: ""
+		goals: ""
+		location: "null"
+		meetingPlace: "null"
+		name: "dasd"
+		startDate: ""
+		startTime: ""
+		volunteers:*/
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	public long getVolunteers() {
+		return volunteers;
+	}
+
+	public void setVolunteers(long volunteers) {
+		this.volunteers = volunteers;
+	}
+
 	public String getOrganizer() {
 		return organizer;
 	}
@@ -9,9 +48,15 @@ public class EventData {
 	public void setOrganizer(String organizer) {
 		this.organizer = organizer;
 	}
-	String name, description, goals, location,
-	meetingPlace, startDate, endDate, organizer;
-	long eventId;
+	
+	public String getImages() {
+		return images;
+	}
+
+	public void setImages(String images) {
+		this.images = images;
+	}
+	
 
 	public EventData() {}
 

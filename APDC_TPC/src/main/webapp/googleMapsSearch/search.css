@@ -2,6 +2,7 @@
        * element that contains the map. */
        #map {
         height: 100%;
+        width: 100%;
       }
       
       /* Optional: Makes the sample page fill the window. */
@@ -45,9 +46,14 @@
         padding-bottom: 12px;
         margin-right: 12px;
       }
-      
+      .srchs{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border: 1px solid red;
+      }
       .pac-controls {
-        display: inline-block;
+        display: block;
         padding: 5px 11px;
       }
       
@@ -57,7 +63,7 @@
         font-weight: 300;
       }
       
-      #pac-input {
+      .pac {
         background-color: #fff;
         font-family: Roboto;
         font-size: 15px;
@@ -68,7 +74,7 @@
         width: 400px;
       }
       
-      #pac-input:focus {
+      .pac:focus {
         border-color: #4d90fe;
       }
       
@@ -82,4 +88,8 @@
       
       #target {
         width: 345px;
+      }
+      .gmnoprint{
+        display: flex;
+        flex-direction: column;
       }
