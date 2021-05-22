@@ -2,13 +2,14 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
-
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.StructuredQuery.Filter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
 import apdc.tpc.utils.StorageMethods;
@@ -38,7 +39,7 @@ import com.google.cloud.datastore.Datastore;
 
 public class EventsDatabaseManagement {
 
-	private static final String EVENTS="EVENTS";
+	public static final String EVENTS="EVENTS";
 	private static final String USERS = "Users";
 	private static final String NAME="NAME";
 	private static final String DESCRIPTION="DESCRIPTION";
@@ -69,22 +70,6 @@ public class EventsDatabaseManagement {
 		}
 		return null;
 	}
-	/*
-	private static Blob getImageBlob(HttpServletRequest httpRequest) {
-		try {
-			//Part p = httpRequest.getPart(Constants.EVENT_PICS_FORMDATA_KEY);
-			//InputStream uploadedInputStream = null;
-			httpRequest.getParts().forEach(p->{
-				InputStream uploadedInputStream = p.getInputStream();
-			});
-			Blob blob = Blob.copyFrom(uploadedInputStream);
-			return blob;
-		} catch (IOException | ServletException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}*/
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -92,11 +77,11 @@ public class EventsDatabaseManagement {
 	 * @param email id of the user performing the operation
 	 * @return
 	 */
-	public static Status createEvent(Datastore datastore,HttpServletRequest httpRequest,String email) {
+	public static Status createEvent(Datastore datastore,HttpServletRequest httpRequest,long userid) {
 		//Generate automatically a key
-		LOG.severe("GOING TO CREATE EVENT!!! -> "+email);
-		String hhh = getPartString(httpRequest);
-		EventData et = Constants.g.fromJson(hhh,EventData.class);
+		LOG.severe("GOING TO CREATE EVENT!!! -> "+userid);
+		String eventJsonData = getPartString(httpRequest);
+		EventData et = Constants.g.fromJson(eventJsonData,EventData.class);
 		System.out.println(et.eventId+" ia ma event id");
 		long eventId=-1;
 		try {
@@ -108,7 +93,7 @@ public class EventsDatabaseManagement {
 		  try {
 			  com.google.cloud.datastore.Key eventKey;
 			  KeyFactory kf = datastore.newKeyFactory()
-						.addAncestors(PathElement.of(USERS,email))
+						.addAncestors(PathElement.of(USERS,userid))
 						.setKind(EVENTS);
 			  if(eventId>Constants.ZERO) {
 				  eventKey = kf.newKey(eventId);
@@ -157,6 +142,11 @@ public class EventsDatabaseManagement {
 			ev = builder.build();
 			txn.put(ev);
 		    txn.commit();
+		    System.out.println("EVENT ID "+eventId);
+		    if(eventId<=Constants.ZERO) {
+		    	eventId=ev.getKey().getId();
+			    EventParticipationMethods.participate(userid, eventId);
+		    }
 		    result=Status.OK;
 		  }catch(Exception e) {
 			  StorageMethods.rollBack(txn);
@@ -176,7 +166,9 @@ public class EventsDatabaseManagement {
 	private static Timestamp makeTimeStamp(String date, String time) throws ParseException {
 		LOG.severe("SAVING DATES <----------------> "+date);
 	    Date dat=new SimpleDateFormat(Constants.DATE_FORMAT).parse(date+" "+time);
+	    System.out.println("BEFORE TIMESTAMP ----------------------> "+dat.toString());
 		Timestamp start = Timestamp.of(dat);
+		System.out.println("AFTER TIMESTAMP ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>........."+start.toDate().toString());
 		return start;
 	}
 	/**
@@ -185,7 +177,8 @@ public class EventsDatabaseManagement {
 	 * @return string date from the timestamp
 	 */
 	private static String revertTimeStamp(Timestamp t){
-		String rr = new SimpleDateFormat(Constants.DATE_FORMAT).format(t.toDate());
+		// new SimpleDateFormat(Constants.DATE_FORMAT).format(t.toDate());
+		String rr = t.toDate().toString();
 		return rr;
 	}
 	/**This methods says that a certain property must not be indexed. TO CHECK LATER
@@ -209,13 +202,19 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static String [] getEvents(String startCursor, String email) {
+	public static String [] getEvents(String startCursor, long userid,boolean finished) {
 		String [] results = new String[TWO];
 		Cursor startcursor=null;
 		Query<Entity> query=null;
-		
+		//Timestamp.no
+		Filter filter= null;
+		if(finished) {
+			filter=PropertyFilter.gt(END_DATE,Timestamp.now());
+		}else {
+			filter=PropertyFilter.le(END_DATE,Timestamp.now());
+		}
 		Builder b=Query.newEntityQueryBuilder()
-			    .setKind(EVENTS)
+			    .setKind(EVENTS).setFilter(filter)
 			    .setLimit(PAGESIGE);
 		if (startCursor!=null) {
 	      startcursor = Cursor.fromUrlSafe(startCursor); 
@@ -227,7 +226,7 @@ public class EventsDatabaseManagement {
 		List<EventData2> events = new LinkedList<>();
 		while(tasks.hasNext()){
 			e = tasks.next();
-			events.add(getEvent(e,email));
+			events.add(getEvent(e,userid,finished));
 		}
 		results[0]=Constants.g.toJson(events);
 		results[1]=tasks.getCursorAfter().toUrlSafe();
@@ -238,11 +237,11 @@ public class EventsDatabaseManagement {
 	 * @param eventId the event to be deleted
 	 * @param email email of the user performing the operation
 	 */
-	public static Response deleteEvent (String eventId, String email){
+	public static Response deleteEvent (String eventId, long userid){
 		Datastore datastore = Constants.datastore;
 		long event = Long.parseLong(eventId);
 		 com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
-					.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
+					.addAncestors(PathElement.of(USERS,userid)).setKind(EVENTS).newKey(event);
 		LOG.severe("GOING TO DELETE EVENT");
 		Transaction txn=null;
 		Response resp=null;
@@ -252,9 +251,10 @@ public class EventsDatabaseManagement {
 				Entity ev = txn.get(eventKey);
 				if(ev!=null) {
 					Entity parentEntity = Constants.datastore.get(ev.getKey().getParent());
-					if(email.equals(parentEntity.getKey().getName())) {
+					if(userid ==parentEntity.getKey().getId()) {
 						txn.delete(eventKey);
 					    txn.commit();
+					    EventParticipationMethods.removeParticipants(event);
 					    return Response.ok().build();
 					}
 				}
@@ -273,7 +273,7 @@ public class EventsDatabaseManagement {
 	 * @param en the entity
 	 * @return an event of type EventData
 	 */
-	private static EventData2 getEvent(Entity en,String email) {
+	private static EventData2 getEvent(Entity en,long userid,boolean finished) {
 		EventData2 ed = new  EventData2();
 		Entity parentEntity = Constants.datastore.get(en.getKey().getParent());
 		ed.setEventId(en.getKey().getId());
@@ -285,13 +285,16 @@ public class EventsDatabaseManagement {
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
 		ed.setOrganizer(parentEntity.getString(Constants.NAME_PROPERTY));
-		ed.setOwner(email.equals(parentEntity.getKey().getName()));
+		ed.setOwner(userid==parentEntity.getKey().getId());
 		System.out.println("GOING TO LOAD EVENTS");
-		try {
-			ed.setVolunteers(en.getLong(VOLUNTEERS));
-		}catch(Exception e) {
-			
+		ed.setVolunteers(en.getLong(VOLUNTEERS));
+		if(ed.isOwner()) {
+			ed.participating=true;
+		}else if(!finished) {
+			ed.participating=EventParticipationMethods.hasParticipant(userid,ed.eventId);
 		}
+		ed.currentParticipants=EventParticipationMethods.countParticipants(userid, ed.eventId,(int)ed.volunteers);
+		//ed.participants=res.getV2();
 		LOG.severe("GOING TO FETCH THE IMAGES ");
 		try {
 			String images = new String(en.getBlob(Constants.EVENT_PICS_FORMDATA_KEY+0).toByteArray());

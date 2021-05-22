@@ -12,23 +12,26 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 public class HandleTokens {
+	private static final String SECRET = "secret";
+
 	private static final long THIRTY_MINUTES=30*60000;
 
+	private static final String USERID_CLAIM_PROP="userid";
 	public HandleTokens() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static String generateToken(String email) {
+	public static String generateToken(long userid) {
 		Date date = new Date(System.currentTimeMillis()+(THIRTY_MINUTES));
 		String jwt=null;
 		try {
 			jwt = Jwts.builder()
 					  .setSubject("users/TzMUocMF4p")
 					  .setExpiration(date)
-					  .claim("userid",email)
+					  .claim(USERID_CLAIM_PROP,userid)
 					  .signWith(
 					    SignatureAlgorithm.HS256,
-					    "secret".getBytes("UTF-8")
+					    SECRET.getBytes("UTF-8")
 					  )
 					  .compact();
 		} catch (UnsupportedEncodingException e) {
@@ -39,35 +42,12 @@ public class HandleTokens {
 	private static Claims getClaims(String token) throws Exception{
 		Claims claims=null;
 		claims = Jwts.parser()
-				  .setSigningKey("secret".getBytes("UTF-8")) //a strong key must come here
+				  .setSigningKey(SECRET.getBytes("UTF-8")) //a strong key must come here
 				  .parseClaimsJws(token).getBody();
-		/*
-		try {
-			
-		} catch (ExpiredJwtException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedJwtException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedJwtException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		//assertEquals(scope, "self groups/admins");
 		return claims;
 	}
-	public static String validateToken(String token) throws Exception {
-		String userid = (String) getClaims(token).get("userid");
+	public static long validateToken(String token) throws Exception {
+		long userid = (long) getClaims(token).get(USERID_CLAIM_PROP);
 		//assertEquals(scope, "self groups/admins");
 		return userid;
 	}

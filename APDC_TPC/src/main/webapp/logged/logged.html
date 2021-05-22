@@ -20,16 +20,15 @@
         <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
     </nav>
     <nav class="nav_logged">
-        <button id="showInfo">MY INFOS</button>
-        <button id="other_info" name="gbo">OTHER USER INFO</button>
+        <button id="showInfo" class="nvb">MY INFOS</button>
+        <button id="other_info" name="gbo" class="nvb">OTHER USER INFO</button>
         <!--
             <button id="disable_user">DISABLE USERS</button>
             <button id="change_pwd">CHANGE PASSWORD</button>
         -->
-        <button id="create_events_btn">CREATE EVENTS</button>
-        <button id="get_evts_btn">UPCOMING EVENTS</button>
-        <button id="get_evts_btn">EDIT EVENTS</button>
-        <button id="">FINISHED EVENTS</button>
+        <button id="create_events_btn" class="nvb">CREATE EVENTS</button>
+        <button id="get_evts_btn" class="nvb">UPCOMING EVENTS</button>
+        <button id="sh_fnshd_evts" class="nvb">FINISHED EVENTS</button>
     </nav>
     <div class="main_body">
         <h1>WELCOME TO SAVING LIFES</h1>
@@ -59,6 +58,10 @@
                 ></script>
                 <div id="edist">
                     <label>Estimated Distance</label>
+                    <span></span>
+                </div>
+                <div id="etime">
+                    <label>Estimated Time</label>
                     <span></span>
                 </div>
             </div>
@@ -159,74 +162,27 @@
                 </di>
             </div>
 
-            <!--EVENT GET EVENTS-->
+            <!--UPCOMING EVENTS-->
             <div class="dispn" id="show_events_blk">
                 <div class="view_user dlfx ve">
+                    <h2>UPCOMING EVENTS:</h2>
                     <div class="show_events" id="events_blk">
-                        <div class="one_ev">
-                            <div class="dlfx evt_disp">
-                                <div class="blk_desc">
-                                    <div class="dlfx mgpd abt_orzr">
-                                        <div class="orgd" >organiser profile picture</div>
-                                        <div class="orgd">Daniel de Almeida Joao</div>
-                                    </div>
-                                    <div  class="dlfx mgpd abt_evt">
-                                        <h2>Title</h2>
-                                        <div class="desc_txt">Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                                            Nulla sed risus ullamcorper, ultrices ex at, ultrices nisi. 
-                                            Vestibulum in venenatis ante. Suspendisse et interdum nunc. 
-                                            Ut porttitor orci gravida rhoncus vulputate. Maecenas rutrum 
-                                            accumsan nisi, eu sollicitudin lorem. Sed vehicula tristique leo 
-                                            sed luctus. Proin id urna ex. Cras feugiat arcu a lacus fermentum, 
-                                            id mattis libero gravida. Morbi a lobortis ipsum, eu sollicitudin 
-                                            lectus. Aenean at dui ut dui porttitor volutpat non nec eros. Donec 
-                                            condimentum condimentum magna et ultrices. Mauris vitae interdum lectus. 
-                                            Donec sit amet congue neque. Etiam magna mi, gravida sit amet
-                                            lectus sit amet, volutpat mollis justo. Suspendisse potenti.
-                                        </div>
-                                        <div class="dlfx mgpd abt_evt" >
-                                            <div class="mrd plc">
-                                                <div class="mrdso">De:</div>
-                                                <div class="mrdso">Setubal</div>
-                                            </div>
-                                            <div class="mrd plc">
-                                                <div class="mrdso">Onde:</div>
-                                                <div class="mrdso">Faro</div>
-                                            </div>
-                                            <button id="sotm">Show On The Map</button>
-                                            <div class="mrd dte">
-                                                <div class="mrdso">Data:</div>
-                                                <div class="mrdso">21 de Abril 18:45 - 16 de Junho 20:00</div>
-                                            </div>
-                                            <div>
-                                                <div>
-                                                    <span>Voluntarios</span>
-                                                    <span>14</span>
-                                                </div>
-                                                <div>
-                                                    <span>Interessados</span>
-                                                    <span>7</span>
-                                                    <button>Estou Interessado</button>
-                                                </div>
-                                            </div>
 
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="evnts_pcs">
-                                    <img src="../imgs/Screen-Shot-2015-07-13-at-1.53.34-PM.png">
-                                </div>
-                            </div>
-                            <div class="rmv_evt">
-                                <button>EDIT</button>
-                                <button>REMOVE</button>
-                            </div>
-                        </div>
                     </div>
                     <button id="load_mr">LOAD MORE</button>
                 </div>
             </div>
             
+            <!--FINISHED EVENTS-->
+            <div class="dispn" id="show_fnd_evts_blk">
+                <div class="view_user dlfx ve">
+                    <h2>FINISHED EVENTS:</h2>
+                    <div class="show_events" id="fnd_evnts_blk">
+                       
+                    </div>
+                    <button id="load_fnshd">LOAD MORE</button>
+                </div>
+            </div>
 
         </div>
 

@@ -1,5 +1,4 @@
 let loggedUserEMail;
-let token;
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -8,6 +7,15 @@ function getHttpXmlRequest(){
 		xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
 	}
 	return xmlHttpReq;
+}
+function selectNavBarButton(btn){
+    let className = "sltdnvb";
+    let elems = document.getElementsByClassName(className);
+    for (let index = 0; index < elems.length; index++) {
+        const element = elems[index];
+        element.classList.remove(className);
+    }
+    btn.classList.add(className);
 }
 function updateNavAttribues() {
     loggedUserEMail = localStorage.getItem("email");
@@ -19,14 +27,14 @@ function updateNavAttribues() {
     //}
     let nameSpan = document.getElementById("name_sp");
     let emailSpan = document.getElementById("email_sp");
-
+    /*
     let additionalAttributes = localStorage.getItem("ad_attr");
 
     if(additionalAttributes!=null){
         additionalAttributes=JSON.parse(additionalAttributes);
         fillAdditionalAttributes(additionalAttributes);
     }
-    
+    */
     nameSpan.textContent=localStorage.getItem("name");;
     emailSpan.textContent=loggedUserEMail
 }
@@ -82,8 +90,7 @@ function updateAditionalAttributes() {
         telemovel:attributes[2].textContent,
         morada:attributes[3].textContent,
         morada_complementar:attributes[4].textContent,
-        localidade:attributes[5].textContent,
-        email:token
+        localidade:attributes[5].textContent
     }
     alert(loggedUserEMail);
     updateInfos(obj);
@@ -112,21 +119,34 @@ function logOff() {
 }
 function removeAccount() {
     let legoffButton = document.getElementById("rmv");
-    let passInput;
+    let password;
     let obj;
 
     legoffButton.onclick=()=>{
-        passInput=prompt("Insert Your Password?");
-        console.log(passInput+" hhhahaa");
-        if(passInput.trim()==""){
+        password=prompt("Insert Your Password?");
+        if(password.trim()==""){
             alert("Insert a valid password!");
             return;
         }
-        obj={
-            email:token,
-            password:passInput
-        };
-        deleteAccount(JSON.stringify(obj));
+        let path="../rest/login/op8";
+        fetch(path,{
+            method:"DELETE",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:"p="+password
+        }).then(response=>{
+            if(response.ok){
+                localStorage.clear();
+                window.location.href="/";
+            }else if(response.status===401){
+                alert("Password is Wrong!");
+            }else{
+                alert("Unexpected Error!");
+            }
+        }).catch(e=>{
+            alert(e);
+        })
     }
 }
 function sendLogOff() {
@@ -143,40 +163,13 @@ function sendLogOff() {
     xmlHttpReq.setRequestHeader("Content-Type", "application/json");
     xmlHttpReq.send();
 }
-function deleteAccount(obj) {
-    let spanText= document.getElementById("rs_sn");
-        let xmlHttpReq = getHttpXmlRequest();
-        xmlHttpReq.onreadystatechange = function(){
-            if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-                let rt = xmlHttpReq.responseText;
-                alert(rt+" result");
-                localStorage.clear();
-                window.location.href="/";
-            }
-        }
-        xmlHttpReq.open("POST","../rest/login/op8",true);
-        xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-        xmlHttpReq.send(obj);
-}
+
 function isLogged() {
-    let gbo = localStorage.getItem("gbo");
-    if(!gbo){
-        let gbosOnly = document.getElementsByName("gbo");
-        for (let index = 0; index < gbosOnly.length; index++) {
-            gbosOnly[0].remove();          
-        }
-    }else{
-        document.getElementById("other_info").classList.remove("dispn");
-        localStorage.removeItem("gbo");
+    email = localStorage.getItem("email");
+    if(token==null){
+        localStorage.clear();
+        window.location.href="/register.html";
     }
-    console.log("I AM GBO "+gbo);
-    token = localStorage.getItem("token");
-    /**
-     *     if(token==null){
-            localStorage.clear();
-            window.location.href="/register.html";
-            }
-     */
 }
 /**** SECOND NAV BUTTONS                                     */
 const dispb="dispb";
@@ -195,6 +188,7 @@ function handShowButtons() {
     showInfo.onclick=()=>{
         hideAllBlocksButOne("my_inf");
         hideMap();
+        selectNavBarButton(showInfo);
     }
     /*
     showOtherUser.onclick=()=>{
@@ -214,7 +208,7 @@ function handShowButtons() {
         hideAllBlocksButOne("change_pwd_block");
     }*/
 }
-isLogged();
+//isLogged();
 updateNavAttribues();
 updateAttributes();
 logOff();

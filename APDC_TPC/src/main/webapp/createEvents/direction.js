@@ -5,6 +5,9 @@
 let origin=null;
 let destination=null;
 let autoCompDirection;
+let distDiv;
+let timeDiv;
+
 const SEARCH1=0;
 const SEARCH2=1;
 const fields =["place_id","name","formatted_address","geometry"];
@@ -24,6 +27,8 @@ function initMap() {
     zoom: 13,
   });
   autoCompDirection = new AutocompleteDirectionsHandler(map);
+  distDiv = document.getElementById("edist").children[1];
+  timeDiv = document.getElementById("etime").children[1];
 }
 class AutocompleteDirectionsHandler {
   constructor(map) {
@@ -124,29 +129,12 @@ class AutocompleteDirectionsHandler {
       (response, status) => {
         if (status === "OK") {
           me.directionsRenderer.setDirections(response);
-          this.distHaversine(origin.loc,destination.loc);
+          distDiv.textContent=": "+response.routes[0].legs[0].distance.text;
+          timeDiv.textContent=": "+response.routes[0].legs[0].duration.text;
         } else {
           window.alert("Directions request failed due to " + status);
         }
       }
     );
-  }
-  // Functions to compute distance between two points on earth's surface
-  rad(x){return x*Math.PI/180;}
-  distHaversine(p1, p2) {
-    if(p1==null||p2==null){
-      return;
-    }
-    var R = 6371; // earth's mean radius in km
-    var dLat  = this.rad(p2.lat - p1.lat);
-    var dLong = this.rad(p2.lng - p1.lng);
-  
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(this.rad(p1.lat)) * Math.cos(this.rad(p2.lat)) * Math.sin(dLong/2) * Math.sin(dLong/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    var d = R * c;
-    let distDiv = document.getElementById("edist").children[1];
-    distDiv.textContent=d+" KM.";
-    //return d;
   }
 }

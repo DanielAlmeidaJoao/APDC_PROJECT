@@ -3,10 +3,20 @@ const OKOK = 200;
 const RMV_EVENT_TEXT = "REMOVE";
 const EDIT_EVENT_TEXT="EDIT";
 function showGetEventsBlock() {
-    let createEvent = document.getElementById("get_evts_btn");
-    createEvent.onclick=()=>{
+    let show = document.getElementById("get_evts_btn");
+    show.onclick=()=>{
         hideAllBlocksButOne("show_events_blk");
         hideMap();
+        selectNavBarButton(show);
+    }
+    show.click();
+}
+function showFinishedEventsBlock() {
+    let show = document.getElementById("sh_fnshd_evts");
+    show.onclick=()=>{
+        hideAllBlocksButOne("show_fnd_evts_blk");
+        hideMap();
+        selectNavBarButton(show);
     }
 }
 /*HTML key names */
@@ -19,6 +29,11 @@ const dv = {
     NAME:"name",
     SPAN:"span"
 }
+
+const cTypes={
+    GSON:"application/json",
+    URENC:"application/x-www-form-urlencoded"
+}
 let viewOnTheMap = document.getElementById("sotm");
 let markers = [];
 /*viewOnTheMap.onclick=()=>{
@@ -27,29 +42,38 @@ let markers = [];
 }*/
 const handleGetEventsButton = function () {
     let load_mr = document.getElementById("load_mr");
+    let loadFinisheds=document.getElementById("load_fnshd");
     load_mr.onclick=()=>{
-        loadEvents();
+        loadUpcomingEvents();
     };
-    function loadEvents() {
-        let path = `/rest/events/view`;
+    loadFinisheds.onclick=()=>{
+        loadFinishedEvents();
+    }
+    function loadEvents(path,finished,divBlock) {
         fetch(path)
         .then(response => response.json())
         .then( data => {
-            //console.log("RESPONSE:");
-            //console.log(data);
-            let mainBlock = document.getElementById("events_blk");
             let chld;
-            //let arr = JSON.parse(data);
             for(let x=0; x<data.length;x++){
-                chld = singleEventBlock(data[x]);
-                //chld = makeEventBlock(data[x]);
-                mainBlock.appendChild(chld);
+                chld = singleEventBlock(data[x],finished);
+                divBlock.appendChild(chld);
             }
         }
         )
         .catch((error) => {
             console.log('Error: '+ error);
         });
+    }
+
+    function loadFinishedEvents() {
+        let mainBlock = document.getElementById("fnd_evnts_blk");
+        let path = `/rest/events/view/finished`;
+        loadEvents(path,true,mainBlock);
+    }
+    function loadUpcomingEvents() {
+        let mainBlock = document.getElementById("events_blk");
+        let path = `/rest/events/view`;
+        loadEvents(path,false,mainBlock);
     }
     
         function makeElement(elementType,valueAtt) {
@@ -128,20 +152,90 @@ const handleGetEventsButton = function () {
             return btn;
         }
         /**
+         * 
+         * @param {Number} volunteers the number of volunteers interested in this event
+         * @param {String} className1 
+         * @param {String} className2 
+         * @param {String} className3 
+         * @param {String} txt 
+         * @returns html div element
+         */
+        function volunteersDivAux(volunteers,className1,className2,className3,txt) {
+            let son1 = me(dv.DIV,className1);
+            let span1 = me(dv.SPAN,className2,txt);
+            let span2=me(dv.SPAN,className3,volunteers);
+
+            son1.appendChild(span1);
+            son1.appendChild(span2);
+            return son1;
+        }
+        function participateIntheEvent(eventid) {
+            let endpoint="/rest/events/participate";
+
+            fetch(endpoint,{
+                method:"POST",
+                headers:{
+                    "Content-Type":cTypes.URENC
+                },
+                body:"eid="+eventid
+            }).then(response=>{
+                console.log(response.status);
+                if(response.status==HttpCodes.conflict){
+                    alert("You are already participating!");
+                }else if(response.status==HttpCodes.forbidden){
+                    alert("Session Expired");
+                }
+            }).catch(e=>{
+                alert(e);
+            })
+        }
+        function removeParticipation(eventid) {
+            let endpoint="/rest/events/rparticipation/"+eventid;
+            fetch(endpoint,{method:'DELETE'}).then(response=>{
+                console.log(response.status);
+                if(response.status==HttpCodes.forbidden){
+                    alert("Session Expired");
+                }else if(response.status==HttpCodes.badrequest){
+                    alert("Oooops, ERROR UNEXPECTED!");
+                }
+            }).catch(e=>{
+                alert(e);
+            })
+        }
+        function participatingButtons(parent,isGoing,eventid) {
+            let participateButton = me(dv.BUTTON,"vlts prt","I will go!");
+            let goingButton = me(dv.BUTTON,"vlts prt","GOING!");
+            if(isGoing){
+                parent.appendChild(goingButton);
+            }else{
+                parent.appendChild(participateButton);
+            }
+            participateButton.onclick=()=>{    
+                participateIntheEvent(eventid);
+                parent.appendChild(goingButton);
+                participateButton.remove();
+            }
+            goingButton.onclick=()=>{
+                removeParticipation(eventid);
+                goingButton.remove();
+                parent.appendChild(participateButton);
+                //remove from datastore
+            }
+        }
+        /**
          * is going to create a div block to have the information about the volunteers in the event
          * @param {number of valunteers need to take part in the event} volunteers 
          * @param {html parent element} parent 
          */
-        function volunteersDiv(volunteers,parent){
-            let mnd = me(dv.DIV,"");
-            
-            let son1 = me(dv.DIV,"");
-            let span1 = me(dv.SPAN,"","Voluntarios");
-            let span2=me(dv.SPAN,"",volunteers);
-
-            son1.appendChild(span1);
-            son1.appendChild(span2);
+        function volunteersDiv(volunteers,currentNum,parent,isOwner,eventid,participating,finished){
+            let mnd = me(dv.DIV,"mgpd");
+            let son1 = volunteersDivAux(volunteers,"vlt","vlts1 vlts","vlts1 vlts","Voluntarios:"); 
+            let interestedDiv = volunteersDivAux(currentNum,"vlt","vlts","vlts","Interested:");            
+            if(!finished && !isOwner){
+                participatingButtons(interestedDiv,participating,eventid);
+            }
             mnd.appendChild(son1);
+            mnd.appendChild(interestedDiv);
             parent.appendChild(mnd);
         }
         /**
@@ -211,7 +305,7 @@ const handleGetEventsButton = function () {
          * @param {*} eventId 
          * @param {*} parent 
          */
-        function removeEventButton(eventId,parent,eventObj) {
+        function removeEventButton(eventId,parent,eventObj,finished) {
             let d = me(dv.DIV,"rmv_evt");
             let rmv = document.createElement("button");
             parent.appendChild(d);
@@ -219,14 +313,14 @@ const handleGetEventsButton = function () {
             rmv.onclick=()=>{
                 deleteEvent(eventId,rmv);
             }
-
-            let editButton=me(dv.BUTTON,"",EDIT_EVENT_TEXT);
-            editButton.onclick=()=>{
-                editEvent(eventObj);
+            if(!finished){
+                let editButton=me(dv.BUTTON,"",EDIT_EVENT_TEXT);
+                editButton.onclick=()=>{
+                    editEvent(eventObj);
+                }
+                d.appendChild(rmv);
+                d.appendChild(editButton);
             }
-            d.appendChild(rmv);
-            d.appendChild(editButton);
-
         }
         /**
          * creates a div to display an event
@@ -237,7 +331,7 @@ const handleGetEventsButton = function () {
          * @param {*} when date
          * @param {*} eventId id of the event
          */
-        function singleEventBlock(eventObj){
+        function singleEventBlock(eventObj,finished){
              /**
          * eventObj.name)
          * eventObj.description
@@ -254,7 +348,8 @@ const handleGetEventsButton = function () {
             let descriptionBlock = me(dv.DIV,"dlfx mgpd abt_evt");
             eventDescDiv(eventObj.name,eventObj.description,descriptionBlock);
             eventDateLocationDiv(eventObj.meetingPlace,eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
-            volunteersDiv(eventObj.volunteers,descriptionBlock);
+
+            volunteersDiv(eventObj.volunteers,eventObj.currentParticipants,descriptionBlock,eventObj.owner,eventObj.eventId,eventObj.participating,finished);
 
             organizerAndDescParent.appendChild(descriptionBlock);
     
@@ -265,7 +360,7 @@ const handleGetEventsButton = function () {
             let mainS1 = me(dv.DIV,"one_ev");
             mainS1.appendChild(organizerAndDescParentGrandPa);
             if(eventObj.owner){
-                removeEventButton(eventObj.eventId,mainS1,eventObj);
+                removeEventButton(eventObj.eventId,mainS1,eventObj,finished);
             }
             let frag = document.createDocumentFragment();
             frag.appendChild(mainS1);
@@ -286,6 +381,8 @@ const handleGetEventsButton = function () {
     let mainBlock = document.getElementById("events_blk");
     let chld = singleEventBlock(eventObj);
     mainBlock.appendChild(chld); */
+    load_mr.click();
 }
 showGetEventsBlock();
+showFinishedEventsBlock();
 handleGetEventsButton();

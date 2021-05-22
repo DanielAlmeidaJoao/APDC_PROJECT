@@ -4,6 +4,7 @@ const HttpCodes = {
     badrequest : 400,
     forbidden: 403,
     unauthorized: 401,
+    conflict: 409
     // etc
 }
 const sbmt = document.getElementById("addEvt_frm");
@@ -19,6 +20,7 @@ function showCreateEventBlock() {
     createEvent.onclick=()=>{
         hideAllBlocksButOne("create_events");
         showMap();
+        selectNavBarButton(createEvent);
     }
 }
 
@@ -72,19 +74,14 @@ function handleCreateEventSubmitForm() {
             eventId=0;
         }
         data["eventId"]=eventId;
-        console.log(data);
         if(data==null){
             return false;
         }
-        //console.log(data);
-
         data = JSON.stringify(data);
         data = makeFormData(data);
         if(data!=null){
-            //uploadPictures(data,formEle);
             uploadData(data,sbmt);
         }
-        //console.log(data);
         return false;
     }
 }
@@ -93,6 +90,7 @@ function resetImagesDiv() {
     while(dvs.childElementCount>0){
         dvs.firstChild.remove();
     }
+    eventImages=new Map();
 }
 function uploadData(datas,formEle) {
     fetch('/rest/events/create', {

@@ -1,8 +1,4 @@
 const endpoint = document.location.host+"/rest/";
-console.log("OK OK");
-
-let myStorage = window.sessionStorage;
-
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -13,65 +9,66 @@ function getHttpXmlRequest(){
 	return xmlHttpReq;
 }
 function registerUser(name,email,password){
-    let spanText= document.getElementById("rs_sn");
-	let xmlHttpReq = getHttpXmlRequest();
-	xmlHttpReq.onreadystatechange = function(){
-		if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-			let rt = xmlHttpReq.responseText;
-            console.log(rt);
-            redirectOnLogin(rt);
-		}
-	}
-	let postString =JSON.stringify({
+    let user={
         name: name,
         email: email,
         password: password 
+    };
+	let postString = JSON.stringify(user);
+    let path="rest/login/op1";
+    fetch(path,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:postString
+    }).then(response=>{
+        if(response.ok){
+            user.password=null;
+            redirectOnLogin(user);
+        }else if(response.status===409){
+            alert("Email already registered!");
+        }else{
+            alert("Invalid Data!");
+        }
+    }).catch((e)=>{
+        console.log(e);
     });
-	xmlHttpReq.open("POST","rest/login/op1",true);
-	xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-	xmlHttpReq.send(postString);
 }
 function redirectOnLogin(rt) {
-    rt = JSON.parse(rt);
-    if(rt.status=="1"){
-        localStorage.setItem("email",rt.email);
-        localStorage.setItem("name",rt.name);
-        localStorage.setItem("token",rt.token);
-        localStorage.setItem("gbo",rt.gbo);
-        if(rt.additionalAttributes!="0"){
-            localStorage.setItem("ad_attr",rt.additionalAttributes);
-            console.log(rt.additionalAttributes);
-        }
-        window.location.href="/logged/logged.html";
-    }else if(rt.status=="2"){
-        alert("THERE WAS AN ERROR GENERATING THE TOKEN! PLEASE RETRY, IF THE ERROR CONTUNES, PLEASE REPORT!");
-    }else if(rt.status=="3"){
-        alert("REGISTER SUCCESS!, BUT THERE WAS AN ERROR GENERATING THE TOKEN, PLEASE RE-LOGIN!");
-    }else if(rt.status=="-2"){
-        alert("USER REGISTERED ALREADY!");
-    }else if(rt.status=="-1"){
-        alert("INTERNAL ERROR");
-    }else
-    {
-        alert("LOGIN FAILED!");
-    }
+    localStorage.setItem("email",rt.email);
+    localStorage.setItem("name",rt.name);
+    window.location.href="/logged/logged.html";
 }
 function processLoginData(email,password) {
-    let xmlHttpReq = getHttpXmlRequest();
-	xmlHttpReq.onreadystatechange = function(){
-		if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-			let rt = xmlHttpReq.responseText;
-            redirectOnLogin(rt);
-		}
-	}
-	let postString =JSON.stringify({
+    let postString =JSON.stringify({
         email: email,
         password: password 
     });
-	xmlHttpReq.open("POST","rest/login/op2",true);
-	xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-	xmlHttpReq.send(postString);
+    let path="rest/login/op2";
+    fetch(path,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:postString
+    }).then(response=>{
+        if(response.ok){
+            return response.json();
+        }else if(response.status===401){
+            alert("Email or Password is wrong!");
+        }else{
+            alert("Invalid Data!");
+        }
+    }).then(obj=>{
+        if(obj){
+            redirectOnLogin(obj);
+        }
+    }).catch(e=>{
+        console.log(e);
+    });
 }
+
 function validateInputs() {
     let name = document.getElementById("inp").value;
     let email = document.getElementById("inp2").value;
@@ -79,12 +76,12 @@ function validateInputs() {
     let conf_password = document.getElementById("inp4").value;
   
     if(name.trim()===""){
-      alert("DON'T YOU DARE!");
+      alert("Name is invalid!");
       return;
     }
   
     if(password!==conf_password){
-      alert("LET'S US BE PROFESSIONALS FELLAS!");
+      alert("Passwords do not match!");
       return;
     }
   
@@ -100,7 +97,6 @@ function handleSubmitButton() {
 
 function handleLogin() {
     let formS=document.getElementById("login_form");
-    console.log("HHAA");
     formS.addEventListener('submit', function(e) {
         e.preventDefault();
     });
@@ -129,7 +125,6 @@ function handleForm(){
 }
 //handleForm();
 
-
 addEventListener('beforeunload', function (event) {
 	//localStorage.clear();
 	return undefined;
@@ -137,5 +132,3 @@ addEventListener('beforeunload', function (event) {
 
 handleLogin();
 handleSubmitButton();
-
-console.log("VERSION 40");

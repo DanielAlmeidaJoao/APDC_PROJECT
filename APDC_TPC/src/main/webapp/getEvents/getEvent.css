@@ -70,3 +70,20 @@ display: flex;
     width: 99.9%;
     height: auto;
 }
+.vlt{
+    display: flex;
+}
+.vlts{
+    padding: 2.5px;
+    margin: 2.5px;
+}
+.prt{
+    background-color: green;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+}
+.prt:hover{
+    cursor: pointer;
+    background-color: rgb(6, 112, 6);
+}

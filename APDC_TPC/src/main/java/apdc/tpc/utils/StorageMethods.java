@@ -2,15 +2,18 @@ package apdc.tpc.utils;
 
 import java.util.logging.Logger;
 
-
-
-
-
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
+import apdc.events.utils.EventsDatabaseManagement;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -29,6 +32,8 @@ public class StorageMethods {
 	
 	private static final String ENABLED = "ENABLED";
 	private static final String DISABLED = "DISABLED";
+	private static final String EMAIL_PROP = "email";
+
 
 
 	//private static final String GBO = "GBO";
@@ -42,6 +47,7 @@ public class StorageMethods {
 	private static final String MORADA = "MORADA";
 	private static final String TELEFONE = "TELEFONE";
 	private static final String TELEMOVEL = "TELEMOVEL";
+	private static final String USERS_KIND="Users";
 	private static final Logger LOG = Logger.getLogger(StorageMethods.class.getName());
 
 	public static UserInfo getOtherUser(Datastore datastore,LoginData data) {
@@ -49,7 +55,7 @@ public class StorageMethods {
 		//data.password -> other user email
 		UserInfo u = new UserInfo();
 		try {
-			String loggedUser = HandleTokens.validateToken(data.getEmail());
+			String loggedUser = null;// HandleTokens.validateToken(data.getEmail());
 			if(loggedUser==null) {
 				u.setStatus("-1");//MUST LOGIN AGAIN
 				return u;
@@ -156,7 +162,7 @@ public class StorageMethods {
 		Transaction txn=null;
 		String result="-1";
 		try {
-			String loggedUser = HandleTokens.validateToken(data.getToken());
+			String loggedUser = null;// HandleTokens.validateToken(data.getToken());
 			LOG.severe("OK-1");
 			if(loggedUser==null) {
 				return result;
@@ -218,28 +224,49 @@ public class StorageMethods {
 	public static Entity getUser(Datastore datastore,LoginData data) {
 		Entity person=null;
 		try {
-			com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind("Users").newKey(data.getEmail());
-			person = datastore.get(userKey);
-			if(data.getPassword().equals(person.getString(PASSWORD))&&("ENABLED".equals(person.getString(STATE)))){
-				return person;
+			//com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind("Users").newKey(data.getEmail());
+			Query<Entity> query = Query.newEntityQueryBuilder()
+				    .setKind(USERS_KIND)
+				    .setFilter(CompositeFilter.and(
+				        PropertyFilter.eq(EMAIL_PROP, data.getEmail()),PropertyFilter.eq(PASSWORD, data.getPassword()))).build();
+			//person = datastore.get(userKey);
+			QueryResults<Entity> tasks = datastore.run(query);
+			if(tasks.hasNext()) {
+				person=tasks.next();
+				if("ENABLED".equals(person.getString(STATE))){
+					return person;
+				}else {
+					return null;
+				}
 			}else {
 				return null;
 			}
+			
 		}catch(Exception e) {
 			
 		}
 		return person;
 	}
-	public static LoggedObject addUser(Datastore datastore, RegisterData data, Gson g) {
+	public static boolean getUser(Datastore datastore,String email) {
+		Query<Entity> query = Query.newEntityQueryBuilder()
+			    .setKind(USERS_KIND)
+			    .setFilter(CompositeFilter.and(
+			        PropertyFilter.eq(EMAIL_PROP, email))).build();
+		//person = datastore.get(userKey);
+		QueryResults<Entity> tasks = datastore.run(query);
+		return tasks.hasNext();
+	}
+	public static long addUser(Datastore datastore, RegisterData data) {
 		Transaction txn =null;
-		LoggedObject lo = new LoggedObject();
-		lo.setStatus("-1");
+		long userid=0L;
 		  try {
-			com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind("Users").newKey(data.getEmail());
+			KeyFactory kf = datastore.newKeyFactory().setKind(USERS_KIND);
+			com.google.cloud.datastore.Key userKey =datastore.allocateId(kf.newKey());
 			Entity person = datastore.get(userKey);
 			if(person==null) {
 				txn = datastore.newTransaction();
 			    person = Entity.newBuilder(userKey)
+			    		.set(EMAIL_PROP,data.getEmail())
 						.set(PASSWORD,data.getPassword())
 						.set(Constants.NAME_PROPERTY,data.getName())
 						.set(ROLE,USER)
@@ -251,21 +278,14 @@ public class StorageMethods {
 			    ad.setEmail(data.getEmail());
 			    ad.setPerfil("PRIVADO");
 			    addUserAdditionalInformation(datastore,ad);
-				
-				lo.setEmail(data.getEmail());
-				lo.setName(data.getName());
-				lo.setStatus("1");
-				lo.setAdditionalAttributes(g.toJson(ad));
-			}else {
-				lo.setStatus("-2");
+				userid = userKey.getId();
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());
 		  }finally {
 			  rollBack(txn);
 		  }
-		  
-		  return lo;
+		  return userid;
 	}
 	public static AdditionalAttributes getAdditionalAttributes(Datastore datastore, String email) {
 		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(ADDITIONALS).newKey(email);
@@ -310,27 +330,18 @@ public class StorageMethods {
 			
 		}
 	}
-	public static int removeUser(Datastore datastore,LoginData data) {
+	public static int removeUser(Datastore datastore,long userid, String password) {
 		int result=-1;
-		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind("Users").newKey(data.getEmail());
-		
+		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(USERS_KIND).newKey(userid);
 		Transaction txn = datastore.newTransaction();
-
 		  try {
 			Entity person = txn.get(ctrsKey);
-			if(!(person!=null&&isEnabled(person))) {
-				return result;
-			}
-			if(data.getPassword().equals(person.getString(PASSWORD))) {
-				com.google.cloud.datastore.Key additionalInfo=datastore.newKeyFactory().setKind(ADDITIONALS).newKey(data.getEmail());
-
+			if(isEnabled(person)&&password.equals(person.getString(PASSWORD))) {
+				com.google.cloud.datastore.Key additionalInfo=datastore.newKeyFactory().setKind(ADDITIONALS).newKey(userid);
 				txn.delete(ctrsKey,additionalInfo);
 			    txn.commit();
 			    result=1;
-			}else {
-				result=-2;
 			}
-			
 		  }catch(Exception e) {
 			LOG.severe(e.getLocalizedMessage());
 		  } finally {

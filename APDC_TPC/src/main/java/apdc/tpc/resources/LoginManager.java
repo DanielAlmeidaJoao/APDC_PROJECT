@@ -1,20 +1,29 @@
 package apdc.tpc.resources;
 
+import java.util.Iterator;
+
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
@@ -39,6 +48,9 @@ public class LoginManager {
 	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();
 
+	private String hashPassword(String password) {
+		return DigestUtils.sha512Hex(password);
+	}
 	@GET
 	@Path("/{username}")
 	public Response getUser(@PathParam("username") String username ) {
@@ -50,7 +62,9 @@ public class LoginManager {
 		}
 		return Response.ok().entity(g.toJson(rs)).build();
 	}
-
+	private boolean validPassword(String password) {
+		return password.length()<Constants.PASSWORD_MINLENGTH||password.length()>Constants.PASSWORD_MAXLENGTH;
+	}
 	@POST
 	@Path("/op1")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -58,18 +72,22 @@ public class LoginManager {
 	public Response doRegister(RegisterData data) {
 		LOG.severe("USER REGISTERED! pp "+data.getEmail());
 		Response res=null;
-		LoggedObject lo = StorageMethods.addUser(Constants.datastore,data,g);
-		if(lo.getStatus().equals("1")) {
-			String token=HandleTokens.generateToken(lo.getEmail());
-			if(token!=null) {
-				lo.setStatus("1");
-				lo.setToken(token);
-			}else {
-				lo.setStatus("3");
-			}
+		if(!validPassword(data.getPassword())) {
+			return Response.status(Status.BAD_REQUEST).build();
 		}
-		
-		res= Response.ok().entity(g.toJson(lo)).build();
+		boolean registered = StorageMethods.getUser(Constants.datastore,data.getEmail());
+		if(registered) {
+			return Response.status(Status.CONFLICT).build();
+		}
+		data.setPassword(hashPassword(data.getPassword()));
+		long userid = StorageMethods.addUser(Constants.datastore,data);
+		if(userid>Constants.ZERO){
+			String token=HandleTokens.generateToken(userid);
+			NewCookie nk = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,token,null);
+			res= Response.ok().cookie(nk).build();
+		}else {
+			res= Response.status(Status.BAD_REQUEST).build();
+		}
 		return res;
 	}
 	
@@ -78,46 +96,34 @@ public class LoginManager {
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doLogin(@Context HttpHeaders httpHeaders, @CookieParam(Constants.COOKIE_TOKEN) String value, LoginData data) {
-		String res=null;
-		LoggedObject lo = new LoggedObject();
 		NewCookie k=null;
+		Response response;
 		try {
+			data.setPassword(hashPassword(data.getPassword()));
 			Entity user = StorageMethods.getUser(Constants.datastore,data);
 			if(user==null) {
-				lo.setStatus("0");
+				response=Response.status(Status.UNAUTHORIZED).build();
 			}else{
 				//AuthToken at = new AuthToken(user.getString("email"));
 			    String domain = httpHeaders.getHeaderString("host");
 			    domain=null;
-				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(data.getEmail()),domain);
+				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(user.getKey().getId()),domain);
+				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
-				lo.setName(user.getString("name"));
-				lo.setToken(HandleTokens.generateToken(lo.getEmail()));
-				if(lo.getToken()==null) {
-					lo.setStatus("2");
-				}else {
-					lo.setStatus("1");
-					lo.setGbo("GBO".equals(user.getString("role")));
-				}
-				AdditionalAttributes ad= StorageMethods.getAdditionalAttributes(Constants.datastore,data.getEmail());
-				if(ad==null) {
-					lo.setAdditionalAttributes("0");
-				}else {
-					lo.setAdditionalAttributes(g.toJson(ad));
-				}
+				lo.setName(user.getString(Constants.NAME_PROPERTY));
+				response=Response.ok().cookie(k).entity(g.toJson(lo)).build();
 			}
 		}catch(Exception e) {
-			lo.setStatus("-1");
+			response=Response.status(Status.BAD_REQUEST).build();
 		}
-		lo.setToken(HandleTokens.generateToken(lo.getEmail()));
-		res= g.toJson(lo);
-		return  Response.ok().cookie(k).entity(res).build();
+		return response;
 	}
 	@POST
 	@Path("/op3")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
 	public Response doUpdateAdditionalInfos(AdditionalAttributes ads) {
+		/*
 		if(request!=null) {
 			LOG.severe("REQUEST IS NULL");
 		}else {
@@ -136,47 +142,50 @@ public class LoginManager {
 			result=""+StorageMethods.addUserAdditionalInformation(Constants.datastore, ads);
 		}else {
 			result="TOKEN NOT FOUND";
-		}
-		return Response.ok().entity(result).build();
+		}*/
+		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
-
+	/**
+	 * do a logout of the logged user. Removes all cookies
+	 * @param headers
+	 * @return
+	 */
 	@GET
 	@Path("/op7")
 	//@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
 	//@Context HttpHeaders headers
-	public Response doLogout() {
+	public Response doLogout(@Context HttpHeaders headers) {
 		//HandleTokens.destroyToken(token);
-		/*headers.getCookies().forEach( (k,v)->{});*/
-	    NewCookie tokenCookie = HandleTokens.destroyCookie(Constants.COOKIE_TOKEN);
-	    NewCookie eventOffsetCookie = HandleTokens.destroyCookie(Constants.GET_EVENT_CURSOR_CK);
-		//int result =1;
-		return Response.ok().cookie(tokenCookie,eventOffsetCookie).build();
+		ResponseBuilder rb = Response.ok();
+		java.util.Map.Entry<String,Cookie> en;
+		Iterator<java.util.Map.Entry<String,Cookie>> entries = headers.getCookies().entrySet().iterator();
+		while(entries.hasNext()) {
+			en=entries.next();
+			NewCookie destroyed = HandleTokens.destroyCookie(en.getKey());
+			rb=rb.cookie(destroyed);
+		}
+		return rb.build();
 	}
-	@POST
+	@DELETE
 	@Path("/op8")
-	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
-	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doRemove(LoginData data) {
-		String token= data.getEmail();
-		String tk =null;
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED +";charset=utf-8")
+	public Response doRemove(@CookieParam(Constants.COOKIE_TOKEN) String token, @FormParam("p") String password) {
+		ResponseBuilder rb;
+		Constants.LOG.severe("GOING TO REMOVE USER!");
 		try {
-			 tk= HandleTokens.validateToken(data.getEmail());
-		}catch (Exception e) {
-			
-		}
-		String res="";
-		if(tk==null) {
-			res="SESSION EXPIRED!";
-		}else {
-			data.setEmail(tk);
-			if (StorageMethods.removeUser(Constants.datastore, data)>0) {
-				HandleTokens.destroyToken(token);
-				res="REMOVED WITH SUCCESS!";
+			long userid = HandleTokens.validateToken(token);
+			password=hashPassword(password);
+			if(StorageMethods.removeUser(Constants.datastore,userid,password)>Constants.ZERO) {
+				rb=Response.status(Status.OK);
+				Constants.LOG.severe("USER REMOVED "+userid);
 			}else {
-				res="THERE WAS AN ERROR!";
+				Constants.LOG.severe("ERRROR "+userid);
+				rb=Response.status(Status.UNAUTHORIZED);
 			}
+		}catch (Exception e) {
+			rb=Response.status(Status.BAD_REQUEST);
 		}
-		return Response.ok().entity(res).build();
+		return rb.build();
 	}
 	@POST
 	@Path("/op9")
@@ -214,11 +223,13 @@ public class LoginManager {
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doChangePassword(RegisterData data) {
+		
 		/**
 		 * name: oldPass,
 	       password: newPass,
 	       email: token,
 		 */
+		/*
 		String email=null;
 		try {
 			email = HandleTokens.validateToken(data.getEmail());
@@ -230,6 +241,7 @@ public class LoginManager {
 		}else {
 			email="-1";
 		}
-		return Response.ok().entity(email).build();
+		return Response.ok().entity(email).build();*/
+		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 }

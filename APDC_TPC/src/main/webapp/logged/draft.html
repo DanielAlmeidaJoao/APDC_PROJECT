@@ -1,123 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="logged.css">
-    <title>Document</title>
-</head>
-<body>
-    <nav class="nav_logged">
-        <span id="name_sp" class="nv_el adt">DANIEL JOAO</span>
-        <span id="email_sp" class="nv_el adt">DANIEL@GMAIL.COM</span>
-
-        <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
-        <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
-    </nav>
-    <nav class="nav_logged">
-        <button id="showInfo">MY INFOS</button>
-        <button id="other_info" name="gbo"  class="dispn">OTHER USER INFO</button>
-        <!--
-            <button id="disable_user">DISABLE USERS</button>
-            <button id="change_pwd">CHANGE PASSWORD</button>
-        -->
-        <button id="">CREATE EVENTS</button>
-        <button id="">UPCOMING EVENTS</button>
-        <button id="">FINISHED EVENTS</button>
-    </nav>
-    <div class="main_body">
-        <h1>WELCOME TO THE PLACE WHERE WELCOME IS WELCOME</h1>
-        <div class="main_body_son2">
-
-            <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
-                <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
-                <div class="info_div">
-                    <label>PERFIL:</label>
-                    <div class="sp_attr kj"></div>
-                </div>
-                <div class="info_div">
-                    <label>TELEFONE FIXO:</label>
-                    <div class="sp_attr"></div>
-                </div>
-                <div class="info_div">
-                    <label>TELEFONE MOVEL:</label>
-                    <div class="sp_attr"></div>
-                </div>
-                <div class="info_div">
-                    <label>MORADA:</label>
-                    <div class="sp_attr"></div>
-                </div>
-                <div class="info_div">
-                    <label>MORADA COMPLEMENTAR:</label>
-                    <div class="sp_attr"></div>
-                </div>
-                <div class="info_div">
-                    <label>LOCALIDADE:</label>
-                    <div class="sp_attr"></div>
-                </div>
-                <button id="upDate">UPDATE</button>
+<div class="one_ev">
+    <div class="dlfx evt_disp">
+        <div class="blk_desc">
+            <div class="dlfx mgpd abt_orzr">
+                <div class="orgd" >organiser profile picture</div>
+                <div class="orgd">Daniel de Almeida Joao</div>
             </div>
-
-            <div class="view_user dispn" id="view_user">
-                <div class="sec_name">VIEWING OTHER USER</div>
-                <form class="form_ele" id="form_ele">
-                    <label for="oth_email">EMAIL</label>
-                    <input id="oth_email">
-                    <button>GO</button>
-                </form>
-                <div class="srch_parent">
-                    <span>SEARCH RESULTS</span>
-                    <div class="srch_res">
-
-                        <div class="srch_attr">
-                            <span class="srch_attr_nam">Name:</span>
-                            <span class="srch_attr_val"></span>
-                        </div>
-                        <div class="srch_attr">
-                            <span class="srch_attr_nam">Email:</span>
-                            <span class="srch_attr_val"></span>
-                        </div>
-                        <div class="srch_attr">
-                            <span class="srch_attr_nam">Role:</span>
-                            <span class="srch_attr_val"></span>
-                        </div>
-                        <div class="srch_attr">
-                            <span class="srch_attr_nam">State:</span>
-                            <span class="srch_attr_val"></span>
-                        </div>
-                    </div>
+            <div  class="dlfx mgpd abt_evt">
+                <h2>Title</h2>
+                <div class="desc_txt">Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                    Nulla sed risus ullamcorper, ultrices ex at, ultrices nisi. 
+                    Vestibulum in venenatis ante. Suspendisse et interdum nunc. 
+                    Ut porttitor orci gravida rhoncus vulputate. Maecenas rutrum 
+                    accumsan nisi, eu sollicitudin lorem. Sed vehicula tristique leo 
+                    sed luctus. Proin id urna ex. Cras feugiat arcu a lacus fermentum, 
+                    id mattis libero gravida. Morbi a lobortis ipsum, eu sollicitudin 
+                    lectus. Aenean at dui ut dui porttitor volutpat non nec eros. Donec 
+                    condimentum condimentum magna et ultrices. Mauris vitae interdum lectus. 
+                    Donec sit amet congue neque. Etiam magna mi, gravida sit amet
+                    lectus sit amet, volutpat mollis justo. Suspendisse potenti.
                 </div>
-            </div>
-
-            <div class="view_user dispn" id="disable_user_b">
-                <div class="sec_name">CHANGE ROLE OR STATE</div>
-                <form class="disable_user" id="form_dis">
-                    <label for="dis_us1">Other user EMAIL</label>
-                    <input id="dis_us1" name="dis_us">
-                    <label for="dis_us2">My Password</label>
-                    <input id="dis_us2" name="dis_us">
-                    <div>
-                        <label for="attr_1">ROLE</label>
-                        <input type="radio" id="attr_1" name="attrs" value="ROLE" checked>
-                        <label for="attr_2">STATE</label>
-                        <input type="radio" id="attr_2" name="attrs" value="STATE">
+                <div class="dlfx mgpd abt_evt" >
+                    <div class="mrd plc">
+                        <div class="mrdso">De:</div>
+                        <div class="mrdso">Setubal</div>
                     </div>
-                    <label for="dis_us3">Attribute Value</label>
-                    <input id="dis_us3" name="dis_us">
-                    <button>GO</button>
-                </form>
-                <div class="srch_parent">
-                    <span>SEARCH RESULTS</span>
-                    <div class="srch_res">
-
+                    <div class="mrd plc">
+                        <div class="mrdso">Onde:</div>
+                        <div class="mrdso">Faro</div>
                     </div>
+                    <button id="sotm">Show On The Map</button>
+                    <div class="mrd dte">
+                        <div class="mrdso">Data:</div>
+                        <div class="mrdso">21 de Abril 18:45 - 16 de Junho 20:00</div>
+                    </div>
+                    <div class="mgpd">
+                        <div class="vlt">
+                            <span class="vlts1 vlts">Voluntarios</span>
+                            <span class="vlts2 vlts">14</span>
+                        </div>
+                        <div class="vlt">
+                            <span class="vlts">Interessados</span>
+                            <span class="vlts">7</span>
+                            <button class="vlts prt">Estou Interessado</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
+        <div class="evnts_pcs">
+            <img src="../imgs/Screen-Shot-2015-07-13-at-1.53.34-PM.png">
+        </div>
     </div>
-    <script src="logged.js"></script>
-    <script src="gboUsersOperations.js"></script>
-    <script src="changePassword.js"></script>
-</body>
-</html>
+    <div class="rmv_evt">
+        <button>EDIT</button>
+        <button>REMOVE</button>
+    </div>
+</div>
