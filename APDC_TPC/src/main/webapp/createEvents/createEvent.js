@@ -1,3 +1,5 @@
+const MAX_IMAGE_sIZE=1000000;
+const max_images=1;
 const HttpCodes = {
     success : 200,
     notFound : 404,
@@ -23,40 +25,36 @@ function showCreateEventBlock() {
         selectNavBarButton(createEvent);
     }
 }
-
-function getEventCreationObject(name, description,goals,volunteers,
-    startingDate,endingDate,startTime,endTime,eventId) {
-    /*
-        name, description, goals, volunteers,location,
-        meetingPlace, startDate, endDate, duration;
-    */
-    if(origin==null||destination==null){
-        alert("Choose an origin and a destination!");
-        return null;
+function cancelEventCreationEdition() {
+    let cancelbtn=document.getElementById("nclbtn");
+    let directionInputs=document.getElementsByClassName("controls");
+    cancelbtn.onclick=()=>{
+        for (let index = 0; index < directionInputs.length; index++) {
+            const element = directionInputs[index];
+            element.value="";
+        }
+        origin=null;
+        destination=null;
+        resetImagesDiv();
+        sbmt.removeAttribute("name");
     }
-    let ff = {
-        name:name,
-        description:description,
-        goals: goals,
-        volunteers:volunteers,
-        location:JSON.stringify(origin),
-        meetingPlace:JSON.stringify(destination),
-        startDate:startingDate+" "+startTime,
-        endDate:endingDate+" "+endTime,
-        eventId:eventId
-    }    
-    return ff;
 }
-function getValue(formElement) {
-    return formElement.value;
-}
-function getFrontEndInputs() {
-    let datas = document.getElementsByName("inp_data");
-    let eventId=sbmt.getAttribute(dv.NAME);
-    //TODO -> check if there are invalid inputs
-    return getEventCreationObject(getValue(datas[0]),getValue(datas[1]),
-    getValue(datas[2]),getValue(datas[3]),getValue(datas[4]),getValue(datas[5])
-    ,getValue(datas[6]),getValue(datas[7]),eventId);
+/**
+ * 
+ * @returns true if start date is less than end date, else false
+ */
+function validDate() {
+    let startInp=document.getElementById("startDate");
+    let endInp=document.getElementById("endDate");
+    let startTime=document.getElementById("startTime");
+    let endTime=document.getElementById("endTime");
+    if(startInp.valueAsNumber<endInp.valueAsNumber){
+        return true;
+    }else if(startInp.valueAsNumber===endInp.valueAsNumber&&startTime.valueAsNumber<endTime.valueAsNumber){
+        return true;
+    }else{
+        return false;
+    }
 }
 function handleCreateEventSubmitForm() {
     sbmt.onsubmit=(e)=>{
@@ -65,7 +63,7 @@ function handleCreateEventSubmitForm() {
             alert("Choose an origin and a destination!");
             return null;
         }
-        const okd = new FormData(event.target);
+        const okd = new FormData(e.target);
         let data = Object.fromEntries(okd.entries());
         data["location"]=JSON.stringify(destination);
         data["meetingPlace"]=JSON.stringify(origin);
@@ -75,6 +73,10 @@ function handleCreateEventSubmitForm() {
         }
         data["eventId"]=eventId;
         if(data==null){
+            return false;
+        }
+        if(!validDate()){
+            alert("Date is Invalid! Start Date must be before End Date!");
             return false;
         }
         data = JSON.stringify(data);
@@ -101,8 +103,7 @@ function uploadData(datas,formEle) {
         let res;
         if(response.status==HttpCodes.success){
             res="Event Created With Success!";
-            formEle.reset();
-            resetImagesDiv();
+            document.getElementById("nclbtn").click();
         }else if(response.status==HttpCodes.unauthorized){
             res="Session is Invalid!";
         }else if(response.status==HttpCodes.badrequest){
@@ -134,7 +135,6 @@ function makeImgDiv(result,caption) {
     eventImages.set(caption,result);
     return ppp;
 }
-const max_images=1;
 function handleImages(){
     let uploadImg = document.getElementById("gtimg");
     let caption = document.getElementById("cpt");
@@ -172,6 +172,10 @@ function makeFormData(evd){
         return null;
     }
     eventImages.forEach((v,k) => {
+        if(v.length>MAX_IMAGE_sIZE){
+            alert("Image is too big!");
+            return;
+        }
         formData.append("img"+x,v);
         x++;
     });
@@ -194,3 +198,4 @@ function makeFormData(evd){
 showCreateEventBlock();
 handleCreateEventSubmitForm();
 handleImages();
+cancelEventCreationEdition();

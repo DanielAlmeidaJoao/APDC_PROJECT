@@ -6,13 +6,24 @@ input{
   color: white;
   background-color: blue;
 }
-
+#login_form{
+  display: flex;
+  align-items: center;
+}
 .login_btn{
   width: auto;
   background-color: red;
   font-size: 20px;
   color: white;
+  font-weight: bold;
   padding: 5px 5px;
+  border: none;
+}
+.login_btn:hover{
+  cursor: pointer;
+}
+#login_form input{
+  height: 30px;
 }
 /** REGISTER */
 .reg_form, .reg_response{
@@ -24,7 +35,13 @@ input{
   margin: 5% auto;
 }
 
+.reg_form{
+  margin-top: 10%;
+}
+.reg_form input{
+  height: 30px;
 
+}
 
 .reg_form button{
   width: 25%;
@@ -35,4 +52,17 @@ input{
   border: 1px solid red;
   width: 400px;
   height: 400px;
+}
+#sbm{
+  width: auto;
+  background-color: orange;
+  padding: 10px 10px;
+  color: white;
+  font-weight: bold;
+  border: none;
+}
+#sbm:hover{
+  cursor: pointer;
+  background-color: rgb(197, 136, 22);
+
 }

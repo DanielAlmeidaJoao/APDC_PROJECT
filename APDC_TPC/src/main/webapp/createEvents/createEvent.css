@@ -63,3 +63,15 @@
     height: 200px;
     width: 400px;
 }
+.crt_btns{
+    display: flex;
+    justify-content: space-around;
+}
+#nclbtn{
+    background-color: rgb(121, 21, 21);
+    font-weight: normal;
+}
+
+.crtb:hover{
+    cursor: pointer;
+}

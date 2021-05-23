@@ -27,61 +27,55 @@ function updateNavAttribues() {
     //}
     let nameSpan = document.getElementById("name_sp");
     let emailSpan = document.getElementById("email_sp");
-    /*
-    let additionalAttributes = localStorage.getItem("ad_attr");
-
-    if(additionalAttributes!=null){
-        additionalAttributes=JSON.parse(additionalAttributes);
-        fillAdditionalAttributes(additionalAttributes);
-    }
-    */
     nameSpan.textContent=localStorage.getItem("name");;
     emailSpan.textContent=loggedUserEMail
 }
-//String perfil, String telefone, String telemovel, String morada, String morada_complementar, String localidade
+//	String perfil, telephone, cellphone, address, more_address, locality;
+/**
+ * updates users additional information
+ * @param {Object} additionalAttributes 
+ */
 function fillAdditionalAttributes(additionalAttributes) {
     let attributes = document.getElementsByClassName("sp_attr");
-    attributes[0].textContent=additionalAttributes.perfil;
-    attributes[1].textContent=additionalAttributes.telefone;
-    attributes[2].textContent=additionalAttributes.telemovel;
-    attributes[3].textContent=additionalAttributes.morada;
-    attributes[4].textContent=additionalAttributes.morada_complementar;
-    attributes[5].textContent=additionalAttributes.localidade;
+    attributes[0].value=additionalAttributes.perfil;
+    attributes[1].value=additionalAttributes.telephone;
+    attributes[2].value=additionalAttributes.cellphone;
+    attributes[3].value=additionalAttributes.address;
+    attributes[4].value=additionalAttributes.more_address;
+    attributes[5].value=additionalAttributes.locality;
 }
-function enableInfoEditions() {
+/**
+ * make form inputs readonly if value is true else editable 
+ * @param {boolean} value 
+ */
+function disableInfoEditions(value) {
     let inputs = document.getElementsByClassName("sp_attr");
     for(let x=0;x<inputs.length;x++){
-        inputs[x].setAttribute("contenteditable","true");
-        console.log("WORINK");
+        inputs[x].readOnly=value;
     }
 }
-function disableInfoEditions() {
-    let inputs = document.getElementsByClassName("sp_attr");
-    for(let x=0;x<inputs.length;x++){
-        inputs[x].removeAttribute("contenteditable");
-    }
-}
+/*
 function updateInfos(obj){
-    let spanText= document.getElementById("rs_sn");
-	let xmlHttpReq = getHttpXmlRequest();
-	xmlHttpReq.onreadystatechange = function(){
-		if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-			let rt = xmlHttpReq.responseText;
-            if(rt=="1"){
-                alert("UPDAETD WITH SUCCESS!");
-                localStorage.setItem("ad_attr",obj);
-            }else{
-                alert("FAILEd :"+rt);
-                localStorage.clear();
-                window.location.href="/register.html";
-            }
-		}
-	}
-	let postString =JSON.stringify(obj);
-	xmlHttpReq.open("POST","../rest/login/op3",true);
-	xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-	xmlHttpReq.send(postString);
-}
+    let postString=JSON.stringify(obj);
+    let path="../rest/login/op3";
+    fetch(path,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:postString
+    }).then(response=>{
+        if(response.ok){
+            alert("UPDAETD WITH SUCCESS!");
+        }else if(response.status===401){
+            alert("Session Expired!");
+        }else{
+            alert("Invalid Data!");
+        }
+    }).catch(e=>{
+        alert(e);
+    })
+}*/
 function updateAditionalAttributes() {
     let attributes = document.getElementsByClassName("sp_attr");
     let obj={
@@ -96,19 +90,47 @@ function updateAditionalAttributes() {
     updateInfos(obj);
 }
 function updateAttributes() {
-    let upDateButton = document.getElementById("upDate");
-    let control=false;
-    upDateButton.onclick=()=>{
-        control=!control;
-        if(control){
-            enableInfoEditions();
-            upDateButton.textContent="SAVE";
-        }else{
-            disableInfoEditions();
-            updateAditionalAttributes();
-            upDateButton.textContent="UPDATE";
-        }
+    let additionalAttributesForm=document.getElementById("my_inf");
+    let editbtn = document.getElementById("edtadt");
+    let updatebtn = document.createElement("button");
+    updatebtn.setAttribute("id","updateadt");
+    updatebtn.textContent="UPDATE";
+    //document.getElementById("updateadt");
+/** <button type="submit" id="updateadt">UPDATE</button> */
+    editbtn.onclick=()=>{
+        editbtn.remove();
+        //updateAditionalAttributes();
+        disableInfoEditions(false);
+        additionalAttributesForm.appendChild(updatebtn);
     }
+    additionalAttributesForm.onsubmit=(e)=>{
+        e.preventDefault();
+        const formInputs = new FormData(e.target);
+        const obj=Object.fromEntries(formInputs.entries());
+        let postString=JSON.stringify(obj);
+        let path="../rest/login/op3";
+        fetch(path,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:postString
+        }).then(response=>{
+            if(response.ok){
+                alert("UPDAETD WITH SUCCESS!");
+                disableInfoEditions(true);
+                updatebtn.remove();
+                additionalAttributesForm.appendChild(editbtn);
+            }else if(response.status===401){
+                alert("Session Expired!");
+            }else{
+                alert("Invalid Data!");
+            }
+        }).catch(e=>{
+            alert(e);
+        })
+    }
+    disableInfoEditions(true);
 }
 function logOff() {
     let legoffButton = document.getElementById("logoff");
@@ -171,7 +193,7 @@ function isLogged() {
         window.location.href="/register.html";
     }
 }
-/**** SECOND NAV BUTTONS                                     */
+/**** SECOND NAV BUTTONS */
 const dispb="dispb";
 function hideAllBlocksButOne(elementToShow) {
     let blocks  = document.getElementsByClassName(dispb);
@@ -180,21 +202,42 @@ function hideAllBlocksButOne(elementToShow) {
     }
     document.getElementById(elementToShow).classList.add(dispb);
 }
+function loadAdditionalInfos(){
+    let path="../rest/login/infos";
+    fetch(path).then(response=>{
+        if(response.ok){
+            return response.json();
+        }else if(response.status===401){
+            alert("Login Please!");
+        }
+    }).then(obj=>{
+        if(obj){
+            fillAdditionalAttributes(obj);
+        }
+    })
+}
+function runOnceOnly(func) {
+    let runned=false;
+    return ()=>{
+        if(!runned){
+            func();
+        }
+    }
+}
+
 function handShowButtons() {
     let showInfo = document.getElementById("showInfo");
 
-    let showOtherUser = document.getElementById("other_info");
+    let getUserAbouts=runOnceOnly(loadAdditionalInfos);
 
     showInfo.onclick=()=>{
         hideAllBlocksButOne("my_inf");
         hideMap();
         selectNavBarButton(showInfo);
+        getUserAbouts();
     }
-    /*
-    showOtherUser.onclick=()=>{
-        hideAllBlocksButOne("view_user");
-        hideMap();
-    }*/
+    
+
 
     /*
     let disableUser = document.getElementById("disable_user");
@@ -208,7 +251,9 @@ function handShowButtons() {
         hideAllBlocksButOne("change_pwd_block");
     }*/
 }
+
 //isLogged();
+
 updateNavAttribues();
 updateAttributes();
 logOff();

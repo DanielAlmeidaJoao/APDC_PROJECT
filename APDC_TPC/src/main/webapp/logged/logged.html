@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="logged.css">
     <link rel="stylesheet" href="../createEvents/createEvent.css">
     <link rel="stylesheet" href="../getEvents/getEvent.css">
+    <link rel="stylesheet" href="../viewusers/vusers.css">
+
     <title>Who am I</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <link rel="stylesheet" type="text/css" href="../createEvents/direction.css" />
@@ -14,14 +16,14 @@
 </head>
 <body>
     <nav class="nav_logged">
-        <span id="name_sp" class="nv_el adt">DANIEL JOAO</span>
-        <span id="email_sp" class="nv_el adt">DANIEL@GMAIL.COM</span>
+        <span id="name_sp" class="nv_el adt"></span>
+        <span id="email_sp" class="nv_el adt"></span>
         <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
         <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
     </nav>
     <nav class="nav_logged">
         <button id="showInfo" class="nvb">MY INFOS</button>
-        <button id="other_info" name="gbo" class="nvb">OTHER USER INFO</button>
+        <button id="superu" style="display: none;" class="nvb">SUPER USER</button>
         <!--
             <button id="disable_user">DISABLE USERS</button>
             <button id="change_pwd">CHANGE PASSWORD</button>
@@ -66,34 +68,35 @@
                 </div>
             </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
-            <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
+            <form class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
                 <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
                 <div class="info_div">
                     <label>PERFIL:</label>
-                    <div class="sp_attr kj"></div>
+                    <input class="sp_attr kj" type="text" name="perfil">
                 </div>
                 <div class="info_div">
                     <label>TELEFONE FIXO:</label>
-                    <div class="sp_attr"></div>
+                    <input class="sp_attr" type="number" name="telephone">
                 </div>
                 <div class="info_div">
                     <label>TELEFONE MOVEL:</label>
-                    <div class="sp_attr"></div>
+                    <input class="sp_attr" type="number" name="cellphone">
                 </div>
                 <div class="info_div">
                     <label>MORADA:</label>
-                    <div class="sp_attr"></div>
+                    <input class="sp_attr" type="text" name="address">
                 </div>
                 <div class="info_div">
                     <label>MORADA COMPLEMENTAR:</label>
-                    <div class="sp_attr"></div>
+                    <input class="sp_attr" type="text" name="more_address">
                 </div>
                 <div class="info_div">
                     <label>LOCALIDADE:</label>
-                    <div class="sp_attr"></div>
+                    <input class="sp_attr" type="text" name="locality">
                 </div>
-                <button id="upDate">UPDATE</button>
-            </div>
+                <span id="edtadt" class="edt_fn">EDIT</span>
+
+            </form>
             <!--OTHER USER INFORMATION-->
             <div class="view_user dispn" id="view_user">
                 <div class="sec_name">VIEWING OTHER USER</div>
@@ -134,21 +137,21 @@
                         -->
                         <div class="evnt_atrs" id="inp_data">
                             <label>Event Name</label>
-                            <input class="crt_inp" type="text" name="name" class="txt_inpt">
+                            <input class="crt_inp" type="text" name="name" class="txt_inpt" required>
                             <label>Event Description</label>
-                            <textarea class="evnt_desc" name="description"></textarea>
+                            <textarea class="evnt_desc" name="description" id="desctxt" required></textarea>
                             <label >Goals</label>
-                            <input class="crt_inp" name="goals" type="text">
+                            <input class="crt_inp" name="goals" type="text" required>
                             <label >Number of volunteers</label>
-                            <input class="crt_inp" name="volunteers" type="number">
+                            <input class="crt_inp" name="volunteers" type="number" required>
                             <label >Start Date</label>
-                            <input class="crt_inp" name="startDate" type="date">
+                            <input class="crt_inp" name="startDate" type="date" id="startDate" required>
                             <label>End Date</label>
-                            <input class="crt_inp" name="endDate" type="date">
+                            <input class="crt_inp" name="endDate" type="date" id="endDate" required>
                             <label>StartTime</label>
-                            <input class="crt_inp" name="startTime" type="time">
+                            <input class="crt_inp" name="startTime" type="time" id="startTime" required>
                             <label>EndTime</label>
-                            <input class="crt_inp" name="endTime" type="time">
+                            <input class="crt_inp" name="endTime" type="time" id="endTime" required>
                         </div>
                         <div class="gmap" id="gmap">
                             <p>
@@ -156,7 +159,10 @@
                             </p>
                             <div class="imgs" id="imgs_dv">
                             </div>
-                            <button class="crt_inp sbt_crt_btn" type="submit">CREATE</button>
+                            <div class="crt_btns">
+                                <button class="crt_inp sbt_crt_btn crtb" type="submit">CREATE</button>
+                                <button class="crt_inp sbt_crt_btn crtb" type="reset" id="nclbtn">CANCEL</button>
+                            </div>
                         </div>
                     </form>
                 </di>
@@ -183,6 +189,25 @@
                     <button id="load_fnshd">LOAD MORE</button>
                 </div>
             </div>
+            <!--SUPERUSER PLACE -->
+            <div class="dispn" id="suplc_blk">
+                <div class="view_user dlfx ve">
+                    <h2>REGISTERED USERS:</h2>
+                    <div class="show_events" id="rgtd_users">
+                        <div class="user_disp">
+                            <div class="users_d">
+                                <span>NAME</span>
+                                <span>EMAIL</span>
+                                <span>USERID</span>
+                                <span>ROLE</span>
+                                <span>STATE</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <button id="mr_rged_users">LOAD MORE</button>
+                </div>
+            </div>
 
         </div>
 
@@ -191,5 +216,7 @@
     <script src="../createEvents/createEvent.js"></script>
     <script src="../getEvents/getEvent.js"></script>
     <script src="../getEvents/editEvent.js"></script>
+    <script src="../viewusers/vusers.js"></script>
+
 </body>
 </html>

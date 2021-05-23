@@ -69,31 +69,51 @@ function processLoginData(email,password) {
     });
 }
 
-function validateInputs() {
-    let name = document.getElementById("inp").value;
-    let email = document.getElementById("inp2").value;
-    let password = document.getElementById("inp3").value;
-    let conf_password = document.getElementById("inp4").value;
-  
-    if(name.trim()===""){
-      alert("Name is invalid!");
-      return;
+function registerUserForm() {
+    let regform = document.getElementById("myForm");
+    regform.onsubmit=(e)=>{
+        e.preventDefault();
+        
+        let name = document.getElementById("inp").value;
+        let email = document.getElementById("inp2").value;
+        let password = document.getElementById("inp3").value;
+        let conf_password = document.getElementById("inp4").value;
+    
+        if(name.trim()===""){
+            alert("Name is invalid!");
+            return false;
+        }
+    
+        if(password!==conf_password){
+            alert("Passwords do not match!");
+            return false;
+        }
+    
+        registerUser(name,email,password);
+
+        return false;
     }
-  
-    if(password!==conf_password){
-      alert("Passwords do not match!");
-      return;
-    }
-  
-    registerUser(name,email,password);
 }
 
-function handleSubmitButton() {
-    let btn =  document.getElementById("sbm");
-    btn.onclick=()=>{
-        validateInputs();
-    }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function handleLogin() {
     let formS=document.getElementById("login_form");
@@ -131,4 +151,4 @@ addEventListener('beforeunload', function (event) {
 });
 
 handleLogin();
-handleSubmitButton();
+registerUserForm();

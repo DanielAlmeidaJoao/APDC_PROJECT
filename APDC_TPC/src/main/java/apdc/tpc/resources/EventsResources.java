@@ -96,11 +96,16 @@ public class EventsResources {
 		Response resp;
 		String result [] =null;
 		try {
+			System.out.println("OLAADSDSA ");
+			Constants.LOG.severe(token+" token");
+			Constants.LOG.severe("GOING TO LOAD FINISHED EVENTS ----------------------------------------------------------->");
 			long userid = HandleTokens.validateToken(token.getValue());
+			Constants.LOG.severe(userid+"");
 			result = EventsDatabaseManagement.getEvents(cursor,userid,true);
 			NewCookie nk = HandleTokens.makeCookie(Constants.FINISHED_EVENTS_CURSOR_CK,result[1],token.getDomain());
 			resp = Response.ok().cookie(nk).entity(result[0]).build();
 		}catch(Exception e) {
+			Constants.LOG.severe(e.getLocalizedMessage());
 			resp = Response.status(Status.FORBIDDEN).build();
 		}
 		return resp;

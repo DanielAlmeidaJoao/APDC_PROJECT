@@ -13,6 +13,8 @@ public interface Constants {
 	
 	public static final String COOKIE_TOKEN ="token";
 	public static final String GET_EVENT_CURSOR_CK ="crsck";
+	public static final String ALL_USERS_CURSOR ="kjdsalj";
+
 	public static final String FINISHED_EVENTS_CURSOR_CK ="fnesck";
 
 	public static final String EVENT_ID = "eventId";
@@ -23,7 +25,6 @@ public interface Constants {
 	public static final int MAX_IMAGES_PER_EVENTS=5;
 
 	///
-	public static final String NAME_PROPERTY = "name";
 	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm"; 
 	
 	public static final String ID="ID";

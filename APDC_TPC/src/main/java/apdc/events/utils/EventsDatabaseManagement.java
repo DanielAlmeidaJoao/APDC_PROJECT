@@ -56,6 +56,11 @@ public class EventsDatabaseManagement {
 
 	public EventsDatabaseManagement() {
 	}
+	/**
+	 * get the html form data input to create an event
+	 * @param httpRequest
+	 * @return
+	 */
 	private static String getPartString(HttpServletRequest httpRequest) {
 		try {
 			Part p = httpRequest.getPart(Constants.EVENT_FORMDATA_KEY);
@@ -204,32 +209,39 @@ public class EventsDatabaseManagement {
 	 */
 	public static String [] getEvents(String startCursor, long userid,boolean finished) {
 		String [] results = new String[TWO];
-		Cursor startcursor=null;
-		Query<Entity> query=null;
-		//Timestamp.no
-		Filter filter= null;
-		if(finished) {
-			filter=PropertyFilter.gt(END_DATE,Timestamp.now());
-		}else {
-			filter=PropertyFilter.le(END_DATE,Timestamp.now());
+		try {
+			Cursor startcursor=null;
+			Query<Entity> query=null;
+			//Timestamp.no
+			Filter filter= null;
+			if(finished) {
+				filter=PropertyFilter.le(END_DATE,Timestamp.now());
+			}else {
+				filter=PropertyFilter.gt(END_DATE,Timestamp.now());
+			}
+			Builder b=Query.newEntityQueryBuilder()
+				    .setKind(EVENTS).setFilter(filter)
+				    .setLimit(PAGESIGE);
+			if (startCursor!=null) {
+		      startcursor = Cursor.fromUrlSafe(startCursor); 
+			  b=b.setStartCursor(startcursor);
+		    }
+			query=b.build();
+			QueryResults<Entity> tasks = Constants.datastore.run(query);
+		    Entity e;
+			List<EventData2> events = new LinkedList<>();
+			while(tasks.hasNext()){
+				e = tasks.next();
+				events.add(getEvent(e,userid,finished));
+			}
+			results[0]=Constants.g.toJson(events);
+			results[1]=tasks.getCursorAfter().toUrlSafe();
+		}catch(Exception e) {
+			Constants.LOG.severe("");
+			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
+			e.printStackTrace();
 		}
-		Builder b=Query.newEntityQueryBuilder()
-			    .setKind(EVENTS).setFilter(filter)
-			    .setLimit(PAGESIGE);
-		if (startCursor!=null) {
-	      startcursor = Cursor.fromUrlSafe(startCursor); 
-		  b=b.setStartCursor(startcursor);
-	    }
-		query=b.build();
-		QueryResults<Entity> tasks = Constants.datastore.run(query);
-	    Entity e;
-		List<EventData2> events = new LinkedList<>();
-		while(tasks.hasNext()){
-			e = tasks.next();
-			events.add(getEvent(e,userid,finished));
-		}
-		results[0]=Constants.g.toJson(events);
-		results[1]=tasks.getCursorAfter().toUrlSafe();
+		
 		return results;
 	}
 	/**
@@ -284,15 +296,21 @@ public class EventsDatabaseManagement {
 		ed.setMeetingPlace(en.getString(MEETING_PLACE));
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
-		ed.setOrganizer(parentEntity.getString(Constants.NAME_PROPERTY));
-		ed.setOwner(userid==parentEntity.getKey().getId());
-		System.out.println("GOING TO LOAD EVENTS");
 		ed.setVolunteers(en.getLong(VOLUNTEERS));
+
+		try {//In case the user owner was removed
+			ed.setOrganizer(parentEntity.getString(StorageMethods.NAME_PROPERTY));
+			ed.setOwner(userid==parentEntity.getKey().getId());
+		}catch(Exception e) {
+			ed.setOrganizer("PUBLIC");
+			ed.setOwner(false);
+		}
 		if(ed.isOwner()) {
 			ed.participating=true;
 		}else if(!finished) {
 			ed.participating=EventParticipationMethods.hasParticipant(userid,ed.eventId);
 		}
+		
 		ed.currentParticipants=EventParticipationMethods.countParticipants(userid, ed.eventId,(int)ed.volunteers);
 		//ed.participants=res.getV2();
 		LOG.severe("GOING TO FETCH THE IMAGES ");
@@ -313,4 +331,5 @@ public class EventsDatabaseManagement {
 			        datastore.newKeyFactory().setKind("TaskList").newKey("default")))
 			    .build();ConceptsTest.java
 	}*/
+	
 }

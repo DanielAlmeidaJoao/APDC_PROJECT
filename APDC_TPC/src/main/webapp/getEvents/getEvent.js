@@ -120,7 +120,7 @@ const handleGetEventsButton = function () {
          */
         function eventDescDiv(title,txt,parent){
             let hh = me(dv.H2,"",title);
-            let dt = me(dv.DIV,"",txt);
+            let dt = me(dv.DIV,"txtDesc",txt);
             parent.appendChild(hh);
             parent.appendChild(dt);
         }
@@ -353,7 +353,7 @@ const handleGetEventsButton = function () {
 
             organizerAndDescParent.appendChild(descriptionBlock);
     
-            let organizerAndDescParentGrandPa=me(dv.DIV,"evt_disp");
+            let organizerAndDescParentGrandPa=me(dv.DIV,"dlfx evt_disp");
             organizerAndDescParentGrandPa.appendChild(organizerAndDescParent);
             eventsImagesDiv(organizerAndDescParentGrandPa,eventObj.images);
     

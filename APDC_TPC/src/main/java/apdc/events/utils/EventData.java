@@ -1,5 +1,9 @@
 package apdc.events.utils;
-
+/**
+ * This class represents an event
+ * @author djoao
+ *
+ */
 public class EventData {
 
 	String name, description, goals, location,

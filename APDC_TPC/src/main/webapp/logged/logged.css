@@ -30,7 +30,7 @@ body{
     border-radius: 10px;
 }
 .sp_attr{
-    width: 150px;
+    width: 400px;
 }
 .nv_el{
     margin: 10px auto;
@@ -105,4 +105,16 @@ body{
 }
 .sltdnvb{
     background-color: rgb(30, 30, 182);
+}
+.edt_fn{
+    background-color: blue;
+    padding: 10px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+}
+.edt_fn:hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 255, 0.747);
+
 }

@@ -2,6 +2,8 @@ package apdc.tpc.resources;
 
 import java.util.Iterator;
 
+
+
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,13 +30,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
 
+import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
-import apdc.tpc.utils.ChangeOtherUser;
 import apdc.tpc.utils.LoggedObject;
 import apdc.tpc.utils.LoginData;
 import apdc.tpc.utils.RegisterData;
 import apdc.tpc.utils.StorageMethods;
-import apdc.tpc.utils.UserInfo;
+//import apdc.tpc.utils.UserInfo;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -48,7 +50,7 @@ public class LoginManager {
 	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();
 
-	private String hashPassword(String password) {
+	public static String hashPassword(String password) {
 		return DigestUtils.sha512Hex(password);
 	}
 	@GET
@@ -62,7 +64,7 @@ public class LoginManager {
 		}
 		return Response.ok().entity(g.toJson(rs)).build();
 	}
-	private boolean validPassword(String password) {
+	private boolean invalidPassword(String password) {
 		return password.length()<Constants.PASSWORD_MINLENGTH||password.length()>Constants.PASSWORD_MAXLENGTH;
 	}
 	@POST
@@ -70,9 +72,9 @@ public class LoginManager {
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doRegister(RegisterData data) {
-		LOG.severe("USER REGISTERED! pp "+data.getEmail());
+		LOG.severe("GOING TO REGISTER USER! pp "+data.getEmail());
 		Response res=null;
-		if(!validPassword(data.getPassword())) {
+		if(invalidPassword(data.getPassword())) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		boolean registered = StorageMethods.getUser(Constants.datastore,data.getEmail());
@@ -85,6 +87,7 @@ public class LoginManager {
 			String token=HandleTokens.generateToken(userid);
 			NewCookie nk = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,token,null);
 			res= Response.ok().cookie(nk).build();
+			LOG.severe("USER REGISTERED! pp "+data.getEmail());
 		}else {
 			res= Response.status(Status.BAD_REQUEST).build();
 		}
@@ -100,6 +103,7 @@ public class LoginManager {
 		Response response;
 		try {
 			data.setPassword(hashPassword(data.getPassword()));
+			System.out.println(data.getPassword());
 			Entity user = StorageMethods.getUser(Constants.datastore,data);
 			if(user==null) {
 				response=Response.status(Status.UNAUTHORIZED).build();
@@ -110,7 +114,7 @@ public class LoginManager {
 				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(user.getKey().getId()),domain);
 				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
-				lo.setName(user.getString(Constants.NAME_PROPERTY));
+				lo.setName(user.getString(StorageMethods.NAME_PROPERTY));
 				response=Response.ok().cookie(k).entity(g.toJson(lo)).build();
 			}
 		}catch(Exception e) {
@@ -122,28 +126,39 @@ public class LoginManager {
 	@Path("/op3")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
-	public Response doUpdateAdditionalInfos(AdditionalAttributes ads) {
-		/*
-		if(request!=null) {
-			LOG.severe("REQUEST IS NULL");
-		}else {
-			LOG.severe("PQ GOING AWEL");
-		}
-		String email = null;
+	public Response doUpdateAdditionalInfos(@CookieParam(Constants.COOKIE_TOKEN) String value, AdditionalAttributes ads) {
+		long userid;
+		Status result;
+		System.out.println("GOING TOOOOOOOOOOO ");
 		try {
-			email = HandleTokens.validateToken(ads.getEmail());
+			userid = HandleTokens.validateToken(value);
+			result=AdditionalAttributesOperations.addUserAdditionalInformation(Constants.datastore,ads,userid);
 		}catch(Exception e) {
-			
-		}
-		String result = "-2";
-		
-		if(email!=null) {
-			ads.setEmail(email);
-			result=""+StorageMethods.addUserAdditionalInformation(Constants.datastore, ads);
-		}else {
-			result="TOKEN NOT FOUND";
-		}*/
-		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			result=Status.UNAUTHORIZED;
+		}		
+		return Response.status(result).build();
+	}
+	@GET
+	@Path("/infos")
+	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
+	public Response getAdditionalInfos(@CookieParam(Constants.COOKIE_TOKEN) String value) {
+		long userid;
+		Response res=null;
+		AdditionalAttributes obj;
+		System.out.println("GOING TOOOOOOOOOOO LOAD ADDITIONAL INFORMATION");
+		try {
+			userid = HandleTokens.validateToken(value);
+			obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid);
+			if(obj==null) {
+				Response.status(Status.NOT_FOUND).build();
+			}else {
+				res=Response.ok().entity(Constants.g.toJson(obj)).build();
+			}
+		}catch(Exception e) {
+			Constants.LOG.severe(e.getLocalizedMessage());
+			res=Response.status(Status.UNAUTHORIZED).build();
+		}		
+		return res;
 	}
 	/**
 	 * do a logout of the logged user. Removes all cookies
@@ -187,6 +202,7 @@ public class LoginManager {
 		}
 		return rb.build();
 	}
+	/*
 	@POST
 	@Path("/op9")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -196,8 +212,8 @@ public class LoginManager {
 		//password -> other user email
 		UserInfo u = StorageMethods.getOtherUser(Constants.datastore,data);
 		return Response.ok().entity(g.toJson(u)).build();
-	}
-	
+	}*/
+	/*
 	@POST
 	@Path("/op10")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -217,7 +233,7 @@ public class LoginManager {
 			}
 		}
 		return Response.ok().entity(u).build();
-	}
+	}*/
 	@POST
 	@Path("/op11")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")

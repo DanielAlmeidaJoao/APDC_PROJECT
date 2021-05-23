@@ -2,64 +2,62 @@ package apdc.tpc.utils;
 
 public class AdditionalAttributes {
 
-    private String perfil, telefone, telemovel, morada, morada_complementar, localidade,email;
-    
-    public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public AdditionalAttributes() {
-		setPerfil("");
-    	setTelefone("");
-    	setTelemovel("");
-    	setMorada("");
-    	setMorada_complementar("");
-    	setLocalidade("");
-	}
-    public AdditionalAttributes(String perfil, String telefone, String telemovel, String morada, String morada_complementar, String localidade) {
-    	setPerfil(perfil);
-    	setTelefone(telefone);
-    	setTelemovel(telemovel);
-    	setMorada(morada);
-    	setMorada_complementar(morada_complementar);
-    	setLocalidade(localidade);
-    }
-	public String getPerfil() {
+    public String getPerfil() {
 		return perfil;
 	}
+
 	public void setPerfil(String perfil) {
 		this.perfil = perfil;
 	}
-	public String getTelefone() {
-		return telefone;
+
+	public String getTelephone() {
+		return telephone;
 	}
-	public void setTelefone(String telefone) {
-		this.telefone = telefone;
+
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
 	}
-	public String getTelemovel() {
-		return telemovel;
+
+	public String getCellphone() {
+		return cellphone;
 	}
-	public void setTelemovel(String telemovel) {
-		this.telemovel = telemovel;
+
+	public void setCellphone(String cellphone) {
+		this.cellphone = cellphone;
 	}
-	public String getMorada() {
-		return morada;
+
+	public String getAddress() {
+		return address;
 	}
-	public void setMorada(String morada) {
-		this.morada = morada;
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
-	public String getMorada_complementar() {
-		return morada_complementar;
+
+	public String getMore_address() {
+		return more_address;
 	}
-	public void setMorada_complementar(String morada_complementar) {
-		this.morada_complementar = morada_complementar;
+
+	public void setMore_address(String more_address) {
+		this.more_address = more_address;
 	}
-	public String getLocalidade() {
-		return localidade;
+
+	public String getLocality() {
+		return locality;
 	}
-	public void setLocalidade(String localidade) {
-		this.localidade = localidade;
+
+	public void setLocality(String locality) {
+		this.locality = locality;
 	}
+
+	String perfil, telephone, cellphone, address, more_address, locality;
+    
+    public AdditionalAttributes(){
+    	perfil="";
+    	telephone="";
+    	cellphone="";
+    	address="";
+    	more_address="";
+    	locality="";
+    }
 }

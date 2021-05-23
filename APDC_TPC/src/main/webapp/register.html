@@ -12,28 +12,23 @@
     <nav class="nav_bar">
         <form id="login_form">
             <label for="login_email">Email</label>
-            <input type="email" id="login_email">
+            <input type="email" id="login_email" required>
             <label  for="login_password">Password</label>
-            <input type="password" id="login_password">
+            <input type="password" id="login_password" required>
             <button class="login_btn" type="submit">LOGIN</button>
         </form>
     </nav>
     <form id="myForm" class="reg_form">
         <label for="inp">Name</label>
-        <input type="text" id="inp">
+        <input type="text" id="inp" required>
         <label for="inp2">Email</label>
-        <input type="email" id="inp2">
+        <input type="email" id="inp2" required>
         <label  for="inp3">Password</label>
-        <input type="password" minlength="6" maxlength="12" id="inp3">
+        <input type="password" minlength="6" maxlength="12" id="inp3" required>
         <label for="inp4">Password Confirmation</label>
-        <input type="password"  id="inp4">
-        <button id="sbm">REGISTER</button>
+        <input type="password"  id="inp4" required>
+        <button type="submit" id="sbm">REGISTER</button>
     </form>
-
-    <div id="reg_response" class="reg_response">
-        <span>REGISTERING RESULT:</span>
-        <span id="rs_sn"></span>
-    </div>
     <script src="firstJS.js"></script>
 </body>
 </html>

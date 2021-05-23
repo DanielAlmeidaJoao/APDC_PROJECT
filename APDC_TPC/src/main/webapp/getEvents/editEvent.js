@@ -13,18 +13,26 @@ function createEventFormIsFree(){
     }
     return true;
 }
+/**
+ * Receives an event to be edited
+ * @param {Object} eventObj 
+ * @returns void
+ */
 function editEvent(eventObj){
     if(!createEventFormIsFree()){
         alert("There are unsaved events!");
         return;
     }
     /*
-        name, description,goals,
-        startingDate,endingDate,startTime,endTime
+    String name, description, goals, location,
+	meetingPlace, startDate, endDate, organizer, startTime, endTime, images;
+	long eventId, volunteers;
     */
+    let descriptionTextarea=document.getElementById("desctxt");
     elems[0].value=eventObj.name;
-    elems[1].value=eventObj.description;
-    elems[2].value=eventObj.goals;
+    descriptionTextarea.value=eventObj.description;
+    elems[1].value=eventObj.goals;
+    elems[2].value=eventObj.volunteers;
     //elems[3].value=eventObj.name;
     //elems[4].value=eventObj.name;
     //elems[5].value=eventObj.name;
