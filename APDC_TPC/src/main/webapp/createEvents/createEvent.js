@@ -24,6 +24,7 @@ function showCreateEventBlock() {
         showMap();
         selectNavBarButton(createEvent);
     }
+    createEvent.click();
 }
 function cancelEventCreationEdition() {
     let cancelbtn=document.getElementById("nclbtn");
@@ -33,7 +34,7 @@ function cancelEventCreationEdition() {
             const element = directionInputs[index];
             element.value="";
         }
-        origin=null;
+        //origin=null;
         destination=null;
         resetImagesDiv();
         sbmt.removeAttribute("name");
@@ -59,14 +60,15 @@ function validDate() {
 function handleCreateEventSubmitForm() {
     sbmt.onsubmit=(e)=>{
         e.preventDefault();
-        if(origin==null||destination==null){
+        if(destination==null){
             alert("Choose an origin and a destination!");
             return null;
         }
         const okd = new FormData(e.target);
         let data = Object.fromEntries(okd.entries());
+        console.log(data);
         data["location"]=JSON.stringify(destination);
-        data["meetingPlace"]=JSON.stringify(origin);
+        //data["meetingPlace"]=JSON.stringify(origin);
         let eventId=sbmt.getAttribute(dv.NAME);
         if(!eventId){
             eventId=0;
@@ -110,6 +112,12 @@ function uploadData(datas,formEle) {
             res="Invalid Data!";
         }
         alert(res);
+        return response.json();
+    }).then(data=>{
+        if(data){
+            clearMarkers();
+            makeSolidarityAction(data);
+        }
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -135,6 +143,7 @@ function makeImgDiv(result,caption) {
     eventImages.set(caption,result);
     return ppp;
 }
+let fil;
 function handleImages(){
     let uploadImg = document.getElementById("gtimg");
     let caption = document.getElementById("cpt");
@@ -142,6 +151,7 @@ function handleImages(){
     eventImages=new Map();
     uploadImg.onchange=function(){
         const file = this.files[0];
+        fil=file;
         if(eventImages.size==max_images){
             alert("Only 5 images allowed!");
             return;
@@ -161,10 +171,13 @@ function handleImages(){
 }
 function makeFormData(evd){
 	let formData = new FormData();	
-	formData.append("evd",evd);
-	let imgs = document.getElementById("imgs_dv").children;
+    formData.append("img_cover",fil);
+    formData.append("evd",evd);
+    /*
+    let imgs = document.getElementById("imgs_dv").children;
     let elem;
 
+    
     let x=0;
     console.log("GOING TO CREATE EVENT: "+eventImages.size);
     if(eventImages.size==0){
@@ -178,7 +191,7 @@ function makeFormData(evd){
         }
         formData.append("img"+x,v);
         x++;
-    });
+    });*/
     /*
     for(let x=0;x<imgs.length;x++){
         elem=imgs[x].firstChild;

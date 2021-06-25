@@ -51,8 +51,17 @@ public class AdditionalAttributes {
 	}
 
 	String perfil, telephone, cellphone, address, more_address, locality;
+	long events;
     
-    public AdditionalAttributes(){
+    public long getEvents() {
+		return events;
+	}
+
+	public void setEvents(long events) {
+		this.events = events;
+	}
+
+	public AdditionalAttributes(){
     	perfil="";
     	telephone="";
     	cellphone="";

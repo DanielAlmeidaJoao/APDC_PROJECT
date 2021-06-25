@@ -8,14 +8,16 @@
     <link rel="stylesheet" href="../createEvents/createEvent.css">
     <link rel="stylesheet" href="../getEvents/getEvent.css">
     <link rel="stylesheet" href="../viewusers/vusers.css">
+    <link rel="stylesheet" href="../userarea/userarea.css">
 
-    <title>Who am I</title>
+    <title>ClosingTheGap</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-    <link rel="stylesheet" type="text/css" href="../createEvents/direction.css" />
-    <script src="../createEvents/direction.js"></script>
+    <link rel="stylesheet" type="text/css" href="../createEvents/search.css" />
+    <script src="../createEvents/search.js"></script>
 </head>
 <body>
     <nav class="nav_logged">
+        <div><img class="nav_img_prfl" id="nav_profile_pic" src="../imgs/Profile_avatar_placeholder_large.png" alt="prifile-pic"> </div>
         <span id="name_sp" class="nv_el adt"></span>
         <span id="email_sp" class="nv_el adt"></span>
         <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
@@ -36,67 +38,73 @@
         <h1>WELCOME TO SAVING LIFES</h1>
         <div class="main_body_son2">
             <div id="map_div" class="mpd hdmap">
-                <div style="display: block">
-                    <div class="srchs">
-                        <input id="origin-input" class="controls" type="text" placeholder="Enter an origin location"/>
-                        <input id="destination-input" class="controls" type="text" placeholder="Enter a destination location"/>
-                    </div>
-                    <div id="mode-selector" class="controls">
-                      <input type="radio" name="type" id="changemode-walking" checked="checked"/>
-                      <label for="changemode-walking">Walking</label>
-              
-                      <input type="radio" name="type" id="changemode-transit" />
-                      <label for="changemode-transit">Transit</label>
-              
-                      <input type="radio" name="type" id="changemode-driving" />
-                      <label for="changemode-driving">Driving</label>
-                    </div>
-                </div>
+                <input id="pac-input" class="controls" type="text"      placeholder="Search Box" />
                 <div id="map"></div>
                 <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-                <script
-                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initMap&libraries=places&v=weekly"
-                async
-                ></script>
-                <div id="edist">
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initAutocomplete&libraries=places&v=weekly"
+                async></script>
+                <div>
                     <label>Estimated Distance</label>
-                    <span></span>
-                </div>
-                <div id="etime">
-                    <label>Estimated Time</label>
-                    <span></span>
+                    <span id="edist"></span>
                 </div>
             </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
-            <form class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
+            <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
                 <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
-                <div class="info_div">
-                    <label>PERFIL:</label>
-                    <input class="sp_attr kj" type="text" name="perfil">
-                </div>
-                <div class="info_div">
-                    <label>TELEFONE FIXO:</label>
-                    <input class="sp_attr" type="number" name="telephone">
-                </div>
-                <div class="info_div">
-                    <label>TELEFONE MOVEL:</label>
-                    <input class="sp_attr" type="number" name="cellphone">
-                </div>
-                <div class="info_div">
-                    <label>MORADA:</label>
-                    <input class="sp_attr" type="text" name="address">
-                </div>
-                <div class="info_div">
-                    <label>MORADA COMPLEMENTAR:</label>
-                    <input class="sp_attr" type="text" name="more_address">
-                </div>
-                <div class="info_div">
-                    <label>LOCALIDADE:</label>
-                    <input class="sp_attr" type="text" name="locality">
-                </div>
-                <span id="edtadt" class="edt_fn">EDIT</span>
+                <div class="user_plc_p user_plc">
+                    <div class="user_plc">
+                        <div id="frst_infos">
+                            <div class="info_div">
+                                <label>PERFIL:</label>
+                                <input class="sp_attr kj" type="text" name="perfil">
+                            </div>
+                            <div class="info_div">
+                                <label>TELEFONE FIXO:</label>
+                                <input class="sp_attr" type="number" name="telephone">
+                            </div>
+                            <div class="info_div">
+                                <label>TELEFONE MOVEL:</label>
+                                <input class="sp_attr" type="number" name="cellphone">
+                            </div>
+                            <div class="info_div">
+                                <label>MORADA:</label>
+                                <input class="sp_attr" type="text" name="address">
+                            </div>
+                            <div class="info_div">
+                                <label>MORADA COMPLEMENTAR:</label>
+                                <input class="sp_attr" type="text" name="more_address">
+                            </div>
+                            <div class="info_div">
+                                <label>LOCALIDADE:</label>
+                                <input class="sp_attr" type="text" name="locality">
+                            </div>
+                            <span id="edtadt" class="edt_fn">EDIT</span>
+                        </div>
+                        <div class="pfpc_prnt" id="pfpc_prnt">
+                            <img class="img_prfl" id="prfl_img" src="/imgs/Profile_avatar_placeholder_large.png">
+                            <div class="prfpc_btns" id="prfpc_btns">
+                            <input id="profileimg"  class="edt_fn" type="file" size="45" accept="image/*"/>
+                            <span class="edt_fn updateImgPic" id="updateImgPic" >UPDATE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="usr_more_info">
+                        <div class="view_user dlfx ve">
+                            <h2>MY EVENTS</h2>
+                            <div>NUMBER OF EVENTS:<span id="evt_counter" ></span> </div>
+                            <div class="show_events" id="shusevnts">
+        
+                            </div>
+                            <button id="load_mr_user_evnts">LOAD MORE</button>
+                        </div>
+                        <div>
+                            <span>PONTUAÇÕES</span>
+                            <div></div>
+                        </div>
 
-            </form>
+                    </div>
+                </div>
+            </div>
             <!--OTHER USER INFORMATION-->
             <div class="view_user dispn" id="view_user">
                 <div class="sec_name">VIEWING OTHER USER</div>
@@ -217,6 +225,6 @@
     <script src="../getEvents/getEvent.js"></script>
     <script src="../getEvents/editEvent.js"></script>
     <script src="../viewusers/vusers.js"></script>
-
+    <script src="../userarea/userarea.js"></script>
 </body>
 </html>

@@ -1,5 +1,4 @@
 package apdc.tpc.utils;
-
 import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Datastore;
@@ -11,7 +10,9 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
+import apdc.tpc.resources.LoginManager;
 import apdc.utils.conts.Constants;
 
 public class StorageMethods {
@@ -90,6 +91,7 @@ public class StorageMethods {
 		QueryResults<Entity> tasks = datastore.run(query);
 		return tasks.hasNext();
 	}
+
 	public static long addUser(Datastore datastore, RegisterData data) {
 		Transaction txn =null;
 		long userid=0L;
@@ -112,6 +114,7 @@ public class StorageMethods {
 			    AdditionalAttributes ad = new AdditionalAttributes();
 			    ad.perfil=PRIVATE_VALUE;
 			    AdditionalAttributesOperations.addUserAdditionalInformation(datastore,ad,userid);
+			    GoogleCloudUtils.saveAvatarPicture(LoginManager.profilePictureBucketName,userid+"");
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());
@@ -140,6 +143,7 @@ public class StorageMethods {
 				txn.delete(ctrsKey,additionalInfo);
 			    txn.commit();*/
 			    result=removeUser(ctrsKey);
+			    GoogleCloudUtils.deleteObject(LoginManager.profilePictureBucketName,userid+"");
 			}
 		  }catch(Exception e) {
 			LOG.severe(e.getLocalizedMessage());

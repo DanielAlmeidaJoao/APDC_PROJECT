@@ -2,6 +2,8 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
+
+
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
@@ -12,6 +14,8 @@ import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.tpc.resources.EventsResources;
+import apdc.tpc.resources.LoginManager;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
@@ -20,7 +24,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,8 +35,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.datastore.Blob;
-import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
@@ -82,7 +83,7 @@ public class EventsDatabaseManagement {
 	 * @param email id of the user performing the operation
 	 * @return
 	 */
-	public static Status createEvent(Datastore datastore,HttpServletRequest httpRequest,long userid) {
+	public static Response createEvent(Datastore datastore,HttpServletRequest httpRequest,long userid) {
 		//Generate automatically a key
 		LOG.severe("GOING TO CREATE EVENT!!! -> "+userid);
 		String eventJsonData = getPartString(httpRequest);
@@ -92,8 +93,7 @@ public class EventsDatabaseManagement {
 		try {
 			eventId	= et.getEventId();
 		}catch(Exception e) {}
-		Blob b=null;
-		Status result;
+		Response result;
 		Transaction txn=null;
 		  try {
 			  com.google.cloud.datastore.Key eventKey;
@@ -117,48 +117,38 @@ public class EventsDatabaseManagement {
 					.set(DESCRIPTION,et.getDescription())
 					.set(GOAL,et.getGoals())
 					.set(LOCATION,noIndexProperties(et.getLocation()))
-					.set(MEETING_PLACE,noIndexProperties(et.getMeetingPlace()))
+					//.set(MEETING_PLACE,noIndexProperties(et.getMeetingPlace()))
 					.set(START_DATE,makeTimeStamp(et.getStartDate(),et.getStartTime()))
 					.set(END_DATE,makeTimeStamp(et.getEndDate(),et.getEndTime()))
 					.set(VOLUNTEERS,et.getVolunteers());
-			
-			int cc=0;
-			Part p;
-			Iterator<Part> it = httpRequest.getParts().iterator();
-			while(it.hasNext()){
-				try {
-					p=it.next();
-					if(!Constants.EVENT_FORMDATA_KEY.equalsIgnoreCase(p.getName())) {
-						if(cc<Constants.MAX_IMAGES_PER_EVENTS) {
-							LOG.severe(p.getName());
-							InputStream uploadedInputStream = p.getInputStream();
-							b = Blob.copyFrom(uploadedInputStream);
-							
-							builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY+cc,BlobValue.newBuilder(b).setExcludeFromIndexes(true).build());
-						}else {
-							break;
-						}
-						cc++;
-					}
-				} catch (IOException e) {
-					LOG.severe(e.getLocalizedMessage());
-				}
+			try {
+				Part p = httpRequest.getPart("img_cover");
+				String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,eventKey.getId()+"",p.getInputStream());
+				builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
+			}catch(Exception e) {
+				e.printStackTrace();
+				return result = Response.status(Status.BAD_REQUEST).build();
 			}
+			
 			ev = builder.build();
-			txn.put(ev);
+			ev = txn.put(ev);
 		    txn.commit();
+		    CountEventsUtils.makeUserEventCounterKind(userid, datastore, true);
 		    System.out.println("EVENT ID "+eventId);
 		    if(eventId<=Constants.ZERO) {
+		    	EventData2 obj = getEvent(ev,userid,false);
+			    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
+			    System.out.println("SENDING THE CREATED OBJECT BACK!!!");
+		    }else {
 		    	eventId=ev.getKey().getId();
 			    EventParticipationMethods.participate(userid, eventId);
+			    result=Response.status(Status.OK).build();
 		    }
-		    result=Status.OK;
 		  }catch(Exception e) {
 			  StorageMethods.rollBack(txn);
-			  result=Status.BAD_REQUEST;
+			  result= Response.status(Status.BAD_REQUEST).build();
 			  LOG.severe("ERRRORR");
 			  LOG.severe(e.getLocalizedMessage());
-			  //e.printStackTrace();
 		  }
 		  return result;
 	}
@@ -245,7 +235,7 @@ public class EventsDatabaseManagement {
 		return results;
 	}
 	/**
-	 * deletes an event
+	 * deletes an event and every ither information related to the event
 	 * @param eventId the event to be deleted
 	 * @param email email of the user performing the operation
 	 */
@@ -266,6 +256,8 @@ public class EventsDatabaseManagement {
 					if(userid ==parentEntity.getKey().getId()) {
 						txn.delete(eventKey);
 					    txn.commit();
+					    CountEventsUtils.makeUserEventCounterKind(userid, datastore, true);
+					    GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventId);
 					    EventParticipationMethods.removeParticipants(event);
 					    return Response.ok().build();
 					}
@@ -293,11 +285,10 @@ public class EventsDatabaseManagement {
 		ed.setEndDate(revertTimeStamp(en.getTimestamp(END_DATE)));
 		ed.setGoals(en.getString(GOAL));
 		ed.setLocation(en.getString(LOCATION));
-		ed.setMeetingPlace(en.getString(MEETING_PLACE));
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
 		ed.setVolunteers(en.getLong(VOLUNTEERS));
-
+		ed.imgUrl=GoogleCloudUtils.publicURL(LoginManager.profilePictureBucketName,parentEntity.getKey().getId()+"");
 		try {//In case the user owner was removed
 			ed.setOrganizer(parentEntity.getString(StorageMethods.NAME_PROPERTY));
 			ed.setOwner(userid==parentEntity.getKey().getId());
@@ -315,9 +306,9 @@ public class EventsDatabaseManagement {
 		//ed.participants=res.getV2();
 		LOG.severe("GOING TO FETCH THE IMAGES ");
 		try {
-			String images = new String(en.getBlob(Constants.EVENT_PICS_FORMDATA_KEY+0).toByteArray());
-			ed.setImages(images);
-			LOG.severe("IMAGES FETCHED WITH SUCCESS");
+			//String.format("https://storage.googleapis.com/%s/%s",EventsResources.bucketName,en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
+			String imgurl=GoogleCloudUtils.publicURL(EventsResources.bucketName,en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
+			ed.setImages(imgurl);
 		}catch(Exception e){LOG.severe("ERRROR: "+e.getLocalizedMessage());}
 		return ed;
 	}

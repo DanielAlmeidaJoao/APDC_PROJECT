@@ -2,11 +2,10 @@ package apdc.tpc.resources;
 
 import java.util.Iterator;
 
-
-
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
@@ -30,6 +29,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
 
+import apdc.events.utils.CountEventsUtils;
+import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.LoggedObject;
@@ -46,6 +47,8 @@ public class LoginManager {
 	@Context private HttpServletRequest request;
 	
 	private static final Logger LOG = Logger.getLogger(LoginManager.class.getName());
+	public static final String profilePictureBucketName="profile_pics46335560256500";
+
 
 	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();
@@ -63,6 +66,33 @@ public class LoginManager {
 			rs= false;
 		}
 		return Response.ok().entity(g.toJson(rs)).build();
+	}
+	/**
+	 * saves the profile photo of the user calling the operation
+	 * @param value
+	 * @return
+	 */
+	@POST
+	@Path("/savep")
+	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response saveProfilePicture(@CookieParam(Constants.COOKIE_TOKEN) String value){
+		Response response;
+		try {
+			long userid = HandleTokens.validateToken(value);			
+			try {
+				Part p = request.getPart("profilePicture");
+				GoogleCloudUtils.uploadObject(profilePictureBucketName,userid+"",p.getInputStream());
+				System.out.println("IMAGE SAVED WITH SUCCESS!");
+				response = Response.status(Status.OK).build();
+			}catch(Exception e) {
+				e.printStackTrace();
+				response = Response.status(Status.BAD_REQUEST).build();
+			}
+		}catch(Exception e) {
+			response = Response.status(Status.UNAUTHORIZED).build();
+		}
+		return response;
 	}
 	private boolean invalidPassword(String password) {
 		return password.length()<Constants.PASSWORD_MINLENGTH||password.length()>Constants.PASSWORD_MAXLENGTH;
@@ -111,10 +141,17 @@ public class LoginManager {
 				//AuthToken at = new AuthToken(user.getString("email"));
 			    String domain = httpHeaders.getHeaderString("host");
 			    domain=null;
-				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(user.getKey().getId()),domain);
+			    long userid = user.getKey().getId();
+				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(userid),domain);
 				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString(StorageMethods.NAME_PROPERTY));
+				if(GoogleCloudUtils.hasThisObject(profilePictureBucketName,userid+"")!=null) {
+					//String.format("https://storage.googleapis.com/%s/%s?ignoreCache=1",profilePictureBucketName,userid)
+					lo.setProfilePictureURL(GoogleCloudUtils.publicURL(profilePictureBucketName,userid+""));
+				}else {
+					lo.setProfilePictureURL("../imgs/Profile_avatar_placeholder_large.png");
+				}
 				response=Response.ok().cookie(k).entity(g.toJson(lo)).build();
 			}
 		}catch(Exception e) {
@@ -152,6 +189,7 @@ public class LoginManager {
 			if(obj==null) {
 				Response.status(Status.NOT_FOUND).build();
 			}else {
+				obj.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
 				res=Response.ok().entity(Constants.g.toJson(obj)).build();
 			}
 		}catch(Exception e) {

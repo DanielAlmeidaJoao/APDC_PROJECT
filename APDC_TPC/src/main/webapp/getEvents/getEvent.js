@@ -9,7 +9,6 @@ function showGetEventsBlock() {
         hideMap();
         selectNavBarButton(show);
     }
-    show.click();
 }
 function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
@@ -55,8 +54,9 @@ const handleGetEventsButton = function () {
         .then( data => {
             let chld;
             for(let x=0; x<data.length;x++){
-                chld = singleEventBlock(data[x],finished);
-                divBlock.appendChild(chld);
+                makeSolidarityAction(data[x]);
+                //chld = singleEventBlock(data[x],finished);
+                //divBlock.appendChild(chld);
             }
         }
         )
@@ -101,9 +101,14 @@ const handleGetEventsButton = function () {
          * @param {*} name - name of the organizer
          * @param {*} parent - parent html of the event that will be created
          */
-        function organizerDiv(name,parent){
+        function organizerDiv(name,parent,url){
             let d=me(dv.DIV,"dlfx mgpd abt_orzr");
-            let dp=me(dv.DIV,"orgd","USER PROFILE PIC");
+            let imgP = document.createElement("img");
+            imgP.setAttribute("class","nav_img_prfl");
+            imgP.setAttribute("src",url);
+            imgP.setAttribute("alt","profile-pic");
+            let dp=me(dv.DIV,"orgd");
+            dp.appendChild(imgP);
             /*
             TODO : the part related to viewing the users profile picture
             */
@@ -244,19 +249,20 @@ const handleGetEventsButton = function () {
          * @param {*} when when the event is taking place
          * @param {*} grdpa parent element that will contain the new created div
          */
-        function eventDateLocationDiv(from,where,when,grdpa){
-            from = JSON.parse(from);
+        function eventDateLocationDiv(where,when,grdpa){
+            //from = JSON.parse(from);
             where =JSON.parse(where);
-            let vonMap = showOnTheMapButton(from,where);
-            from=from.name;
+            //makeMarker(where.name,where.loc.lat,where.loc.lng,map,`<div>${where.name}</div>`);
+            //let vonMap = showOnTheMapButton(from,where);
+            //from=from.name;
             where=where.name;
             let parent = me(dv.DIV,"dlfx mgpd abt_evt");
-            let dt0 =  littleDetails("mrd plc",from,"From (optional):");
+            //let dt0 =  littleDetails("mrd plc",from,"From (optional):");
             let dt =  littleDetails("mrd plc",where,"Where:");
             let dt2 = littleDetails("mrd dte",when,"When:");
-            parent.appendChild(dt0);
+            //parent.appendChild(dt0);
             parent.appendChild(dt);
-            parent.appendChild(vonMap);
+            //parent.appendChild(vonMap);
             parent.appendChild(dt2);
             grdpa.appendChild(parent);
         }
@@ -322,6 +328,7 @@ const handleGetEventsButton = function () {
                 d.appendChild(editButton);
             }
         }
+        
         /**
          * creates a div to display an event
          * @param {*} organiser organizer of the event
@@ -343,11 +350,11 @@ const handleGetEventsButton = function () {
          * eventObj.eventId
          */
             let organizerAndDescParent = me(dv.DIV,"blk_desc");
-            organizerDiv(eventObj.organizer,organizerAndDescParent);
+            organizerDiv(eventObj.organizer,organizerAndDescParent,eventObj.imgUrl);
     
             let descriptionBlock = me(dv.DIV,"dlfx mgpd abt_evt");
             eventDescDiv(eventObj.name,eventObj.description,descriptionBlock);
-            eventDateLocationDiv(eventObj.meetingPlace,eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
+            eventDateLocationDiv(eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
 
             volunteersDiv(eventObj.volunteers,eventObj.currentParticipants,descriptionBlock,eventObj.owner,eventObj.eventId,eventObj.participating,finished);
 
@@ -365,6 +372,7 @@ const handleGetEventsButton = function () {
             let frag = document.createDocumentFragment();
             frag.appendChild(mainS1);
             return frag;
+            
         }
     /*
     let eventObj={
@@ -380,8 +388,50 @@ const handleGetEventsButton = function () {
     }
     let mainBlock = document.getElementById("events_blk");
     let chld = singleEventBlock(eventObj);
-    mainBlock.appendChild(chld); */
+    mainBlock.appendChild(chld);*/
+
+    
+
     load_mr.click();
+}
+function makeSolidarityAction(eventObj) {
+    let where =JSON.parse(eventObj.location);
+    let contentString = makeShowInfoString(eventObj.imgUrl,eventObj.organizer,eventObj.name,eventObj.description,where.name,eventObj.startDate+" Until "+eventObj.endDate,eventObj.currentParticipants,eventObj.volunteers,eventObj.images);
+    makeMarker(eventObj.name,where.loc.lat,where.loc.lng,map,contentString);
+}
+function makeShowInfoString(profilePic,organiser,eventName,eventDescription,where,when,numinterested,capacity,eventPic) {
+    return `<div class="one_ev">
+    <div class="dlfx evt_disp">
+        <div class="blk_desc">
+            <div class="dlfx mgpd abt_orzr">
+                <div class="orgd"><img class="nav_img_prfl"
+                        src=${profilePic}
+                        alt="profile-pic"></div>
+                <div class="orgd">${organiser}</div>
+            </div>
+            <div class="dlfx mgpd abt_evt">
+                <h2 class="">${eventName}</h2>
+                <div class="txtDesc">${eventDescription}</div>
+                <div class="dlfx mgpd abt_evt">
+                    <div class="mrd plc">
+                        <div class="mrdso">Where:</div>
+                        <div class="mrdso">${where}</div>
+                    </div>
+                    <div class="mrd dte">
+                        <div class="mrdso">When:</div>
+                        <div class="mrdso">${when}</div>
+                    </div>
+                </div>
+                <div class="mgpd">
+                    <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${capacity}</span>
+                    </div>
+                    <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${numinterested}</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventPic} alt="eventimage1"></div>
+    </div>
+</div>`;
 }
 showGetEventsBlock();
 showFinishedEventsBlock();

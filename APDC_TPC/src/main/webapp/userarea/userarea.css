@@ -1,0 +1,31 @@
+.user_plc_p{
+    flex-direction: column;
+}
+.user_plc{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.img_prfl{
+    max-width: 400px;
+    max-height: 400px;
+    border-radius: 10px;
+}
+
+.info_div input:focus{
+    outline: none;
+}
+.prfpc_btns{
+    display: none;
+    flex-direction: column;
+}
+.showProileBtns{
+    display: flex;
+}
+.updateImgPic{
+    display: none;
+}
+.usr_more_info{
+    border: 1px solid red;
+    margin-top: 10px;
+}

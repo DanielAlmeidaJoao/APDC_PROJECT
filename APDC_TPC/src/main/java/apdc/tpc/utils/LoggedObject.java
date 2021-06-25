@@ -2,8 +2,16 @@ package apdc.tpc.utils;
 
 public class LoggedObject {
 
-	String name, email;
+	String name, email, profilePictureURL;
 	
+	public String getProfilePictureURL() {
+		return profilePictureURL;
+	}
+
+	public void setProfilePictureURL(String profilePictureURL) {
+		this.profilePictureURL = profilePictureURL;
+	}
+
 	public LoggedObject() {
 		
 	}

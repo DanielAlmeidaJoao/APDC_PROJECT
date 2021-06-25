@@ -112,9 +112,16 @@ body{
     border-radius: 5px;
     font-weight: bold;
     color: white;
+    margin: 1px 1px;
+    text-align: center;
 }
 .edt_fn:hover{
     cursor: pointer;
     background-color: rgba(0, 0, 255, 0.747);
-
+}
+.nav_img_prfl{
+    width: 40px;
+    height: 40px;
+    border-radius: 50% 50%;
+    padding: 10px 10px;
 }

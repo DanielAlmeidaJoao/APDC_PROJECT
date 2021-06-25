@@ -2,6 +2,7 @@ package apdc.tpc.resources;
 
 import java.util.logging.Logger;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -22,6 +23,7 @@ import com.google.cloud.datastore.Datastore;
 
 import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.EventsDatabaseManagement;
+import apdc.events.utils.GoogleCloudUtils;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -30,6 +32,7 @@ public class EventsResources {
 	//private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 	@Context
 	private HttpServletRequest httpRequest;
+	public static final String bucketName = "daniel1624401699897";
 	private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 
 	public EventsResources() {
@@ -49,10 +52,17 @@ public class EventsResources {
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		Response response;
 		Datastore ds = Constants.datastore;
+		/*
 		try {
-			long userid = HandleTokens.validateToken(value);
-			Status result = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
-			response = Response.status(result).build();
+			System.out.println("HELLO BROTHERS");
+			Tester.downloadObject(bucketName,"firstObject");
+			System.out.println("BUCKET CREATED!");
+		}catch(Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		}*/
+		try {
+			long userid = HandleTokens.validateToken(value);			
+			response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
 		}catch(Exception e) {
 			response = Response.status(Status.UNAUTHORIZED).build();
 		}
@@ -180,5 +190,19 @@ public class EventsResources {
 			status=Status.FORBIDDEN;
 		}
 		return Response.status(status).build();
+	}
+	/**
+	 * deletes a particular event 
+	 * @param eventId the event to be deleted
+	 * @param token the logged user token to verify if the user is has permission to do so
+	 * @return
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM /*+";image/*"*/)
+	@Path("/m/image")
+	public Response downloadImage() {
+		System.out.println("WAS CALLED AND IS OKKK");
+		return Response.ok(GoogleCloudUtils.downloadObject(bucketName,"5755839738544128")).build();
+		//return Response.ok().build();
 	}
 }

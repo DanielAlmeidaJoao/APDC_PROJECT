@@ -1,4 +1,5 @@
 let loggedUserEMail;
+let profilePictureURL;
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -27,7 +28,9 @@ function updateNavAttribues() {
     //}
     let nameSpan = document.getElementById("name_sp");
     let emailSpan = document.getElementById("email_sp");
-    nameSpan.textContent=localStorage.getItem("name");;
+    nameSpan.textContent=localStorage.getItem("name");
+    profilePictureURL = localStorage.getItem("profilePictureURL");
+    document.getElementById("nav_profile_pic").setAttribute("src",profilePictureURL);
     emailSpan.textContent=loggedUserEMail
 }
 //	String perfil, telephone, cellphone, address, more_address, locality;
@@ -43,6 +46,7 @@ function fillAdditionalAttributes(additionalAttributes) {
     attributes[3].value=additionalAttributes.address;
     attributes[4].value=additionalAttributes.more_address;
     attributes[5].value=additionalAttributes.locality;
+    document.getElementById("evt_counter").textContent=additionalAttributes.events;
 }
 /**
  * make form inputs readonly if value is true else editable 
@@ -98,10 +102,10 @@ function updateAttributes() {
     //document.getElementById("updateadt");
 /** <button type="submit" id="updateadt">UPDATE</button> */
     editbtn.onclick=()=>{
+        editbtn.parentElement.appendChild(updatebtn);
         editbtn.remove();
         //updateAditionalAttributes();
         disableInfoEditions(false);
-        additionalAttributesForm.appendChild(updatebtn);
     }
     additionalAttributesForm.onsubmit=(e)=>{
         e.preventDefault();
@@ -119,9 +123,9 @@ function updateAttributes() {
             if(response.ok){
                 alert("UPDAETD WITH SUCCESS!");
                 disableInfoEditions(true);
+                updatebtn.parentElement.appendChild(editbtn);
                 updatebtn.remove();
-                additionalAttributesForm.appendChild(editbtn);
-            }else if(response.status===401){
+            }else if(response.status==401){
                 alert("Session Expired!");
             }else{
                 alert("Invalid Data!");
@@ -231,6 +235,9 @@ function handShowButtons() {
     let getUserAbouts=runOnceOnly(loadAdditionalInfos);
 
     showInfo.onclick=()=>{
+        /*if(profilePictureURL!="undefined"&&document.getElementById("prfl_img").getAttribute("src")!=profilePictureURL){
+        }*/
+        document.getElementById("prfl_img").setAttribute("src",profilePictureURL);
         hideAllBlocksButOne("my_inf");
         hideMap();
         selectNavBarButton(showInfo);

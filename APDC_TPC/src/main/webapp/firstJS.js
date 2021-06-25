@@ -12,7 +12,8 @@ function registerUser(name,email,password){
     let user={
         name: name,
         email: email,
-        password: password 
+        password: password,
+        profilePictureURL:"/imgs/Profile_avatar_placeholder_large.png" 
     };
 	let postString = JSON.stringify(user);
     let path="rest/login/op1";
@@ -38,6 +39,8 @@ function registerUser(name,email,password){
 function redirectOnLogin(rt) {
     localStorage.setItem("email",rt.email);
     localStorage.setItem("name",rt.name);
+    localStorage.setItem("profilePictureURL",rt.profilePictureURL);
+
     window.location.href="/logged/logged.html";
 }
 function processLoginData(email,password) {

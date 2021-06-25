@@ -1,4 +1,7 @@
 package apdc.events.utils;
+
+import java.io.File;
+
 /**
  * This class represents an event
  * @author djoao
@@ -7,7 +10,15 @@ package apdc.events.utils;
 public class EventData {
 
 	String name, description, goals, location,
-	meetingPlace, startDate, endDate, organizer, startTime, endTime, images;
+	startDate, endDate, organizer, startTime, endTime, images;
+	File img_cover;
+	public File getImg_cover() {
+		return img_cover;
+	}
+
+	public void setImg_cover(File img_cover) {
+		this.img_cover = img_cover;
+	}
 	long eventId, volunteers;
 	//volunteers is long because I am unable to fetch integer value from datastore without casting.
 	/*
@@ -98,12 +109,7 @@ public class EventData {
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	public String getMeetingPlace() {
-		return meetingPlace;
-	}
-	public void setMeetingPlace(String meetingPlace) {
-		this.meetingPlace = meetingPlace;
-	}
+
 	public String getStartDate() {
 		return startDate;
 	}

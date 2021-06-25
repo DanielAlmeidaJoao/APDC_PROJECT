@@ -2,8 +2,6 @@
 // parameter when you first load the API. For example:
 // <script
 // src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-let origin=null;
-let destination=null;
 let autoCompDirection;
 let distDiv;
 let timeDiv;
@@ -14,17 +12,18 @@ const fields =["place_id","name","formatted_address","geometry"];
 function initMap() {
   let myLat= 41.85;
   let myLong=-87.65;
+ 
+  let map = new google.maps.Map(document.getElementById("map"), {
+    mapTypeControl: false,
+    center: { lat:myLat, lng:myLong },
+    zoom: 16,
+  });
   navigator.geolocation.getCurrentPosition(function(position) {
     myLat = position.coords.latitude;
     myLong = position.coords.longitude;
     if(map){
       map.setCenter({ lat:myLat, lng: myLong});
     }
-  });
-  const map = new google.maps.Map(document.getElementById("map"), {
-    mapTypeControl: false,
-    center: { lat:myLat, lng:myLong },
-    zoom: 13,
   });
   autoCompDirection = new AutocompleteDirectionsHandler(map);
   distDiv = document.getElementById("edist").children[1];

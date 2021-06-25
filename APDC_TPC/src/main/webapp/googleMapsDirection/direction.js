@@ -67,9 +67,9 @@ class AutocompleteDirectionsHandler {
       }
 
       if (mode === "ORIG") {
-        this.originPlaceId = "EihBdi4gZGEgTGliZXJkYWRlLCAyOTUwIFBhbG1lbGEsIFBvcnR1Z2FsIi4qLAoUChIJT2s9gGdBGQ0RI_erjg6GhsoSFAoSCTshzcObQRkNEY6I-TQmhJhA"; //place.place_id;
+        this.originPlaceId = place.place_id; //"EihBdi4gZGEgTGliZXJkYWRlLCAyOTUwIFBhbG1lbGEsIFBvcnR1Z2FsIi4qLAoUChIJT2s9gGdBGQ0RI_erjg6GhsoSFAoSCTshzcObQRkNEY6I-TQmhJhA"; //place.place_id;
       } else {
-        this.destinationPlaceId ="EkFBdi4gZG9zIEJvbWJlaXJvcyBWb2x1bnTDoXJpb3MgZGUgUGFsbWVsYSwgMjk1MCBQYWxtZWxhLCBQb3J0dWdhbCIuKiwKFAoSCcEuH91mQRkNESe92-wQ8bJiEhQKEgk7Ic3Dm0EZDRGOiPk0JoSYQA"; //place.place_id;
+        this.destinationPlaceId = place.place_id; //"EkFBdi4gZG9zIEJvbWJlaXJvcyBWb2x1bnTDoXJpb3MgZGUgUGFsbWVsYSwgMjk1MCBQYWxtZWxhLCBQb3J0dWdhbCIuKiwKFAoSCcEuH91mQRkNESe92-wQ8bJiEhQKEgk7Ic3Dm0EZDRGOiPk0JoSYQA"; //place.place_id;
       }
       this.route();
     });

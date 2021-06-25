@@ -2,7 +2,7 @@ package apdc.events.utils;
 
 public class EventData2 extends EventData {
 	boolean owner, participating;
-	String participants;
+	String participants,imgUrl;
 	int currentParticipants;
 	public boolean isOwner() {
 		return owner;
