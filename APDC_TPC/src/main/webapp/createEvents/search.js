@@ -40,14 +40,13 @@ function initAutocomplete() {
         // The anchor for this image is the base of the flagpole at (0, 32).
         anchor: new google.maps.Point(0, 32),
       }; */
-      /*
+      
       new google.maps.Marker({
         //icon:image,
         title: "I AM HERE",
         position: new google.maps.LatLng(lat,lng),
         map: map
-      });*/
-      makeMarker("I AM HERE",lat,lng,map,`<img class="nav_img_prfl" id="nav_profile_pic" src=${profilePictureURL} alt="prifile-pic">`);
+      });
     }
   });
   // Create the search box and link it to the UI element.
@@ -132,16 +131,40 @@ DistHaversine = function(p1, p2) {
 
   return d;
 }
-function makeMarker(title,lat,long,map,contentString) {
+const currentPoints = [];
+function makeMarker(eventObj) {
+  let where =JSON.parse(eventObj.location);
   let distDiv = document.getElementById("edist");
-  let infowindow = new google.maps.InfoWindow({content: contentString});
+  
   let marker =  new google.maps.Marker({
-      title: title,
-      position: new google.maps.LatLng(lat,long),
+      title: eventObj.name,
+      position: new google.maps.LatLng(where.loc.lat,where.loc.lng),
       map: map
   });
+  marker.id=eventObj.eventId;
+  currentPoints.push(marker);
+  let contentString = makeShowInfoString(eventObj,where.name);
+  let infowindow = new google.maps.InfoWindow({content: contentString});
   marker.addListener('click', function() {
-      infowindow.open(map, marker);
-      distDiv.textContent=DistHaversine(origin, { lat: lat, lng: long });
+    infowindow.open(map, marker);
+    distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
   });
 }
+
+/**
+ * if(notrunned){
+          notrunned=false;
+          fetch(`/rest/events/view/${eventObj.eventId}`)
+          .then(response => response.json())
+          .then( data => {
+            let contentString = makeShowInfoString(data,where.name);
+            infowindow = new google.maps.InfoWindow({content: contentString});
+            infowindow.open(map, marker);
+            distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+          }
+          )
+          .catch((error) => {
+              console.log('Error: '+ error);
+          });
+      }
+ */

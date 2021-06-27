@@ -37,7 +37,22 @@ function editEvent(eventObj){
     //elems[4].value=eventObj.name;
     //elems[5].value=eventObj.name;
     const imgparnt = document.getElementById("imgs_dv");
-    imgparnt.appendChild(makeImgDiv(eventObj.images,"eventimage"));  
+    imgparnt.appendChild(makeImgDiv(eventObj.images,"eventimage"));
+    
+    //
     document.getElementById("addEvt_frm").setAttribute(dv.NAME,eventObj.eventId);
     document.getElementById("create_events_btn").click();
 }
+function deleteMarker(id) {
+    //Find and remove the marker from the Array
+    for (let i = 0; i < currentPoints.length; i++) {
+        if (currentPoints[i].id == id) {
+            //Remove the marker from Map                  
+            currentPoints[i].setMap(null);
+
+            //Remove the marker from array.
+            currentPoints.splice(i, 1);
+            return;
+        }
+    }
+};

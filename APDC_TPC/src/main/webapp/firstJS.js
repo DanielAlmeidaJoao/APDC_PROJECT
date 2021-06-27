@@ -12,8 +12,7 @@ function registerUser(name,email,password){
     let user={
         name: name,
         email: email,
-        password: password,
-        profilePictureURL:"/imgs/Profile_avatar_placeholder_large.png" 
+        password: password
     };
 	let postString = JSON.stringify(user);
     let path="rest/login/op1";
@@ -26,6 +25,7 @@ function registerUser(name,email,password){
     }).then(response=>{
         if(response.ok){
             user.password=null;
+            user["profilePictureURL"]="/imgs/Profile_avatar_placeholder_large.png";
             redirectOnLogin(user);
         }else if(response.status===409){
             alert("Email already registered!");

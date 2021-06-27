@@ -84,7 +84,7 @@ function handleCreateEventSubmitForm() {
         data = JSON.stringify(data);
         data = makeFormData(data);
         if(data!=null){
-            uploadData(data,sbmt);
+            uploadData(data);
         }
         return false;
     }
@@ -96,7 +96,22 @@ function resetImagesDiv() {
     }
     eventImages=new Map();
 }
-function uploadData(datas,formEle) {
+function updateNumberOfElements(elementid,inc,element) {
+    let update=-1;
+    if(inc){
+        update=1;
+    }
+    if(element){
+        element.textContent=parseInt(element.textContent)+update;
+    }else{
+        document.getElementById(elementid).textContent=parseInt(document.getElementById(elementid).textContent)+update;
+    }
+}
+/**
+ * creates a new event or update with the information in the json object 'datas', if the event already exist
+ * @param {*} datas 
+ */
+function uploadData(datas) {
     fetch('/rest/events/create', {
     method: 'POST', // or 'PUT'
     body:datas
@@ -115,8 +130,14 @@ function uploadData(datas,formEle) {
         return response.json();
     }).then(data=>{
         if(data){
+            let eventBlock = document.getElementById(HTML_EVENT_ID_SUFFIX+data.eventId);
+            if(eventBlock){
+                deleteMarker(eventObj.eventId);
+                updateNumberOfElements("evt_counter",true);
+                eventBlock.parentElement.replaceChild(singleEventBlock(data,false),eventBlock);
+            }
             clearMarkers();
-            makeSolidarityAction(data);
+            makeMarker(data);
         }
     })
     .catch((error) => {
@@ -177,7 +198,8 @@ function makeFormData(evd){
     let imgs = document.getElementById("imgs_dv").children;
     let elem;
 
-    
+    			
+
     let x=0;
     console.log("GOING TO CREATE EVENT: "+eventImages.size);
     if(eventImages.size==0){

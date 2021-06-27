@@ -11,6 +11,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
 import apdc.events.utils.GoogleCloudUtils;
+import apdc.events.utils.ImageKindsUtils;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.resources.LoginManager;
 import apdc.utils.conts.Constants;
@@ -37,6 +38,8 @@ public class StorageMethods {
 	public static final String DISABLED = "DISABLED";
 
 	private static final String PRIVATE_VALUE = "PRIVATE";
+
+    public static final String DEFAULT_AVATAR_OBJECT_NAME="Profile_avatar_placeholder_large.png";
 
 
 	//private static final String GBO = "GBO";
@@ -114,7 +117,8 @@ public class StorageMethods {
 			    AdditionalAttributes ad = new AdditionalAttributes();
 			    ad.perfil=PRIVATE_VALUE;
 			    AdditionalAttributesOperations.addUserAdditionalInformation(datastore,ad,userid);
-			    GoogleCloudUtils.saveAvatarPicture(LoginManager.profilePictureBucketName,userid+"");
+			    //GoogleCloudUtils.saveAvatarPicture(LoginManager.profilePictureBucketName,userid+"");
+			    ImageKindsUtils.addUserProfilePicture(userid,DEFAULT_AVATAR_OBJECT_NAME);
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());

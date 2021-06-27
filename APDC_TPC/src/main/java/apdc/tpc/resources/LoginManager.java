@@ -31,6 +31,7 @@ import com.google.gson.Gson;
 
 import apdc.events.utils.CountEventsUtils;
 import apdc.events.utils.GoogleCloudUtils;
+import apdc.events.utils.ImageKindsUtils;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.LoggedObject;
@@ -81,10 +82,14 @@ public class LoginManager {
 		try {
 			long userid = HandleTokens.validateToken(value);			
 			try {
+				String objectName=userid+""+System.currentTimeMillis();
 				Part p = request.getPart("profilePicture");
-				GoogleCloudUtils.uploadObject(profilePictureBucketName,userid+"",p.getInputStream());
+				GoogleCloudUtils.uploadObject(profilePictureBucketName,objectName,p.getInputStream());
+				String oldobjectName = ImageKindsUtils.addUserProfilePicture(userid,objectName);
+				GoogleCloudUtils.deleteObject(profilePictureBucketName,oldobjectName);
 				System.out.println("IMAGE SAVED WITH SUCCESS!");
-				response = Response.status(Status.OK).build();
+				String url=GoogleCloudUtils.publicURL(profilePictureBucketName,objectName); //url
+				response = Response.ok(Constants.g.toJson(url)).build();
 			}catch(Exception e) {
 				e.printStackTrace();
 				response = Response.status(Status.BAD_REQUEST).build();
@@ -146,12 +151,8 @@ public class LoginManager {
 				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString(StorageMethods.NAME_PROPERTY));
-				if(GoogleCloudUtils.hasThisObject(profilePictureBucketName,userid+"")!=null) {
-					//String.format("https://storage.googleapis.com/%s/%s?ignoreCache=1",profilePictureBucketName,userid)
-					lo.setProfilePictureURL(GoogleCloudUtils.publicURL(profilePictureBucketName,userid+""));
-				}else {
-					lo.setProfilePictureURL("../imgs/Profile_avatar_placeholder_large.png");
-				}
+				String objectName=ImageKindsUtils.getObjectName(userid,ImageKindsUtils.USERS_PROFILE_PICTURES_KIND);
+				lo.setProfilePictureURL(GoogleCloudUtils.publicURL(profilePictureBucketName,objectName));
 				response=Response.ok().cookie(k).entity(g.toJson(lo)).build();
 			}
 		}catch(Exception e) {

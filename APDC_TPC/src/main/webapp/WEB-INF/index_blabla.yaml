@@ -1,0 +1,6 @@
+indexes:
+
+- kind: EVENTS
+  properties:
+  - name: END_DATE
+  - name: LOCATION

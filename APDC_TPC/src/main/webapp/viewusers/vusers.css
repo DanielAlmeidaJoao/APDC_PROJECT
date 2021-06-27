@@ -1,3 +1,9 @@
+.usr_more_info{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
 .user_disp{
     border: 1px solid red;
     margin: 10px 10px;
@@ -20,5 +26,19 @@
 .subt:hover{
     cursor: pointer;
     background-color: #1d1b1b;
-
+}
+.usr_evts{
+    display: none;
+}
+.num_evts span{
+    padding: 10px 10px;
+}
+.num_evts{
+    background-color: blue;
+    padding: 10px 10px;
+    border-radius: 5px 5px;
+    color: white;
+}
+.num_evts:hover{
+    cursor: pointer;
 }

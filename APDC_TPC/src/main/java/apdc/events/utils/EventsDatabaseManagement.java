@@ -7,6 +7,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.ProjectionEntity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StringValue;
@@ -33,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.io.IOUtils;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Cursor;
@@ -65,16 +68,24 @@ public class EventsDatabaseManagement {
 	private static String getPartString(HttpServletRequest httpRequest) {
 		try {
 			Part p = httpRequest.getPart(Constants.EVENT_FORMDATA_KEY);
+			/*
 			p.delete();
 			byte [] b = new byte[(int) p.getSize()];
 			InputStream is = p.getInputStream();
-			is.read(b);
-			String h = new String(b);
+			is.read(b);*/
+			String h = new String(IOUtils.toByteArray(p.getInputStream()));
 			return h;
 		} catch (IOException | ServletException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static EventData2 getEvent(long eventid,Datastore datastore,long userid) {
+		com.google.cloud.datastore.Key eventKey = datastore.newKeyFactory().setKind(EVENTS).newKey(eventid);
+		Entity ev = datastore.get(eventKey);
+		EventData2 event = getEvent(ev,userid, false);
+		return event;
 	}
 	/**
 	 * creates and stores an event into the database
@@ -87,12 +98,16 @@ public class EventsDatabaseManagement {
 		//Generate automatically a key
 		LOG.severe("GOING TO CREATE EVENT!!! -> "+userid);
 		String eventJsonData = getPartString(httpRequest);
-		EventData et = Constants.g.fromJson(eventJsonData,EventData.class);
-		System.out.println(et.eventId+" ia ma event id");
+		EventData et =null;
 		long eventId=-1;
 		try {
+			et = Constants.g.fromJson(eventJsonData,EventData.class);
+			LOG.severe(et.eventId+" ia ma event id");
 			eventId	= et.getEventId();
-		}catch(Exception e) {}
+		}catch(Exception e) {
+			LOG.severe(" SOMETHING WENT WRONG "+e.getLocalizedMessage());
+
+		}
 		Response result;
 		Transaction txn=null;
 		  try {
@@ -104,14 +119,11 @@ public class EventsDatabaseManagement {
 				  eventKey = kf.newKey(eventId);
 			  }else {
 				  eventKey=datastore.allocateId(kf.newKey());
-			  }
-
-		  
+			  }		  
 		  //com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
 					//.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
 			txn = datastore.newTransaction();
 			Entity ev;
-			
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
@@ -123,27 +135,29 @@ public class EventsDatabaseManagement {
 					.set(VOLUNTEERS,et.getVolunteers());
 			try {
 				Part p = httpRequest.getPart("img_cover");
-				String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,eventKey.getId()+"",p.getInputStream());
-				builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
+				if(p!=null) {
+					String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,eventKey.getId()+"",p.getInputStream());
+					builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
+				}
 			}catch(Exception e) {
 				e.printStackTrace();
+				LOG.severe(e.getLocalizedMessage());
 				return result = Response.status(Status.BAD_REQUEST).build();
 			}
-			
 			ev = builder.build();
 			ev = txn.put(ev);
-		    txn.commit();
-		    CountEventsUtils.makeUserEventCounterKind(userid, datastore, true);
-		    System.out.println("EVENT ID "+eventId);
 		    if(eventId<=Constants.ZERO) {
-		    	EventData2 obj = getEvent(ev,userid,false);
-			    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
-			    System.out.println("SENDING THE CREATED OBJECT BACK!!!");
+		    	eventId=ev.getKey().getId();
+			    CountEventsUtils.makeUserEventCounterKind(userid, datastore,true,txn);
+			    if(EventParticipationMethods.addOrRemoveParticipation(userid,eventId,txn)==false) {
+			    	throw new Exception("Participation does not exist, it should be false!");
+			    }
 		    }else {
 		    	eventId=ev.getKey().getId();
-			    EventParticipationMethods.participate(userid, eventId);
-			    result=Response.status(Status.OK).build();
 		    }
+		    txn.commit();
+		    EventData2 obj = getEvent(ev,userid,false);
+		    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
 		  }catch(Exception e) {
 			  StorageMethods.rollBack(txn);
 			  result= Response.status(Status.BAD_REQUEST).build();
@@ -197,7 +211,51 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static String [] getEvents(String startCursor, long userid,boolean finished) {
+	public static Pair<String,String> getUpcomingEvent(String startCursor, long userid) {
+		try {
+			Cursor startcursor=null;
+			Query<ProjectionEntity> query=null;
+			Filter filter= PropertyFilter.gt(END_DATE,Timestamp.now());
+					
+			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
+				    .setKind(EVENTS).setFilter(filter)
+				    .setProjection(LOCATION).setLimit(PAGESIGE);
+			if (startCursor!=null) {
+			      startcursor = Cursor.fromUrlSafe(startCursor); 
+				  dd=dd.setStartCursor(startcursor);
+			    }
+			query=dd.build();
+			
+			QueryResults<ProjectionEntity> tasks = Constants.datastore.run(query);
+			ProjectionEntity e;
+			List<EventLocation> events = new LinkedList<>();
+			while(tasks.hasNext()){
+				e = tasks.next();
+				events.add(new EventLocation(e.getString(LOCATION),e.getKey().getId()));
+			}
+			//data,cursor
+			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+		}catch(Exception e) {
+			Constants.LOG.severe("");
+			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	/**
+	 * Caution: Be careful when passing a cursor to a client, such as in a web form.
+	 * Although the client cannot change the cursor value to access results outside of the original query,
+	 *  it is possible for it to decode the cursor to expose information about result entities,
+	 *  such as the project ID, entity kind, key name or numeric ID, ancestor keys,
+	 *  and properties used in the query's filters and sort orders.
+	 *  If you don't want users to have access to that information,
+	 *  you can encrypt the cursor, or store it and provide the user with an opaque key
+	 * @param pageSize
+	 * @param pageCursor
+	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
+	 */
+	public static Pair<String,String> getEvents(String startCursor, long userid,boolean finished) {
 		String [] results = new String[TWO];
 		try {
 			Cursor startcursor=null;
@@ -224,15 +282,15 @@ public class EventsDatabaseManagement {
 				e = tasks.next();
 				events.add(getEvent(e,userid,finished));
 			}
-			results[0]=Constants.g.toJson(events);
-			results[1]=tasks.getCursorAfter().toUrlSafe();
+			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+
 		}catch(Exception e) {
 			Constants.LOG.severe("");
 			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 		
-		return results;
+		return null;
 	}
 	/**
 	 * deletes an event and every ither information related to the event
@@ -255,10 +313,10 @@ public class EventsDatabaseManagement {
 					Entity parentEntity = Constants.datastore.get(ev.getKey().getParent());
 					if(userid ==parentEntity.getKey().getId()) {
 						txn.delete(eventKey);
+					    CountEventsUtils.makeUserEventCounterKind(userid, datastore,false,txn);
+					    EventParticipationMethods.removeParticipants(event,txn);
 					    txn.commit();
-					    CountEventsUtils.makeUserEventCounterKind(userid, datastore, true);
 					    GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventId);
-					    EventParticipationMethods.removeParticipants(event);
 					    return Response.ok().build();
 					}
 				}
@@ -288,7 +346,14 @@ public class EventsDatabaseManagement {
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
 		ed.setVolunteers(en.getLong(VOLUNTEERS));
-		ed.imgUrl=GoogleCloudUtils.publicURL(LoginManager.profilePictureBucketName,parentEntity.getKey().getId()+"");
+		try {
+			String objectName=ImageKindsUtils.getObjectName(parentEntity.getKey().getId(),ImageKindsUtils.USERS_PROFILE_PICTURES_KIND);
+			System.out.println(objectName+" OBJECT NAME");
+			String imgurl=GoogleCloudUtils.publicURL(LoginManager.profilePictureBucketName,objectName);
+			ed.imgUrl=imgurl;
+		}catch(Exception e) {
+			
+		}
 		try {//In case the user owner was removed
 			ed.setOrganizer(parentEntity.getString(StorageMethods.NAME_PROPERTY));
 			ed.setOwner(userid==parentEntity.getKey().getId());
@@ -301,8 +366,8 @@ public class EventsDatabaseManagement {
 		}else if(!finished) {
 			ed.participating=EventParticipationMethods.hasParticipant(userid,ed.eventId);
 		}
-		
 		ed.currentParticipants=EventParticipationMethods.countParticipants(userid, ed.eventId,(int)ed.volunteers);
+		System.out.println("CURRENT PARTICIPANTS "+ed.currentParticipants);
 		//ed.participants=res.getV2();
 		LOG.severe("GOING TO FETCH THE IMAGES ");
 		try {
@@ -322,5 +387,40 @@ public class EventsDatabaseManagement {
 			        datastore.newKeyFactory().setKind("TaskList").newKey("default")))
 			    .build();ConceptsTest.java
 	}*/
+	public static String [] getLoggedUserEvents(String startCursor, long userid) {
+		String [] results = new String[TWO];
+		try {
+			Cursor startcursor=null;
+			Query<Entity> query=null;
+			//Timestamp.no			
+			Builder b=Query.newEntityQueryBuilder()
+				    .setKind(EVENTS)
+				    .setFilter(PropertyFilter.hasAncestor(
+				    		Constants.datastore.newKeyFactory().setKind(USERS).newKey(userid))).setLimit(PAGESIGE);
+			if (startCursor!=null) {
+		      startcursor = Cursor.fromUrlSafe(startCursor); 
+			  b=b.setStartCursor(startcursor);
+		    }
+			query=b.build();
+			QueryResults<Entity> tasks = Constants.datastore.run(query);
+		    Entity e;
+			List<EventData2> events = new LinkedList<>();
+			//Timestamp currentTime = Timestamp.now();
+			
+			while(tasks.hasNext()){
+				e = tasks.next();
+				EventData2 ev = getEvent(e,userid,false);
+				events.add(ev);
+			}
+			results[0]=Constants.g.toJson(events);
+			results[1]=tasks.getCursorAfter().toUrlSafe();
+		}catch(Exception e) {
+			Constants.LOG.severe("");
+			Constants.LOG.severe("GETTING THE EVENTS OF THE LOGGED USER "+e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+		
+		return results;
+	}
 	
 }

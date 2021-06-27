@@ -18,7 +18,7 @@ public class EventParticipationMethods {
 	private static final String PARTICIPANT_ID_PROP="userid";
 	private static final String PARTICIPANTS_KIND="event_participants";
 	private static final String COUNT_PARTICIPANTS_KIND="count_participants";
-	private static final String COUNT_PROP="userid";
+	private static final String COUNT_PROP="count";
 
 
 
@@ -74,45 +74,39 @@ public class EventParticipationMethods {
 		}
 		return result;
 	}
-	public static boolean participate(long userid, long eventId){
+	public static boolean addOrRemoveParticipation(long userid, long eventId,Transaction txn){
 		Datastore datastore = Constants.datastore;
-		Transaction txn=null;
 		Constants.LOG.severe("Going to Add a participant to an event!");
 		boolean result=false;
-		com.google.cloud.datastore.Key countParticipants=datastore.newKeyFactory()
+		com.google.cloud.datastore.Key countParticipantsKey =datastore.newKeyFactory()
 			.addAncestors(PathElement.of(EventsDatabaseManagement.EVENTS,eventId))
-			.setKind(COUNT_PARTICIPANTS_KIND).newKey(eventId);
-
-		  try {
-				txn = datastore.newTransaction();
-				
-				com.google.cloud.datastore.Key eventKey;
-				KeyFactory kf = datastore.newKeyFactory()
-										.addAncestors(PathElement.of(EventsDatabaseManagement.EVENTS,eventId))
-										.setKind(PARTICIPANTS_KIND);
-				eventKey=datastore.allocateId(kf.newKey());
-				
-				Entity ev=Entity.newBuilder(eventKey).set(PARTICIPANT_ID_PROP,userid).build();
-				
-				Entity count = txn.get(countParticipants);
-				long cc;
-				if(count==null) {
-					cc=1L;
-					count=Entity.newBuilder(countParticipants).set(COUNT_PROP,1L).build();
-				}else {
-					cc= count.getLong(COUNT_PROP);
-					cc++;
-					count=Entity.newBuilder(countParticipants).set(COUNT_PROP,cc).build();
-				}
-				txn.put(ev,count);
-				txn.commit();
-				print("PARTICIPANT "+userid+" ADDED!");
-				result=true;
-		  }catch (Exception e) {
-			  	StorageMethods.rollBack(txn);
-			  	print(e.getLocalizedMessage()+" <---> THIS IS ERROR");
-		  }
-		  return result;
+			.setKind(COUNT_PARTICIPANTS_KIND).newKey(eventId); //number of  participants per event
+		Entity count = txn.get(countParticipantsKey);
+		long cc;
+		System.out.println("HERE 1");
+		Entity ev=getParticipation(userid,eventId);
+		if(ev==null) { // is not participating in the event
+			if(count==null) {
+				cc=0L;
+				count=Entity.newBuilder(countParticipantsKey).set(COUNT_PROP,cc).build();
+			}
+			cc=1L+count.getLong(COUNT_PROP);
+			KeyFactory kf = datastore.newKeyFactory() 
+					.addAncestors(PathElement.of(EventsDatabaseManagement.EVENTS,eventId)) 
+					.setKind(PARTICIPANTS_KIND); 
+			com.google.cloud.datastore.Key eventKey=datastore.allocateId(kf.newKey()); 
+			ev=Entity.newBuilder(eventKey).set(PARTICIPANT_ID_PROP,userid).build();  
+			txn.put(ev);
+			result=true;
+		}else {
+			cc=count.getLong(COUNT_PROP)-1L;
+			txn.delete(ev.getKey());
+			result=false;
+		}
+		count=Entity.newBuilder(countParticipantsKey).set(COUNT_PROP,cc).build();
+		txn.put(count);
+		print("PARTICIPANT "+userid+" ADDED OR REMOVED ! "+result);
+		return result;
 	}
 	/**
 	 * removes a user from participating in this event
@@ -148,30 +142,21 @@ public class EventParticipationMethods {
 	 * @param eventid
 	 * @return
 	 */
-	public static boolean removeParticipants(long eventid) {
+	public static boolean removeParticipants(long eventid,Transaction txn) {
 		boolean isIn=false;
-		Transaction txn=null;
-		try {
-			txn=Constants.datastore.newTransaction();
-			print("REMOVE ALL PARTICIPATIONS IN THIS EVENT! "+eventid);
-			EntityQuery  en =  Query.newEntityQueryBuilder()
-				    .setKind(PARTICIPANTS_KIND)
-				    .setFilter(CompositeFilter.and(
-				    		PropertyFilter.hasAncestor(Constants.datastore.newKeyFactory().setKind(EventsDatabaseManagement.EVENTS).newKey(eventid))))
-				    .build();
-			Query<Entity> query=en;
-			QueryResults<Entity> results =  txn.run(query);
-			
-			Entity e;
-			while(results.hasNext()) {
-				e=results.next();
-				txn.delete(e.getKey());
-			}
-		    txn.commit();
-
-		}catch(Exception e) {
-			print("ERROR --> "+e.getLocalizedMessage());
-			StorageMethods.rollBack(txn);
+		print("REMOVE ALL PARTICIPATIONS IN THIS EVENT! "+eventid);
+		EntityQuery  en =  Query.newEntityQueryBuilder()
+			    .setKind(PARTICIPANTS_KIND)
+			    .setFilter(CompositeFilter.and(
+			    		PropertyFilter.hasAncestor(Constants.datastore.newKeyFactory().setKind(EventsDatabaseManagement.EVENTS).newKey(eventid))))
+			    .build();
+		Query<Entity> query=en;
+		QueryResults<Entity> results =  txn.run(query);
+		
+		Entity e;
+		while(results.hasNext()) {
+			e=results.next();
+			txn.delete(e.getKey());
 		}
 		return isIn;
 	}

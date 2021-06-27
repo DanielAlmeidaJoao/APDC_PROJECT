@@ -160,5 +160,31 @@ function handleRole() {
     })
 }
 
+function handleNumberOfEventsButton() {
+    let path="/rest/events/view/myevents";
+    let numberEventsBtn=document.getElementById("num_evts");
+    let dispBlock = document.getElementById("shusevnts");
+    numberEventsBtn.onclick=()=>{
+        if(dispBlock.childElementCount==0&&dispBlock.parentElement.classList.contains("usr_evts")){
+            //load
+            
+            fetch(path).then(response => response.json()).then( data => {
+                    let chld;
+                    for(let x=0; x<data.length;x++){
+                        //makeSolidarityAction(data[x]);
+                        chld = singleEventBlock(data[x],false);
+                        dispBlock.appendChild(chld);
+                    }
+                }
+                )
+                .catch((error) => {
+                    console.log('Error: '+ error);
+                });
+        }
+        dispBlock.parentElement.classList.toggle("usr_evts");
+    }
+    
+}
+handleNumberOfEventsButton();
 loadusers();
 handleRole();

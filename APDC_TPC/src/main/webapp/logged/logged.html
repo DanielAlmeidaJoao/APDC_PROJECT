@@ -30,8 +30,7 @@
             <button id="disable_user">DISABLE USERS</button>
             <button id="change_pwd">CHANGE PASSWORD</button>
         -->
-        <button id="create_events_btn" class="nvb">CREATE EVENTS</button>
-        <button id="get_evts_btn" class="nvb">UPCOMING EVENTS</button>
+        <button id="create_events_btn" class="nvb">EVENTS</button>
         <button id="sh_fnshd_evts" class="nvb">FINISHED EVENTS</button>
     </nav>
     <div class="main_body">
@@ -47,13 +46,14 @@
                     <label>Estimated Distance</label>
                     <span id="edist"></span>
                 </div>
+                <button id="vwmrpnt" class="edt_fn">View More Points</button>
             </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
             <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
                 <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
                 <div class="user_plc_p user_plc">
                     <div class="user_plc">
-                        <div id="frst_infos">
+                        <form id="frst_infos">
                             <div class="info_div">
                                 <label>PERFIL:</label>
                                 <input class="sp_attr kj" type="text" name="perfil">
@@ -79,7 +79,7 @@
                                 <input class="sp_attr" type="text" name="locality">
                             </div>
                             <span id="edtadt" class="edt_fn">EDIT</span>
-                        </div>
+                        </form>
                         <div class="pfpc_prnt" id="pfpc_prnt">
                             <img class="img_prfl" id="prfl_img" src="/imgs/Profile_avatar_placeholder_large.png">
                             <div class="prfpc_btns" id="prfpc_btns">
@@ -89,19 +89,13 @@
                         </div>
                     </div>
                     <div class="usr_more_info">
-                        <div class="view_user dlfx ve">
-                            <h2>MY EVENTS</h2>
-                            <div>NUMBER OF EVENTS:<span id="evt_counter" ></span> </div>
+                        <div id="num_evts" class="num_evts">NUMBER OF EVENTS:<span id="evt_counter">0</span> </div>
+                        <div id="usrs_evts_disp" class="view_user dlfx ve usr_evts">
                             <div class="show_events" id="shusevnts">
         
                             </div>
                             <button id="load_mr_user_evnts">LOAD MORE</button>
                         </div>
-                        <div>
-                            <span>PONTUAÇÕES</span>
-                            <div></div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -174,17 +168,6 @@
                         </div>
                     </form>
                 </di>
-            </div>
-
-            <!--UPCOMING EVENTS-->
-            <div class="dispn" id="show_events_blk">
-                <div class="view_user dlfx ve">
-                    <h2>UPCOMING EVENTS:</h2>
-                    <div class="show_events" id="events_blk">
-
-                    </div>
-                    <button id="load_mr">LOAD MORE</button>
-                </div>
             </div>
             
             <!--FINISHED EVENTS-->

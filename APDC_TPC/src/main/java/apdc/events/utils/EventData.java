@@ -12,6 +12,8 @@ public class EventData {
 	String name, description, goals, location,
 	startDate, endDate, organizer, startTime, endTime, images;
 	File img_cover;
+	long eventId, volunteers;
+
 	public File getImg_cover() {
 		return img_cover;
 	}
@@ -19,7 +21,6 @@ public class EventData {
 	public void setImg_cover(File img_cover) {
 		this.img_cover = img_cover;
 	}
-	long eventId, volunteers;
 	//volunteers is long because I am unable to fetch integer value from datastore without casting.
 	/*
 	description: ""

@@ -1,12 +1,8 @@
 package apdc.events.utils;
 
-import java.io.File;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
@@ -149,17 +145,14 @@ public class GoogleCloudUtils {
 	 * @param objectName
 	 */
 	public static void deleteObject(String bucketName, String objectName) {
-		Storage storage = StorageOptions.getDefaultInstance().getService();
-		/*
-		 * Example of creating a blob from a byte array: 
-			String bucketName = "my-unique-bucket";
-			 String blobName = "my-blob-name";
-			 BlobId blobId = BlobId.of(bucketName, blobName);
-			 BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
-			 Blob blob = storage.create(blobInfo, "Hello, World!".getBytes(UTF_8
-		 */
-	    BlobId blobId = BlobId.of(bucketName, objectName);
-	    storage.delete(blobId);
+		try {
+			Storage storage = StorageOptions.getDefaultInstance().getService();
+		    BlobId blobId = BlobId.of(bucketName, objectName);
+		    storage.delete(blobId);
+		}catch(Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		}
+		
 	}
 	public static String publicURL(String bucketName, String objectName) {
 		return String.format("https://storage.googleapis.com/%s/%s",bucketName,objectName);
