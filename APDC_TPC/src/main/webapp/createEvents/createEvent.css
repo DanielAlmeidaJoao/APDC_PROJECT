@@ -9,10 +9,16 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
+    border: 1px dotted rgb(21, 201, 177);
+    padding: 10px 10px;
 }
 .evnt_atrs{
     display: flex;
     flex-direction: column;
+}
+.evnt_atrs input:focus-visible{
+    border: 2px solid rgb(21, 201, 177);
+    outline: rgb(21, 201, 177);
 }
 .addEvt_frm{
     width: auto;
@@ -48,6 +54,7 @@
     height: 30px;
     font-size: 20px;
     padding: 2px 2px;
+    border: 1px solid rgb(21, 201, 177);
 }
 .sbt_crt_btn{
     width: 130px;
@@ -62,6 +69,11 @@
     font-size: 25px;
     height: 200px;
     width: 400px;
+    border: 1px solid rgb(21, 201, 177);
+}
+.evnt_desc:focus-visible{
+    border: 2px solid rgb(21, 201, 177);
+    outline: rgb(21, 201, 177);
 }
 .crt_btns{
     display: flex;

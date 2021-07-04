@@ -52,7 +52,16 @@ function loadEvents(path,finished,divBlock) {
     .then( data => {
         let chld;
         for(let x=0; x<data.length;x++){
-            makeMarker(data[x]);
+            try {
+                if(finished){
+                    let chld =  eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                    divBlock.appendChild(chld);
+                }else{
+                    makeMarker(data[x]);
+                }
+            } catch (error) {
+                console.log(error+" HELLO");
+            }
             //chld = singleEventBlock(data[x],finished);
             //divBlock.appendChild(chld);
         }
@@ -99,6 +108,7 @@ function me(ele,className,txt){
  * @param {*} name - name of the organizer
  * @param {*} parent - parent html of the event that will be created
  */
+/**
 function organizerDiv(name,parent,url){
     let d=me(dv.DIV,"dlfx mgpd abt_orzr");
     let imgP = document.createElement("img");
@@ -110,23 +120,26 @@ function organizerDiv(name,parent,url){
     /*
     TODO : the part related to viewing the users profile picture
     */
+/*
     let dnm = me(dv.DIV,"orgd",name);
     d.appendChild(dp);
     d.appendChild(dnm);
     parent.appendChild(d);
 }
+
 /**
  * creates the div that will keep the event description and title
  * @param {*} title title of the event
  * @param {*} txt text description of the event
  * @param {*} parent html parent element of the div being created
  */
+/**
 function eventDescDiv(title,txt,parent){
     let hh = me(dv.H2,"",title);
     let dt = me(dv.DIV,"txtDesc",txt);
     parent.appendChild(hh);
     parent.appendChild(dt);
-}
+} */
 /**
  * creates a div to represent date or the place where the event is taking place
  * @param {*} className html class name for css
@@ -163,6 +176,7 @@ function showOnTheMapButton(from,to) {
  * @param {String} txt 
  * @returns html div element
  */
+/*
 function volunteersDivAux(volunteers,className1,className2,className3,txt) {
     let son1 = me(dv.DIV,className1);
     let span1 = me(dv.SPAN,className2,txt);
@@ -171,7 +185,7 @@ function volunteersDivAux(volunteers,className1,className2,className3,txt) {
     son1.appendChild(span1);
     son1.appendChild(span2);
     return son1;
-}
+}*/
 function participateIntheEvent(button,eventid) {
     let endpoint="/rest/events/participate";
 
@@ -240,6 +254,7 @@ function participatingButtons(parent,isGoing,eventid) {
  * @param {number of valunteers need to take part in the event} volunteers 
  * @param {html parent element} parent 
  */
+/*
 function volunteersDiv(volunteers,currentNum,parent,isOwner,eventid,participating,finished){
     let mnd = me(dv.DIV,"mgpd");
     let son1 = volunteersDivAux(volunteers,"vlt","vlts1 vlts","vlts1 vlts","Voluntarios:"); 
@@ -248,6 +263,7 @@ function volunteersDiv(volunteers,currentNum,parent,isOwner,eventid,participatin
     if(!finished && !isOwner){
         participatingButtons(interestedDiv,participating,eventid);
     }*/
+    /*
     mnd.appendChild(son1);
     mnd.appendChild(interestedDiv);
     parent.appendChild(mnd);
@@ -258,6 +274,7 @@ function volunteersDiv(volunteers,currentNum,parent,isOwner,eventid,participatin
  * @param {*} when when the event is taking place
  * @param {*} grdpa parent element that will contain the new created div
  */
+/*
 function eventDateLocationDiv(where,when,grdpa){
     //from = JSON.parse(from);
     where =JSON.parse(where);
@@ -273,15 +290,13 @@ function eventDateLocationDiv(where,when,grdpa){
     //parent.appendChild(vonMap);
     parent.appendChild(dt2);
     grdpa.appendChild(parent);
-}
-function stringToDom(str){
-    let doc = new DOMParser().parseFromString(str,'text/html');
-    return doc.body.firstChild;
-}
+}*/
+
 /**
  * div that will have the images associated with this event on the time of creation
  * @param {*} parent parent element that will contain the new created div
  */
+/*
 function eventsImagesDiv(parent,imgArr){
     let d = me(dv.DIV,"dlfx imgs_dv evnts_pcs");
     //let im= me(dv.IMG,"");
@@ -293,7 +308,7 @@ function eventsImagesDiv(parent,imgArr){
     im.setAttribute("alt","eventimage1");
     d.appendChild(im);  
     parent.appendChild(d);
-}
+}*/
 /**
  * async method to remove the event from the database
  * @param {*} eventId id of the event to be removed
@@ -321,6 +336,7 @@ function deleteEvent(eventId,btn) {
  * @param {*} eventId 
  * @param {*} parent 
  */
+
 function removeEventButton(eventId,parent,eventObj,finished) {
     let d = me(dv.DIV,"rmv_evt");
     let rmv = document.createElement("button");
@@ -348,6 +364,7 @@ function removeEventButton(eventId,parent,eventObj,finished) {
  * @param {*} when date
  * @param {*} eventId id of the event
  */
+   /*
 function singleEventBlock(eventObj,finished){
         /**
  * eventObj.name)
@@ -359,56 +376,38 @@ function singleEventBlock(eventObj,finished){
  * eventObj.endDate
  * eventObj.eventId
  */
-    let organizerAndDescParent = me(dv.DIV,"blk_desc");
-    organizerDiv(eventObj.organizer,organizerAndDescParent,eventObj.imgUrl);
+    //let organizerAndDescParent = me(dv.DIV,"blk_desc");
+    //organizerDiv(eventObj.organizer,organizerAndDescParent,eventObj.imgUrl);
 
-    let descriptionBlock = me(dv.DIV,"dlfx mgpd abt_evt");
-    eventDescDiv(eventObj.name,eventObj.description,descriptionBlock);
-    eventDateLocationDiv(eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
+    //let descriptionBlock = me(dv.DIV,"dlfx mgpd abt_evt");
+    //eventDescDiv(eventObj.name,eventObj.description,descriptionBlock);
+    //eventDateLocationDiv(eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
 
-    volunteersDiv(eventObj.volunteers,eventObj.currentParticipants,descriptionBlock,eventObj.owner,eventObj.eventId,eventObj.participating,finished);
+    //volunteersDiv(eventObj.volunteers,eventObj.currentParticipants,descriptionBlock,eventObj.owner,eventObj.eventId,eventObj.participating,finished);
 
-    organizerAndDescParent.appendChild(descriptionBlock);
+    //organizerAndDescParent.appendChild(descriptionBlock);
 
-    let organizerAndDescParentGrandPa=me(dv.DIV,"dlfx evt_disp");
-    organizerAndDescParentGrandPa.appendChild(organizerAndDescParent);
-    eventsImagesDiv(organizerAndDescParentGrandPa,eventObj.images);
+    //let organizerAndDescParentGrandPa=me(dv.DIV,"dlfx evt_disp");
+    //organizerAndDescParentGrandPa.appendChild(organizerAndDescParent);
+    //eventsImagesDiv(organizerAndDescParentGrandPa,eventObj.images);
 
-    let mainS1 = me(dv.DIV,"one_ev");
+    //let mainS1 = me(dv.DIV,"one_ev");
 
-    mainS1.setAttribute("id",HTML_EVENT_ID_SUFFIX+eventObj.eventId);
-    mainS1.appendChild(organizerAndDescParentGrandPa);
+    //mainS1.setAttribute("id",HTML_EVENT_ID_SUFFIX+eventObj.eventId);
+    //mainS1.appendChild(organizerAndDescParentGrandPa);
+ 
+    /*
     if(eventObj.owner){
         removeEventButton(eventObj.eventId,mainS1,eventObj,finished);
     }
     let frag = document.createDocumentFragment();
     frag.appendChild(mainS1);
-    return frag;
-    
+    return frag;    
 }
-/*
-let eventObj={
-    organizer:"daniel joao",
-    name:"salvar crianças famintas",
-    description:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed risus ullamcorper, ultrices ex at, ultrices nisi. Vestibulum in venenatis ante. Suspendisse et interdum nunc. Ut porttitor orci gravida rhoncus vulputate. Maecenas rutrum accumsan nisi, eu sollicitudin lorem. Sed vehicula tristique leo sed luctus. Proin id urna ex. Cras feugiat arcu a lacus fermentum, id mattis libero gravida. Morbi a lobortis ipsum, eu sollicitudin lectus. Aenean at dui ut dui porttitor volutpat non nec eros. Donec condimentum condimentum magna et ultrices. Mauris vitae interdum lectus. Donec sit amet congue neque. Etiam magna mi, gravida sit amet lectus sit amet, volutpat mollis justo. Suspendisse potenti.",
-    goals:"okkoo golos",
-    location:"setubal a",
-    meetingPlace:"dadasdsa",
-    startDate:"29 de abril 2029",
-    endDate:"16 de junho 3020",
-    eventId:"313321321jhb3h3j21hb3jb2"
-}
-let mainBlock = document.getElementById("events_blk");
-let chld = singleEventBlock(eventObj);
-mainBlock.appendChild(chld);*/
-/*
-try{      
-    makeMarker(eventObj);
-}catch(err){
-    console.log(err);
-} */
+*/
 
-function makeShowInfoString(eventObj,where) {
+//NOTE: THIS FUNCTION MUST CALL removeEventButton(eventId,parent,eventObj,finished) TO REMOVE AND EDIT AN EVENT
+function makeShowInfoString(eventObj,where,ownEvents) {
     let goingText="";
     if(eventObj.participating){
         goingText=GOING_TEXT;
@@ -416,44 +415,88 @@ function makeShowInfoString(eventObj,where) {
         goingText=WANTING_TO_GO;
     }
     let funcString;
+    let reportBtn="";
     if(!eventObj.owner){
         funcString=`<button class='vlts prt' onclick=participateIntheEvent(this,${eventObj.eventId});>${goingText}</button>`;
+        reportBtn=`<button class='rptbtn'>REPORT</button>`;
     }else{
-        funcString="";
+        funcString=`<button class='vlts prt' >${GOING_TEXT}</button>`;
     }
+    let removeDiv="";
+    if(ownEvents){
+        let canEdit = "";
+        if(!eventObj.finished){
+            canEdit=`<button onclick=editEvent(this,); data-obj='${JSON.stringify(eventObj)}'>EDIT</button>`;
+        }
+        removeDiv =
+        `<div class="rmv_evt">
+            <button onclick=deleteEvent(${eventObj.eventId},this)>Remove</button>
+            ${canEdit}
+        </div>`
+    }    
     return `<div class="one_ev">
-    <div class="dlfx evt_disp">
-        <div class="blk_desc">
-            <div class="dlfx mgpd abt_orzr">
-                <div class="orgd"><img class="nav_img_prfl"
-                        src=${eventObj.imgUrl}
-                        alt="profile-pic"></div>
-                <div class="orgd">${eventObj.organizer}</div>
-            </div>
-            <div class="dlfx mgpd abt_evt">
-                <h2 class="">${eventObj.name}</h2>
-                <div class="txtDesc">${eventObj.description}</div>
-                <div class="dlfx mgpd abt_evt">
-                    <div class="mrd plc">
-                        <div class="mrdso">Where:</div>
-                        <div class="mrdso">${where}</div>
+                <div class="evt_disp">
+                    <div class="blk_desc">
+                        <div class="dlfx mgpd abt_orzr">
+                            <div class="orgd"><img class="nav_img_prfl"
+                                    src=${eventObj.imgUrl}
+                                    alt="profile-pic"></div>
+                            <div class="orgd">${eventObj.organizer}</div>
+                        </div>
+                        <div class="dlfx mgpd abt_evt">
+                            <h2 class="">${eventObj.name}</h2>
+                            <div class="txtDesc">${eventObj.description}</div>
+                            <div class="dlfx mgpd abt_evt">
+                                <div class="mrd plc">
+                                    <div class="mrdso">Where:</div>
+                                    <div class="mrdso">${where}</div>
+                                </div>
+                                <div class="mrd dte">
+                                    <div class="mrdso">When:</div>
+                                    <div class="mrdso">${eventObj.startDate+" Until "+eventObj.endDate}</div>
+                                </div>
+                            </div>
+                            <div class="mgpd">
+                                <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${eventObj.volunteers}</span>
+                                </div>
+                                <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${eventObj.currentParticipants}</span></div>
+                                ${funcString}
+                            </div>
+                        </div>
                     </div>
-                    <div class="mrd dte">
-                        <div class="mrdso">When:</div>
-                        <div class="mrdso">${eventObj.startDate+" Until "+eventObj.endDate}</div>
+                    <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventObj.images} alt="eventimage1"></div>
+                </div>
+                
+                <div class="cmt_mndv">
+                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span>${eventObj.countComments}</span> </button>
+                    <div class="cmtchlddv hidecmts">
+                        <div class="pstcmtdv dlfx">
+                            <textarea class="pstcmtxta"></textarea>
+                            <button class="pstcmtbtn" onclick=publishComment(this,${eventObj.eventId});>COMMENT</button>
+                        </div>
+                        <div class="allcmts">
+                                                        
+                        </div>
+                        <button>MORE COMMENTS</button>
                     </div>
                 </div>
-                <div class="mgpd">
-                    <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${eventObj.volunteers}</span>
-                    </div>
-                    <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${eventObj.currentParticipants}</span></div>
-                    ${funcString}
-                </div>
-            </div>
-        </div>
-        <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventObj.images} alt="eventimage1"></div>
-    </div>
-</div>`;
+                ${removeDiv}
+                ${reportBtn}
+            </div>`;
+}
+/**
+ * Convert a template string into HTML DOM nodes
+ * @param  {String} str The template string
+ * @return {Node}       The template HTML
+ */
+function stringToHTML(str) {
+	let parser = new DOMParser();
+	let doc = parser.parseFromString(str, 'text/html');
+	return doc.body.firstChild;
+};
+function stringToDom(str){
+    let doc = new DOMParser().parseFromString(str,'text/html');
+    return doc.body.firstChild;
 }
 
 showFinishedEventsBlock();

@@ -1,4 +1,4 @@
-package apdc.events.utils;
+package apdc.events.utils.jsonclasses;
 
 import java.io.File;
 

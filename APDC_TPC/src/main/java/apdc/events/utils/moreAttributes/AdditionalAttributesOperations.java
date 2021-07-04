@@ -6,6 +6,8 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.events.utils.CountEventsUtils;
+import apdc.events.utils.EventParticipationMethods;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
@@ -48,7 +50,6 @@ public class AdditionalAttributesOperations {
 		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(ADITIONALS).newKey(userid);
 		 AdditionalAttributes ad=null;
 		
-		Transaction txn = datastore.newTransaction();
 		  try {
 			Entity stats=datastore.get(ctrsKey);
 			ad = new AdditionalAttributes();
@@ -58,10 +59,10 @@ public class AdditionalAttributesOperations {
 			ad.setAddress(stats.getString(MORADA));
 			ad.setMore_address(stats.getString(MORADA_COMPLEMENTAR));
 			ad.setLocality(stats.getString(LOCALIDADE));
+			ad.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
+			ad.setInterestedEvents(EventParticipationMethods.getNumberOfInterestedEvents(userid));
 		  }catch(Exception e) {
-			  print(e.getLocalizedMessage());
-		  } finally {
-			  StorageMethods.rollBack(txn);
+			  EventParticipationMethods.print("AdditionalAttributesOperations","AdditionalAttributes",e.getLocalizedMessage());
 		  }
 		  return ad;
 	}
@@ -86,7 +87,6 @@ public class AdditionalAttributesOperations {
 		  }catch(Exception e) {
 			result=Status.BAD_REQUEST;
 			print(e.getLocalizedMessage());
-		  } finally {
 			  StorageMethods.rollBack(txn);
 		  }
 		  return result;

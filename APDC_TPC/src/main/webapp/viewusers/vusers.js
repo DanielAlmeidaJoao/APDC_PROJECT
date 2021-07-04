@@ -159,11 +159,16 @@ function handleRole() {
         }
     })
 }
-
-function handleNumberOfEventsButton() {
-    let path="/rest/events/view/myevents";
-    let numberEventsBtn=document.getElementById("num_evts");
-    let dispBlock = document.getElementById("shusevnts");
+/**
+ * shows the number of events the user has posted and also loads all the events the user has posted
+ * @param {*} numberEventsBtnId 
+ * @param {*} dispBlockId 
+ * @param {*} endpoint 
+ */
+function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,endpoint) {
+    let path="/rest/events/view/"+endpoint;
+    let numberEventsBtn=document.getElementById(numberEventsBtnId);
+    let dispBlock = document.getElementById(dispBlockId);
     numberEventsBtn.onclick=()=>{
         if(dispBlock.childElementCount==0&&dispBlock.parentElement.classList.contains("usr_evts")){
             //load
@@ -172,7 +177,7 @@ function handleNumberOfEventsButton() {
                     let chld;
                     for(let x=0; x<data.length;x++){
                         //makeSolidarityAction(data[x]);
-                        chld = singleEventBlock(data[x],false);
+                        chld =  eventDivBlock(data[x],endpoint=="myevents"); //singleEventBlock(data[x],false);
                         dispBlock.appendChild(chld);
                     }
                 }
@@ -183,8 +188,14 @@ function handleNumberOfEventsButton() {
         }
         dispBlock.parentElement.classList.toggle("usr_evts");
     }
-    
 }
-handleNumberOfEventsButton();
+function eventDivBlock(eventObj,ownEvents) {
+    let where = JSON.parse(eventObj.location);
+    let str = makeShowInfoString(eventObj,where.name,ownEvents);
+    return stringToHTML(str);
+}
+handleNumberOfEventsButton("num_evts","shusevnts","myevents"); //show events made by the user
+handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested"); //show events the user has interests
+
 loadusers();
 handleRole();

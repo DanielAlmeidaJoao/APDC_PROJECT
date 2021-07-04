@@ -1,4 +1,7 @@
 package apdc.tpc.utils;
+import java.util.LinkedList;
+
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.cloud.datastore.Datastore;
@@ -10,8 +13,8 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.GoogleCloudUtils;
-import apdc.events.utils.ImageKindsUtils;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.resources.LoginManager;
 import apdc.utils.conts.Constants;
@@ -27,6 +30,9 @@ public class StorageMethods {
 	public static final String NAME_PROPERTY = "name";
 
 	public static final String EMAIL_PROP = "email";
+	
+	public static final String PROFILE_PICTURE_URL_PROP = "PROFILE_PICTURE_URL";
+
 
 
 	public static final String GBO = "GBO";
@@ -85,16 +91,69 @@ public class StorageMethods {
 
 		return person;
 	}
-	public static boolean getUser(Datastore datastore,String email) {
+	public static Entity getUser(Datastore datastore,String email) {
 		Query<Entity> query = Query.newEntityQueryBuilder()
 			    .setKind(USERS_KIND)
 			    .setFilter(CompositeFilter.and(
 			        PropertyFilter.eq(EMAIL_PROP, email))).build();
 		//person = datastore.get(userKey);
 		QueryResults<Entity> tasks = datastore.run(query);
-		return tasks.hasNext();
+		return tasks.next();
 	}
 
+	public static void updateProfilePicture(long userid,String newProfileUrl) {
+		Datastore datastore=Constants.datastore;
+		com.google.cloud.datastore.Key userKey = datastore.newKeyFactory().setKind(USERS_KIND).newKey(userid);
+		Entity e = datastore.get(userKey);
+		RegisterData data = new RegisterData();
+		data.setEmail(e.getString(EMAIL_PROP));
+		data.setName(e.getString(NAME_PROPERTY));
+		data.setPassword(e.getString(PASSWORD));
+		data.setProfilePictureUrl(newProfileUrl);
+		String [] res=e.getString(PROFILE_PICTURE_URL_PROP).split("/");
+		String oldobjectName=res[res.length-1];
+		updateUser(userKey,e,data);
+		GoogleCloudUtils.deleteObject(LoginManager.profilePictureBucketName,oldobjectName);
+	}
+	public static void updatePassword(String email,String password) {
+		Datastore datastore=Constants.datastore;
+		Entity user = getUser(datastore, email);
+		if(!user.getString(PASSWORD).equals(password)) {
+			RegisterData data = new RegisterData();
+			data.setEmail(user.getString(EMAIL_PROP));
+			data.setName(user.getString(NAME_PROPERTY));
+			data.setPassword(password);
+			data.setProfilePictureUrl(user.getString(PROFILE_PICTURE_URL_PROP));
+			updateUser(user.getKey(),user,data);
+		}
+	}
+	/**
+	 * updates name, email, password or profile picture url
+	 * @param userid
+	 * @param e
+	 */
+	private static void updateUser(com.google.cloud.datastore.Key userKey,Entity e, RegisterData data) {
+		Datastore datastore=Constants.datastore;
+		Transaction txn=null;
+		try {
+			txn = datastore.newTransaction();
+			e = Entity.newBuilder(e.getKey())
+		    		.set(EMAIL_PROP,data.getEmail())
+					.set(PASSWORD,data.getPassword())
+					.set(NAME_PROPERTY,data.getName())
+					.set(ROLE_PROP,e.getString(ROLE_PROP))
+					.set(STATE_PROP,e.getString(STATE_PROP))
+					.set(PROFILE_PICTURE_URL_PROP,data.getProfilePictureUrl())
+					.build();
+			txn.put(e);
+			txn.commit();
+		}catch(Exception ex) {
+			if(txn!=null) {
+				txn.rollback();
+			}
+			ex.printStackTrace();
+		}
+	}
 	public static long addUser(Datastore datastore, RegisterData data) {
 		Transaction txn =null;
 		long userid=0L;
@@ -110,6 +169,7 @@ public class StorageMethods {
 						.set(NAME_PROPERTY,data.getName())
 						.set(ROLE_PROP,USER)
 						.set(STATE_PROP,ENABLED)
+						.set(PROFILE_PICTURE_URL_PROP,data.getProfilePictureUrl())
 						.build();
 				txn.put(person);
 			    txn.commit();
@@ -117,8 +177,6 @@ public class StorageMethods {
 			    AdditionalAttributes ad = new AdditionalAttributes();
 			    ad.perfil=PRIVATE_VALUE;
 			    AdditionalAttributesOperations.addUserAdditionalInformation(datastore,ad,userid);
-			    //GoogleCloudUtils.saveAvatarPicture(LoginManager.profilePictureBucketName,userid+"");
-			    ImageKindsUtils.addUserProfilePicture(userid,DEFAULT_AVATAR_OBJECT_NAME);
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());
@@ -157,11 +215,18 @@ public class StorageMethods {
 	public static int removeUser(com.google.cloud.datastore.Key ctrsKey) {
 		Transaction txn = Constants.datastore.newTransaction();
 		int result=-1;
+		boolean ok=false;
 		  try {
 			  com.google.cloud.datastore.Key additionalInfo=Constants.datastore.newKeyFactory().setKind(AdditionalAttributesOperations.ADITIONALS).newKey(ctrsKey.getId());
 				txn.delete(ctrsKey,additionalInfo);
-			    txn.commit();
-			    result=1;
+				ok  = EventParticipationMethods.removeFromInterestedEvents(ctrsKey.getId(),txn);
+				
+				if(ok) {
+				    txn.commit();
+				    result=1;
+				}else {
+					txn.rollback();
+				}
 		  }catch(Exception e) {
 			LOG.severe(e.getLocalizedMessage());
 			if(txn!=null) {
@@ -175,7 +240,7 @@ public class StorageMethods {
 		Transaction txn =null;
 		String result="-1";
 		  try {
-			com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind("Users").newKey(email);
+			com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind(StorageMethods.USERS_KIND).newKey(email);
 			txn = datastore.newTransaction();
 			Entity person = txn.get(userKey);
 			if(person==null) {

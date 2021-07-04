@@ -90,7 +90,7 @@ function initAutocomplete() {
           position: place.geometry.location,
         })
       );
-
+        console.log(place);
       if (place.geometry.viewport) {
         // Only geocodes have viewport.
         bounds.union(place.geometry.viewport);
@@ -135,22 +135,65 @@ const currentPoints = [];
 function makeMarker(eventObj) {
   let where =JSON.parse(eventObj.location);
   let distDiv = document.getElementById("edist");
-  
   let marker =  new google.maps.Marker({
-      title: eventObj.name,
+      title: "Event: "+eventObj.name,
       position: new google.maps.LatLng(where.loc.lat,where.loc.lng),
       map: map
   });
   marker.id=eventObj.eventId;
   currentPoints.push(marker);
-  let contentString = makeShowInfoString(eventObj,where.name);
+  let clicked=false;
+  
+  let contentString = null;
+  let infowindow = null;
+  console.log("I AM CLICKED! "+clicked);
+  marker.addListener('click', function() {
+    console.log("MARKER CLICKED "+clicked);
+    if(clicked==false){
+      console.log(" AHAHA");
+      let path=`/rest/events/event/${marker.id}`;
+      console.log("I AM PATHH "+path);
+      fetch(path).then(response => {
+        return response.json();
+      }).then(event=>{
+        if(event){
+          clicked=true;
+          contentString = makeShowInfoString(event,where.name,false);
+          infowindow = new google.maps.InfoWindow({content: contentString,maxWidth:"800px"});
+          infowindow.open(map, marker);
+          distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+        }
+      }).catch(err=>{
+        console.log("ERROR "+err);
+      })
+    }
+    else{
+      infowindow.open(map, marker);
+      distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+    }
+  });
+}
+
+function makeMarker2(eventObj) {
+  let where =JSON.parse(eventObj.location);
+  let distDiv = document.getElementById("edist");
+  
+  let marker =  new google.maps.Marker({
+      title: "Event: "+eventObj.name,
+      position: new google.maps.LatLng(where.loc.lat,where.loc.lng),
+      map: map
+  });
+  marker.id=eventObj.eventId;
+  currentPoints.push(marker);
+  let clicked=false;
+  
+  let contentString = makeShowInfoString(eventObj,where.name,false);
   let infowindow = new google.maps.InfoWindow({content: contentString});
   marker.addListener('click', function() {
     infowindow.open(map, marker);
     distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
   });
 }
-
 /**
  * if(notrunned){
           notrunned=false;

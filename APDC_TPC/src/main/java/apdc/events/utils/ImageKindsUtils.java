@@ -84,7 +84,4 @@ public class ImageKindsUtils {
 		  }
 		  return null;
 	}
-	public static String addUserProfilePicture(long userid, String url) {
-		return addObjectName(userid,USERS_PROFILE_PICTURES_KIND,url);
-	}
 }

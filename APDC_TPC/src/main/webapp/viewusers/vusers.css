@@ -42,3 +42,10 @@
 .num_evts:hover{
     cursor: pointer;
 }
+.usr_evtsnr{
+    display: flex;
+    justify-content: space-between;
+}
+.usr_evtsnr div{
+    margin: 0px 5px;
+}

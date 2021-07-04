@@ -98,26 +98,6 @@ function registerUserForm() {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function handleLogin() {
     let formS=document.getElementById("login_form");
     formS.addEventListener('submit', function(e) {
@@ -153,5 +133,19 @@ addEventListener('beforeunload', function (event) {
 	return undefined;
 });
 
+function showLoginForm() {
+    let hideClassName="hidregfrm";
+    let openAccountBtn = document.getElementById("open_acc");
+    let goToLoginBtn=document.getElementById("gtlogin");
+    openAccountBtn.onclick=()=>{
+        openAccountBtn.parentElement.classList.toggle(hideClassName);
+        document.getElementById("myForm").classList.toggle(hideClassName);
+    }
+    goToLoginBtn.onclick=()=>{
+        openAccountBtn.click();
+    }
+}
+
 handleLogin();
 registerUserForm();
+showLoginForm();

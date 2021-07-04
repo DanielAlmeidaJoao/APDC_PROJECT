@@ -1,13 +1,20 @@
-package apdc.events.utils;
+package apdc.events.utils.jsonclasses;
 
 public class EventLocation {
 
-	String location;
+	String location,name;
 	long eventId;
 	public EventLocation(){}
-	public EventLocation(String location, long eventid) {
+	public EventLocation(String location, long eventid, String name) {
 		this.location=location;
 		this.eventId=eventid;
+		this.name=name;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 	public String getLocation() {
 		return location;

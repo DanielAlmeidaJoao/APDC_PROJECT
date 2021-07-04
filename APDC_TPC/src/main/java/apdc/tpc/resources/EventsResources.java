@@ -1,11 +1,9 @@
 package apdc.tpc.resources;
 
-import java.io.IOException;
+
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
@@ -22,19 +20,17 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.IOUtils;
-
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.repackaged.com.google.datastore.v1.PropertyFilter;
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Transaction;
 
-import apdc.events.utils.EventData;
-import apdc.events.utils.EventData2;
 import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.Pair;
+import apdc.events.utils.jsonclasses.EventData2;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -97,7 +93,7 @@ public class EventsResources {
 			System.out.println("TOKEN "+token);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
-			Pair<String,String> pair = EventsDatabaseManagement.getEvents(value,userid,false);
+			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvent(value,userid);
 			NewCookie nk = HandleTokens.makeCookie(Constants.GET_EVENT_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {
@@ -106,13 +102,13 @@ public class EventsResources {
 		return resp;
 	}
 	/**
-	 * loads upcoming events 
+	 * loads a single event
 	 * @param value offset value stored in the specified cookie
 	 * @param token session token stored in the specified token
 	 * @return 200 if the operation is success
 	 */
 	@GET
-	@Path("/view/{eventId}")
+	@Path("/event/{eventId}")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doGetEvent(@PathParam("eventId") long eventId, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
@@ -140,11 +136,7 @@ public class EventsResources {
 	public Response doGetFinishedEvents(@CookieParam(Constants.FINISHED_EVENTS_CURSOR_CK) String cursor, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
 		Response resp;
 		try {
-			System.out.println("OLAADSDSA ");
-			Constants.LOG.severe(token+" token");
-			Constants.LOG.severe("GOING TO LOAD FINISHED EVENTS ----------------------------------------------------------->");
 			long userid = HandleTokens.validateToken(token.getValue());
-			Constants.LOG.severe(userid+"");
 			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true);
 			NewCookie nk = HandleTokens.makeCookie(Constants.FINISHED_EVENTS_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
@@ -180,6 +172,30 @@ public class EventsResources {
 		return resp;
 	}
 	/**
+	 * loads all registered events 
+	 * @param value offset value stored in the specified cookie
+	 * @param token session token stored in the specified token
+	 * @return 200 if the operation is success
+	 */
+	@GET
+	@Path("/view/interested")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response loggedUserInterestedEvents(@CookieParam(Constants.USER_INTERESTED_EVENTS_CURSOR_CK) String cursor, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+		Response resp;
+		Pair<String,String> result =null;
+		try {
+			long userid = HandleTokens.validateToken(token.getValue());
+			result = EventsDatabaseManagement.getLoggedUserInterestedEvents(cursor,userid);
+			NewCookie nk = HandleTokens.makeCookie(Constants.USER_INTERESTED_EVENTS_CURSOR_CK,result.getV2(),token.getDomain());
+			resp = Response.ok().cookie(nk).entity(result.getV1()).build();
+		}catch(Exception e) {
+			Constants.LOG.severe(e.getLocalizedMessage());
+			resp = Response.status(Status.FORBIDDEN).build();
+		}
+		return resp;
+	}
+	/**
 	 * deletes a particular event 
 	 * @param eventId the event to be deleted
 	 * @param token the logged user token to verify if the user is has permission to do so
@@ -192,7 +208,9 @@ public class EventsResources {
 		LOG.severe("GOING TO REMOVE THIS EVENT "+eventId);
 		try {
 			long userid = HandleTokens.validateToken(token);
+			System.out.println("USERID "+userid);
 			resp = EventsDatabaseManagement.deleteEvent(eventId,userid);
+			System.out.println("OOKKK "+eventId);
 		}catch(Exception e) {
 			resp = Response.status(Status.FORBIDDEN).build();
 		}
@@ -247,19 +265,5 @@ public class EventsResources {
 			status=Status.FORBIDDEN;
 		}
 		return Response.status(status).build();
-	}
-	/**
-	 * deletes a particular event 
-	 * @param eventId the event to be deleted
-	 * @param token the logged user token to verify if the user is has permission to do so
-	 * @return
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_OCTET_STREAM /*+";image/*"*/)
-	@Path("/m/image")
-	public Response downloadImage() {
-		System.out.println("WAS CALLED AND IS OKKK");
-		return Response.ok(GoogleCloudUtils.downloadObject(bucketName,"5755839738544128")).build();
-		//return Response.ok().build();
 	}
 }

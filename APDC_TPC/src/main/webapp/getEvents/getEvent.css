@@ -15,13 +15,18 @@ display: flex;
 
 .evt_disp{
     display: flex;
+    align-items: center;
     margin: 10px 10px;
+    border-bottom: 1px solid rgba(119, 115, 115, 0.219);
 }
 .one_ev{
     width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 .blk_desc{
-    width: 600px
+    width: 400px;
 }
 .dlfx{
     display: flex;
@@ -61,14 +66,14 @@ display: flex;
     justify-self: flex-end;
 }
 .evnts_pcs{
-    width: 500px;
-    max-height: 500px;
+    width: 300px;
+    height: 300px;
     /*overflow-y: scroll;*/
 }
 .evnts_pcs img{
-    width: 99.9%;
+    width: 100%;
     height: auto;
-    max-height: 450px;
+    max-height: inherit;
 }
 .vlt{
     display: flex;
@@ -89,4 +94,53 @@ display: flex;
 }
 .txtDesc{
     word-break: break-word;
+}
+
+/* COMMENTS STYLING */
+
+.cmt_mndv{
+    width:80%;
+}
+.pstcmtxta{
+    width: 80%;
+    margin: 0px;
+    border: none;
+    border-bottom: 1px solid #dfdada;
+    font-size: 18px;
+    padding: 10px 10px;
+    background-color: rgba(218, 214, 214, 0.123);
+    border-radius: 5px;
+}
+.pstcmtxta:focus-visible{
+    outline: none;
+    border-bottom: 2px solid #111;
+}
+.allcmts{
+    padding: 10px 10px;
+}
+.snglsmt{
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    font-size: 20px;
+    padding:10px 10px;
+    margin: 10px 10px;
+}
+.cmtpfimg{
+    padding: 0px 10px;
+}
+.cmtername{
+    margin-bottom: 10px;
+}
+.cmtdate{
+    color: rgb(197, 196, 196);
+}
+.hidecmts{
+    display: none;
+}
+.cmtauthnm{
+    font-weight: bold;
+}
+.hidermvcmtb{
+    display: none;
 }

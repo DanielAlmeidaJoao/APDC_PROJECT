@@ -16,25 +16,27 @@
     <script src="../createEvents/search.js"></script>
 </head>
 <body>
-    <nav class="nav_logged">
-        <div><img class="nav_img_prfl" id="nav_profile_pic" src="../imgs/Profile_avatar_placeholder_large.png" alt="prifile-pic"> </div>
-        <span id="name_sp" class="nv_el adt"></span>
-        <span id="email_sp" class="nv_el adt"></span>
-        <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
-        <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
+    <nav class="nav_bar0">
+        <div class="nav_logged">
+            <div><img class="nav_img_prfl" id="nav_profile_pic" src="../imgs/Profile_avatar_placeholder_large.png" alt="prifile-pic"> </div>
+            <span id="name_sp" class="nv_el adt"></span>
+            <span id="email_sp" class="nv_el adt"></span>
+            <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
+            <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
+        </div>
+        <div class="nav_logged">
+            <button id="showInfo" class="nvb">MY INFOS</button>
+            <button id="superu" style="display: none;" class="nvb">SUPER USER</button>
+            <!--
+                <button id="disable_user">DISABLE USERS</button>
+                <button id="change_pwd">CHANGE PASSWORD</button>
+            -->
+            <button id="create_events_btn" class="nvb">EVENTS</button>
+            <button id="sh_fnshd_evts" class="nvb">FINISHED EVENTS</button>
+        </div>
     </nav>
-    <nav class="nav_logged">
-        <button id="showInfo" class="nvb">MY INFOS</button>
-        <button id="superu" style="display: none;" class="nvb">SUPER USER</button>
-        <!--
-            <button id="disable_user">DISABLE USERS</button>
-            <button id="change_pwd">CHANGE PASSWORD</button>
-        -->
-        <button id="create_events_btn" class="nvb">EVENTS</button>
-        <button id="sh_fnshd_evts" class="nvb">FINISHED EVENTS</button>
-    </nav>
+
     <div class="main_body">
-        <h1>WELCOME TO SAVING LIFES</h1>
         <div class="main_body_son2">
             <div id="map_div" class="mpd hdmap">
                 <input id="pac-input" class="controls" type="text"      placeholder="Search Box" />
@@ -50,7 +52,6 @@
             </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
             <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
-                <div class="sec_name">ADDITIONAL ATTRIBUTES</div>
                 <div class="user_plc_p user_plc">
                     <div class="user_plc">
                         <form id="frst_infos">
@@ -89,12 +90,25 @@
                         </div>
                     </div>
                     <div class="usr_more_info">
-                        <div id="num_evts" class="num_evts">NUMBER OF EVENTS:<span id="evt_counter">0</span> </div>
+                        <div class="usr_evtsnr">
+                            <div id="num_evts" class="num_evts">EVENTS CREATED:<span id="evt_counter">0</span> </div>
+                            <div id="intrdevts" class="num_evts">EVENTS INTERESTED:<span id="evtintr_counter">0</span></div>
+                        </div>
+                        
                         <div id="usrs_evts_disp" class="view_user dlfx ve usr_evts">
+                            <div class="sec_name">EVENTS CREATED</div>
                             <div class="show_events" id="shusevnts">
         
                             </div>
                             <button id="load_mr_user_evnts">LOAD MORE</button>
+                        </div>
+
+                        <div id="usrs_evts_itrd" class="view_user dlfx ve usr_evts">
+                            <div class="sec_name">EVENTS INTERESTED</div>
+                            <div class="show_events" id="shusevntsitrd">
+        
+                            </div>
+                            <button id="load_mr_itrstd">LOAD MORE</button>
                         </div>
                     </div>
                 </div>
@@ -209,5 +223,6 @@
     <script src="../getEvents/editEvent.js"></script>
     <script src="../viewusers/vusers.js"></script>
     <script src="../userarea/userarea.js"></script>
+    <script src="../getEvents/eventComments.js"></script>
 </body>
 </html>

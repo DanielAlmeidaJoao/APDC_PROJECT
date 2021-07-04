@@ -18,7 +18,9 @@ function createEventFormIsFree(){
  * @param {Object} eventObj 
  * @returns void
  */
-function editEvent(eventObj){
+function editEvent(btn){
+    let eventObj =  JSON.parse(btn.getAttribute("data-obj"));
+    btn.removeAttribute("data-obj");
     if(!createEventFormIsFree()){
         alert("There are unsaved events!");
         return;

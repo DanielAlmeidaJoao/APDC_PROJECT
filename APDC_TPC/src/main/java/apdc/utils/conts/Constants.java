@@ -12,11 +12,16 @@ public interface Constants {
 	public static final int ZERO = 0;
 	
 	public static final String COOKIE_TOKEN ="token";
+	
+	public static final String VERIFICATION_CODE_COOKIE ="vrfcck";
+
 	public static final String GET_EVENT_CURSOR_CK ="crsck";
 	public static final String ALL_USERS_CURSOR ="kjdsalj";
 
 	public static final String FINISHED_EVENTS_CURSOR_CK ="fnesck";
 	public static final String USER_EVENTS_CURSOR_CK ="userevntscrs";
+	public static final String USER_INTERESTED_EVENTS_CURSOR_CK ="useritrstdscrs";
+
 
 
 	public static final String EVENT_ID = "eventId";

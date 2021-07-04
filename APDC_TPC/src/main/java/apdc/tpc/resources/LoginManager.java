@@ -1,7 +1,7 @@
 package apdc.tpc.resources;
 
 import java.util.Iterator;
-
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,9 +29,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
 
-import apdc.events.utils.CountEventsUtils;
 import apdc.events.utils.GoogleCloudUtils;
-import apdc.events.utils.ImageKindsUtils;
+import apdc.events.utils.jsonclasses.ChangePasswordArgs;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.LoggedObject;
@@ -48,6 +47,7 @@ public class LoginManager {
 	@Context private HttpServletRequest request;
 	
 	private static final Logger LOG = Logger.getLogger(LoginManager.class.getName());
+	
 	public static final String profilePictureBucketName="profile_pics46335560256500";
 
 
@@ -78,6 +78,7 @@ public class LoginManager {
 	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response saveProfilePicture(@CookieParam(Constants.COOKIE_TOKEN) String value){
+		
 		Response response;
 		try {
 			long userid = HandleTokens.validateToken(value);			
@@ -85,10 +86,8 @@ public class LoginManager {
 				String objectName=userid+""+System.currentTimeMillis();
 				Part p = request.getPart("profilePicture");
 				GoogleCloudUtils.uploadObject(profilePictureBucketName,objectName,p.getInputStream());
-				String oldobjectName = ImageKindsUtils.addUserProfilePicture(userid,objectName);
-				GoogleCloudUtils.deleteObject(profilePictureBucketName,oldobjectName);
-				System.out.println("IMAGE SAVED WITH SUCCESS!");
 				String url=GoogleCloudUtils.publicURL(profilePictureBucketName,objectName); //url
+				StorageMethods.updateProfilePicture(userid,url);
 				response = Response.ok(Constants.g.toJson(url)).build();
 			}catch(Exception e) {
 				e.printStackTrace();
@@ -99,6 +98,7 @@ public class LoginManager {
 		}
 		return response;
 	}
+	
 	private boolean invalidPassword(String password) {
 		return password.length()<Constants.PASSWORD_MINLENGTH||password.length()>Constants.PASSWORD_MAXLENGTH;
 	}
@@ -112,11 +112,12 @@ public class LoginManager {
 		if(invalidPassword(data.getPassword())) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-		boolean registered = StorageMethods.getUser(Constants.datastore,data.getEmail());
+		boolean registered = StorageMethods.getUser(Constants.datastore,data.getEmail())!=null;
 		if(registered) {
 			return Response.status(Status.CONFLICT).build();
 		}
 		data.setPassword(hashPassword(data.getPassword()));
+		data.setProfilePictureUrl("/imgs/Profile_avatar_placeholder_large.png");
 		long userid = StorageMethods.addUser(Constants.datastore,data);
 		if(userid>Constants.ZERO){
 			String token=HandleTokens.generateToken(userid);
@@ -128,7 +129,48 @@ public class LoginManager {
 		}
 		return res;
 	}
-	
+	@GET
+	@Path("/vcd/{email}")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response getVerificationCode(@PathParam("email") String email) {
+		LOG.severe("GOING TO SEND VERIFICATION CODE "+email);
+		Response res=null;
+		if(StorageMethods.getUser(Constants.datastore,email)!=null) {
+			Random rand = new Random();
+			int number = rand.nextInt(999999);			
+			String vCode = String.format("%07d",number);
+			System.out.println(vCode);
+			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,DigestUtils.sha512Hex(vCode),null,4*60);
+			res = Response.ok().cookie(k).build();
+		}else {
+			res = Response.status(Status.NOT_FOUND).build();
+		}		
+		return res;
+	}
+	@POST
+	@Path("/chgpwd")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response getVerificationCode(@CookieParam(Constants.VERIFICATION_CODE_COOKIE) String value, ChangePasswordArgs args) {
+		Response res=null;
+		try {
+			if(DigestUtils.sha512Hex(args.getVcode()).equals(value)) {
+				StorageMethods.updatePassword(args.getEmail(),hashPassword(args.getPassword()));
+				NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);
+				res = Response.ok().cookie(k).build();
+			}else {
+				res = Response.status(Status.NOT_ACCEPTABLE).build();
+			}
+		}catch(Exception e) {
+			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);
+			res = Response.status(Status.BAD_REQUEST).cookie(k).build();
+			e.printStackTrace();
+		}
+		
+		
+		return res;
+	}
 	@POST
 	@Path("/op2")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -151,8 +193,7 @@ public class LoginManager {
 				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString(StorageMethods.NAME_PROPERTY));
-				String objectName=ImageKindsUtils.getObjectName(userid,ImageKindsUtils.USERS_PROFILE_PICTURES_KIND);
-				lo.setProfilePictureURL(GoogleCloudUtils.publicURL(profilePictureBucketName,objectName));
+				lo.setProfilePictureURL(user.getString(StorageMethods.PROFILE_PICTURE_URL_PROP));
 				response=Response.ok().cookie(k).entity(g.toJson(lo)).build();
 			}
 		}catch(Exception e) {
@@ -190,7 +231,6 @@ public class LoginManager {
 			if(obj==null) {
 				Response.status(Status.NOT_FOUND).build();
 			}else {
-				obj.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
 				res=Response.ok().entity(Constants.g.toJson(obj)).build();
 			}
 		}catch(Exception e) {

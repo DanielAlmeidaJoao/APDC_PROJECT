@@ -137,7 +137,7 @@ function uploadData(datas) {
                 eventBlock.parentElement.replaceChild(singleEventBlock(data,false),eventBlock);
             }
             clearMarkers();
-            makeMarker(data);
+            makeMarker2(data);
         }
     })
     .catch((error) => {

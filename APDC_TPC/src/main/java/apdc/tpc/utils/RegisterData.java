@@ -2,7 +2,13 @@ package apdc.tpc.utils;
 
 public class RegisterData {
 
-	private String name, password, email;
+	private String name, password, email, profilePictureUrl;
+	public String getProfilePictureUrl() {
+		return profilePictureUrl;
+	}
+	public void setProfilePictureUrl(String profilePictureUrl) {
+		this.profilePictureUrl = profilePictureUrl;
+	}
 	public RegisterData() {
 	}
 	public String getName() {

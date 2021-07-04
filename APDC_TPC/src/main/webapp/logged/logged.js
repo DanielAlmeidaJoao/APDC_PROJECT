@@ -1,5 +1,6 @@
 let loggedUserEMail;
 let profilePictureURL;
+let loggedUserName;
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -29,6 +30,7 @@ function updateNavAttribues() {
     let nameSpan = document.getElementById("name_sp");
     let emailSpan = document.getElementById("email_sp");
     nameSpan.textContent=localStorage.getItem("name");
+    loggedUserName=localStorage.getItem("name");
     profilePictureURL = localStorage.getItem("profilePictureURL");
     document.getElementById("nav_profile_pic").setAttribute("src",profilePictureURL);
     emailSpan.textContent=loggedUserEMail
@@ -47,6 +49,7 @@ function fillAdditionalAttributes(additionalAttributes) {
     attributes[4].value=additionalAttributes.more_address;
     attributes[5].value=additionalAttributes.locality;
     document.getElementById("evt_counter").textContent=additionalAttributes.events;
+    document.getElementById("evtintr_counter").textContent=additionalAttributes.interestedEvents;
 }
 /**
  * make form inputs readonly if value is true else editable 

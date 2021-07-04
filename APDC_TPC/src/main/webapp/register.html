@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WELCOM TO WELCOME</title>
+    <title>ClosingTheGape</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,29 +12,31 @@
     <nav class="nav_bar"><span class="app_name">Closing The Gap</span> </nav>
     <div class="main_section">
         <div class="cover_img">
+            <span class="app_motto">The Gap is Closable</span>
             <img src="./imgs/app_images/logoAtivo 1xxxhdpi.png">
         </div>
         <div class="main_section_son2">
 
-            <form id="login_form">
+            <form id="login_form" class="login_form">
+            <!--
                 <span class="login_txt">Login</span>
-                <label for="login_email">Email</label>
+            -->    
                 <input type="email" id="login_email" required placeholder="email">
-                <label  for="login_password">Password</label>
                 <input type="password" id="login_password" required placeholder="password">
-                <button class="login_btn" type="submit">LOGIN</button>
+                <input class="login_btn" type="submit" value="Login">
+                <a class="forgot_pwd_a" href="./changep/changePassword.html">forgot password</a>
+                <span class="sprt1"></span>
+                <div class="login_btn opnacc0" id="open_acc">Open an account</div>
             </form>
             <!--<form id="myForm" class="reg_form">-->
-            <form id="myForm" class="reg_form">
-                <label for="inp">Name</label>
-                <input type="text" id="inp" required>
-                <label for="inp2">Email</label>
-                <input type="email" id="inp2" required>
-                <label  for="inp3">Password</label>
-                <input type="password" minlength="6" maxlength="12" id="inp3" required>
-                <label for="inp4">Password Confirmation</label>
-                <input type="password"  id="inp4" required>
+            <form id="myForm" class="login_form reg_form1 hidregfrm">
+                <span class="reg_txt">Registering</span>
+                <input type="text" id="inp" required placeholder="My name is">
+                <input type="email" id="inp2" required placeholder="Email">
+                <input type="password" minlength="6" maxlength="12" id="inp3" required placeholder="password">
+                <input type="password"  id="inp4" required placeholder="password confirmation">
                 <button type="submit" id="sbm">REGISTER</button>
+                <div class="login_btn log09" id="gtlogin">Go To Login</div>
             </form>
         </div>
     </div>

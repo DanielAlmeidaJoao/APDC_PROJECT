@@ -63,6 +63,12 @@ public class HandleTokens {
 
 	}
 	
+	public static NewCookie makeCookie(String name,String value,String domain, int expirationTime) {
+		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
+		Cookie ck = new Cookie(name, value, "/", domain);
+		NewCookie nk = new NewCookie(ck,null,expirationTime,null,true,true);
+		return nk;
+	}
 	public static NewCookie makeCookie(String name,String value,String domain) {
 		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
 		Cookie ck = new Cookie(name, value, "/", domain);

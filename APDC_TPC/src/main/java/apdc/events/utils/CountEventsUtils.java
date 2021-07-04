@@ -13,8 +13,6 @@ public class CountEventsUtils {
 	
 	public static void makeUserEventCounterKind(long userid, Datastore datastore,boolean inc,Transaction txn) {
 		LOG.info("GOING TO UPDATE THE NUMBER OF EVENTS USER "+userid+" HAS.");
-		
-
 		com.google.cloud.datastore.Key userKey =datastore.newKeyFactory().setKind(COUNT_EVENTS_PER_USER_KIND).newKey(userid);
 		long newValue;
 	
