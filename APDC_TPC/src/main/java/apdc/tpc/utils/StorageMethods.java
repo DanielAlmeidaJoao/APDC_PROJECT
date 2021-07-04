@@ -92,13 +92,19 @@ public class StorageMethods {
 		return person;
 	}
 	public static Entity getUser(Datastore datastore,String email) {
-		Query<Entity> query = Query.newEntityQueryBuilder()
-			    .setKind(USERS_KIND)
-			    .setFilter(CompositeFilter.and(
-			        PropertyFilter.eq(EMAIL_PROP, email))).build();
-		//person = datastore.get(userKey);
-		QueryResults<Entity> tasks = datastore.run(query);
-		return tasks.next();
+		Entity user=null;
+		try {
+			Query<Entity> query = Query.newEntityQueryBuilder()
+				    .setKind(USERS_KIND)
+				    .setFilter(PropertyFilter.eq(EMAIL_PROP,email)).build();
+			//person = datastore.get(userKey);
+			QueryResults<Entity> tasks = datastore.run(query);
+			user = tasks.next();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return user;
 	}
 
 	public static void updateProfilePicture(long userid,String newProfileUrl) {
@@ -159,7 +165,7 @@ public class StorageMethods {
 		long userid=0L;
 		  try {
 			KeyFactory kf = datastore.newKeyFactory().setKind(USERS_KIND);
-			com.google.cloud.datastore.Key userKey =datastore.allocateId(kf.newKey());
+			com.google.cloud.datastore.Key userKey = datastore.allocateId(kf.newKey());
 			Entity person = datastore.get(userKey);
 			if(person==null) {
 				txn = datastore.newTransaction();
