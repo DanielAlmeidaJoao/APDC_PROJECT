@@ -31,6 +31,7 @@ import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.Pair;
 import apdc.events.utils.jsonclasses.EventData2;
+import apdc.events.utils.jsonclasses.ReportEventArgs;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -60,20 +61,26 @@ public class EventsResources {
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		Response response;
 		Datastore ds = Constants.datastore;
-		/*
-		try {
-			System.out.println("HELLO BROTHERS");
-			Tester.downloadObject(bucketName,"firstObject");
-			System.out.println("BUCKET CREATED!");
-		}catch(Exception e) {
-			System.out.println(e.getLocalizedMessage());
-		}*/
-		
 		try {
 			long userid = HandleTokens.validateToken(value);			
 			response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);	
 		}catch(Exception e) {
 			response = Response.status(Status.UNAUTHORIZED).entity(Constants.g.toJson(e.getLocalizedMessage())).build();
+		}
+		return response;
+	}
+	@POST
+	@Path("/report")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response reportEvent(@CookieParam(Constants.COOKIE_TOKEN) String value, ReportEventArgs args){
+		Response response;
+		LOG.severe("GOING TO ADD AN EVENT! "+args.getReportText()+" "+args.getEventId());
+		try {
+			long userid = HandleTokens.validateToken(value);			
+			response = EventsDatabaseManagement.addReport(args,userid);	
+		}catch(Exception e) {
+			response = Response.status(Status.BAD_REQUEST).build();
 		}
 		return response;
 	}

@@ -16,6 +16,8 @@ import com.google.cloud.datastore.Transaction;
 import apdc.events.utils.jsonclasses.EventData;
 import apdc.events.utils.jsonclasses.EventData2;
 import apdc.events.utils.jsonclasses.EventLocation;
+import apdc.events.utils.jsonclasses.ReportEventArgs;
+import apdc.events.utils.jsonclasses.ReportProperty;
 import apdc.tpc.resources.EventsResources;
 import apdc.tpc.resources.LoginManager;
 import apdc.tpc.utils.StorageMethods;
@@ -38,7 +40,9 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.IOUtils;
 
 import com.google.appengine.api.datastore.Query.CompositeFilter;
+import com.google.appengine.api.users.User;
 import com.google.cloud.Timestamp;
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
@@ -50,6 +54,10 @@ public class EventsDatabaseManagement {
 	private static final String DESCRIPTION="DESCRIPTION";
 	private static final String GOAL="GOAL";
 	private static final String LOCATION="LOCATION";
+	private static final String REPORT_TEXTS_PROPERTY="REPORT_TEXTS";
+	private static final String REPORTED_PROP="REPORTED";
+
+
 	private static final String MEETING_PLACE="MEETING_PLACE";
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
@@ -90,6 +98,52 @@ public class EventsDatabaseManagement {
 		EventData2 event = getEvent(ev,userid, false);
 		return event;
 	}
+	
+	public static Response addReport(ReportEventArgs report, long userid) {
+		Response result=null;
+		Datastore datastore = Constants.datastore;
+		try {
+			com.google.cloud.datastore.Key eventKey = datastore.newKeyFactory().setKind(EVENTS).newKey(report.getEventId());
+			Transaction txn = datastore.newTransaction();
+			Entity event = txn.get(eventKey);
+			if(event!=null) {
+				if(event.getLong(EVENT_OWNER)==userid) {
+					return Response.status(Status.UNAUTHORIZED).build();
+				}
+				/*
+				Entity user = StorageMethods.getUser(datastore, userid);
+				if(!user.getString(StorageMethods.ROLE_PROP).equals(StorageMethods.SU)) {
+					return Response.status(Status.CONFLICT).build();
+				}*/
+				ReportProperty rep = Constants.g.fromJson(event.getString(REPORT_TEXTS_PROPERTY),ReportProperty.class);
+				rep.addReport(report.getReportText());
+				Entity.Builder  builder =Entity.newBuilder(eventKey)
+						.set(NAME,event.getString(NAME))
+						.set(DESCRIPTION,event.getString(DESCRIPTION))
+						.set(GOAL,event.getString(GOAL))
+						.set(LOCATION,event.getString(LOCATION))
+						.set(START_DATE,event.getTimestamp(START_DATE))
+						.set(END_DATE,event.getTimestamp(END_DATE))
+						.set(VOLUNTEERS,event.getLong(VOLUNTEERS))
+						.set(EVENT_OWNER,event.getLong(EVENT_OWNER))
+						.set(Constants.EVENT_PICS_FORMDATA_KEY,event.getString(Constants.EVENT_PICS_FORMDATA_KEY))
+						.set(REPORTED_PROP,true)
+						.set(REPORT_TEXTS_PROPERTY,noIndexProperties(Constants.g.toJson(rep)));
+						//.set(REPORT_PROPERTY,event.getString(REPORT_PROPERTY));
+				
+				event = builder.build();
+				event = txn.put(event);
+				txn.commit();
+				result=Response.ok().build();
+			}else {
+				 result=Response.status(Status.NOT_FOUND).build();
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			result=Response.status(Status.BAD_REQUEST).build();
+		}
+		return result;
+	}
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -114,18 +168,23 @@ public class EventsDatabaseManagement {
 		Response result;
 		Transaction txn=null;
 		  try {
+			txn = datastore.newTransaction();
+			Entity ev;
 			  com.google.cloud.datastore.Key eventKey;
 			  KeyFactory kf = datastore.newKeyFactory()
 						.setKind(EVENTS);
 			  if(eventId>Constants.ZERO) {
 				  eventKey = kf.newKey(eventId);
+				  ev = txn.get(eventKey);
+				  if(ev==null) {
+					return Response.status(Status.NOT_FOUND).build();
+				  }
 			  }else {
 				  eventKey=datastore.allocateId(kf.newKey());
 			  }		  
 		  //com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
 					//.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
-			txn = datastore.newTransaction();
-			Entity ev;
+			
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
@@ -136,6 +195,17 @@ public class EventsDatabaseManagement {
 					.set(END_DATE,makeTimeStamp(et.getEndDate(),et.getEndTime()))
 					.set(VOLUNTEERS,et.getVolunteers())
 					.set(EVENT_OWNER,userid);
+			
+			//handles the reports
+			if(eventId<=Constants.ZERO) {
+				builder.set(REPORTED_PROP,false);
+				builder.set(REPORT_TEXTS_PROPERTY,noIndexProperties(Constants.g.toJson(new ReportProperty())));
+			}else {
+				Entity event = datastore.get(eventKey);
+				builder.set(REPORTED_PROP,event.getBoolean(REPORTED_PROP));
+				builder.set(REPORT_TEXTS_PROPERTY,noIndexProperties(event.getString(REPORT_TEXTS_PROPERTY)));
+			}
+					
 			try {
 				Part p = httpRequest.getPart("img_cover");
 				if(p!=null) {

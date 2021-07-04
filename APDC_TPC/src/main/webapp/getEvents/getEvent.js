@@ -54,7 +54,7 @@ function loadEvents(path,finished,divBlock) {
         for(let x=0; x<data.length;x++){
             try {
                 if(finished){
-                    let chld =  eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                    let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
                     divBlock.appendChild(chld);
                 }else{
                     makeMarker(data[x]);
@@ -405,7 +405,37 @@ function singleEventBlock(eventObj,finished){
     return frag;    
 }
 */
+function reportEvent(btn){
+    btn.parentElement.children[1].classList.toggle("hiderptdv");
+}
 
+function submitReport(btn,eventid){
+    let args = JSON.stringify({
+        eventId:eventid,
+        reportText:btn.parentElement.children[0].value
+    });
+    let pathEndpoint= "/rest/events/report";
+    fetch(pathEndpoint,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:args
+    }).then(response =>{
+        if(response.status==200){
+            btn.parentElement.children[0].value="";
+            alert("Report Submitted!");
+        }else if(response.status==401){
+            alert("Unauthorized!");
+        }else if(response.status==404){
+            alert("Not Found!");
+        }else{
+            alert("Unexpected Error!");
+        }
+    }).catch(err=>{
+        console.log(err);
+    });
+}
 //NOTE: THIS FUNCTION MUST CALL removeEventButton(eventId,parent,eventObj,finished) TO REMOVE AND EDIT AN EVENT
 function makeShowInfoString(eventObj,where,ownEvents) {
     let goingText="";
@@ -418,7 +448,13 @@ function makeShowInfoString(eventObj,where,ownEvents) {
     let reportBtn="";
     if(!eventObj.owner){
         funcString=`<button class='vlts prt' onclick=participateIntheEvent(this,${eventObj.eventId});>${goingText}</button>`;
-        reportBtn=`<button class='rptbtn'>REPORT</button>`;
+        reportBtn=`<div>
+                        <button class='rptbtn' onclick=reportEvent(this);>REPORT</button>
+                        <div class="rptdv hiderptdv">
+                            <textarea placeholder="I am reporting because"></textarea>
+                            <button onclick=submitReport(this,${eventObj.eventId});>Submit</button>
+                        </div>
+                    </div>`;
     }else{
         funcString=`<button class='vlts prt' >${GOING_TEXT}</button>`;
     }

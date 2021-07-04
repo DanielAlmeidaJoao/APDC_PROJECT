@@ -24,6 +24,7 @@ display: flex;
     display: flex;
     align-items: center;
     flex-direction: column;
+    border: 2px solid green;
 }
 .blk_desc{
     width: 400px;
@@ -140,6 +141,9 @@ display: flex;
 }
 .cmtauthnm{
     font-weight: bold;
+}
+.hiderptdv{
+    display: none;
 }
 .hidermvcmtb{
     display: none;
