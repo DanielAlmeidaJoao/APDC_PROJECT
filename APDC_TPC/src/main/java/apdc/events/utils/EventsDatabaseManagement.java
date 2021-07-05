@@ -98,7 +98,6 @@ public class EventsDatabaseManagement {
 		EventData2 event = getEvent(ev,userid, false);
 		return event;
 	}
-	
 	public static Response addReport(ReportEventArgs report, long userid) {
 		Response result=null;
 		Datastore datastore = Constants.datastore;
@@ -292,14 +291,13 @@ public class EventsDatabaseManagement {
 	 */
 	public static Pair<String,String> getUpcomingEvent(String startCursor, long userid) {
 		try {
-			System.out.println("kkkkkkkkkkkkkkkkkkkkkkk ");
-
 			Cursor startcursor=null;
 			Query<ProjectionEntity> query=null;
-			Filter filter= PropertyFilter.gt(END_DATE,Timestamp.now());
-					
+			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
+			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
+
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
-				    .setKind(EVENTS).setFilter(filter)
+				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter.and(filter,unreportedEventFilter))
 				    .setProjection(NAME,LOCATION)
 				    .setLimit(PAGESIGE);
 			if (startCursor!=null) {

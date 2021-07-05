@@ -425,6 +425,7 @@ function submitReport(btn,eventid){
         if(response.status==200){
             btn.parentElement.children[0].value="";
             alert("Report Submitted!");
+            deleteMarker(eventid);
         }else if(response.status==401){
             alert("Unauthorized!");
         }else if(response.status==404){

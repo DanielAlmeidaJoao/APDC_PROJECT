@@ -29,6 +29,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
 
+import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.jsonclasses.ChangePasswordArgs;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
