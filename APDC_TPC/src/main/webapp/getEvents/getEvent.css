@@ -127,6 +127,14 @@ display: flex;
     padding:10px 10px;
     margin: 10px 10px;
 }
+.rpt_txt{
+    margin: 10px 10px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: aliceblue;
+    padding: 10px 10px;
+    border-radius: 5px;
+}
 .cmtpfimg{
     padding: 0px 10px;
 }

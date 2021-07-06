@@ -170,9 +170,10 @@
                             <input class="crt_inp" name="endTime" type="time" id="endTime" required>
                         </div>
                         <div class="gmap" id="gmap">
-                            <p>
-                                Select an image : <input id="gtimg" type="file" size="45" accept="image/*"/>
-                            </p>
+                            <div>
+                                <label class="upld7" for="gtimg">Upload image</label>
+                                <input id="gtimg" type="file" size="45" accept="image/*"/>
+                            </div>
                             <div class="imgs" id="imgs_dv">
                             </div>
                             <div class="crt_btns">
@@ -195,8 +196,13 @@
                 </div>
             </div>
             <!--SUPERUSER PLACE -->
-            <div class="dispn" id="suplc_blk">
-                <div class="view_user dlfx ve">
+            <!--suplc_blk-->
+            <div class="spdv dispn" id="suplc_blk">
+                <div class="sp_nvb">
+                    <button id="shw_users" class="shus">USERS</button>
+                    <button id="shw_rptdevts">REPORTED EVENTS</button>
+                </div>
+                <div class="view_user dlfx ve" id="shusddv">
                     <h2>REGISTERED USERS:</h2>
                     <div class="show_events" id="rgtd_users">
                         <div class="user_disp">
@@ -208,9 +214,15 @@
                                 <span>STATE</span>
                             </div>
                         </div>
-                        
                     </div>
                     <button id="mr_rged_users">LOAD MORE</button>
+                </div>
+                <div class="view_user dlfx ve hidespdvs" id="rptdmvd">
+                    <h2>REPORTED EVENTS:</h2>
+                    <div class="show_events" id="rptd_events">
+                       
+                    </div>
+                    <button id="mor_rptd_events">LOAD MORE</button>
                 </div>
             </div>
 

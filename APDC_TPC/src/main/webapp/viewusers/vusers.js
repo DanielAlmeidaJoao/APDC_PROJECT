@@ -133,6 +133,27 @@ function loadusers() {
         }).catch(e=>{console.log(e)})
     }
 }
+function loadReportedEvents() {
+    let dispBlock = document.getElementById("rptd_events");
+    let loadMore=document.getElementById("mor_rptd_events");
+    loadMore.onclick=()=>{
+        let path= '/rest/super/reported';
+        fetch(path).then(response=>{
+            if(response.ok){
+                return response.json();
+            }
+        }).then(obj=>{
+            if(obj){
+                let chld;
+                for(let x=0; x<obj.length;x++){
+                    //makeSolidarityAction(data[x]);
+                    chld =  reportedEventDivBlock(obj[x]); //singleEventBlock(obj[x],false);
+                    dispBlock.appendChild(chld);
+                }
+            }
+        }).catch(e=>{console.log(e)});
+    }
+}
 function superUser() {
     let superUser = document.getElementById("superu");
     superUser.style.display="block";
@@ -141,8 +162,42 @@ function superUser() {
         hideMap();
         selectNavBarButton(superUser);
     }
+    handleShowDivButtons();
+    loadReportedEvents();
+    loadusers();
+}
+function handleShowDivButtonsAux(usrbtn,eventsbtn,userdiv,evntsdiv){
+    document.getElementById(usrbtn).classList.add("shus");
+    document.getElementById(eventsbtn).classList.remove("shus");
+
+    document.getElementById(userdiv).classList.remove("hidespdvs");
+    document.getElementById(evntsdiv).classList.add("hidespdvs");
+}
+function handleShowDivButtons() {
+    let showUsers = document.getElementById("shw_users");
+    let showReportedEvents = document.getElementById("shw_rptdevts");
+
+    showUsers.onclick=()=>{
+        /*
+        document.getElementById("shw_users").classList.add("shus");
+        document.getElementById("shw_rptdevts").classList.remove("shus");
+        document.getElementById("shusddv").classList.remove("hidespdvs");
+        document.getElementById("rptdmvd").classList.add("hidespdvs"); */
+        if(document.getElementById("rgtd_users").childElementCount==0){
+            document.getElementById("mr_rged_users").click();
+        }
+        handleShowDivButtonsAux("shw_users","shw_rptdevts","shusddv","rptdmvd");
+    }
+    showReportedEvents.onclick=()=>{
+        handleShowDivButtonsAux("shw_rptdevts","shw_users","rptdmvd","shusddv");
+        if(document.getElementById("rptd_events").childElementCount==0){
+            document.getElementById("mor_rptd_events").click();
+        }
+    }
 }
 function handleRole() {
+    //superUser();
+    
     let path= '/rest/super/role';
     fetch(path).then(response=>{
         if(response.ok){
@@ -165,10 +220,12 @@ function handleRole() {
  * @param {*} dispBlockId 
  * @param {*} endpoint 
  */
-function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,endpoint) {
+function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,otherDispblock,endpoint) {
     let path="/rest/events/view/"+endpoint;
     let numberEventsBtn=document.getElementById(numberEventsBtnId);
     let dispBlock = document.getElementById(dispBlockId);
+    let otherDispBlock = document.getElementById(otherDispblock);
+
     numberEventsBtn.onclick=()=>{
         if(dispBlock.childElementCount==0&&dispBlock.parentElement.classList.contains("usr_evts")){
             //load
@@ -186,7 +243,8 @@ function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,endpoint) {
                     console.log('Error: '+ error);
                 });
         }
-        dispBlock.parentElement.classList.toggle("usr_evts");
+        dispBlock.parentElement.classList.remove("usr_evts");
+        otherDispBlock.parentElement.classList.add("usr_evts");
     }
 }
 function eventDivBlock(eventObj,ownEvents) {
@@ -194,8 +252,11 @@ function eventDivBlock(eventObj,ownEvents) {
     let str = makeShowInfoString(eventObj,where.name,ownEvents);
     return stringToHTML(str);
 }
-handleNumberOfEventsButton("num_evts","shusevnts","myevents"); //show events made by the user
-handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested"); //show events the user has interests
-
-loadusers();
+function reportedEventDivBlock(eventObj) {
+    let where = JSON.parse(eventObj.location);
+    let str = makeShowInfoStringForSu(eventObj,where.name);
+    return stringToHTML(str);
+}
+handleNumberOfEventsButton("num_evts","shusevnts","shusevntsitrd","myevents"); //show events made by the user
+handleNumberOfEventsButton("intrdevts","shusevntsitrd","shusevnts","interested"); //show events the user has interests
 handleRole();

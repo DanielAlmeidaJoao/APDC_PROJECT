@@ -1,9 +1,9 @@
 package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
+
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.ProjectionEntity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -19,7 +19,6 @@ import apdc.events.utils.jsonclasses.EventLocation;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
 import apdc.events.utils.jsonclasses.ReportProperty;
 import apdc.tpc.resources.EventsResources;
-import apdc.tpc.resources.LoginManager;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
@@ -38,18 +37,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
-
-import com.google.appengine.api.datastore.Query.CompositeFilter;
-import com.google.appengine.api.users.User;
 import com.google.cloud.Timestamp;
-import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
 public class EventsDatabaseManagement {
 
 	public static final String EVENTS="EVENTS";
-	private static final String USERS = "Users";
+	//private static final String USERS = "Users";
 	private static final String NAME="NAME";
 	private static final String DESCRIPTION="DESCRIPTION";
 	private static final String GOAL="GOAL";
@@ -58,7 +53,7 @@ public class EventsDatabaseManagement {
 	private static final String REPORTED_PROP="REPORTED";
 
 
-	private static final String MEETING_PLACE="MEETING_PLACE";
+	//private static final String MEETING_PLACE="MEETING_PLACE";
 	private static final String START_DATE="START_DATE";
 	private static final String END_DATE="END_DATE";
 	private static final String VOLUNTEERS="N_VOLUNTEERS";
@@ -98,24 +93,35 @@ public class EventsDatabaseManagement {
 		EventData2 event = getEvent(ev,userid, false);
 		return event;
 	}
-	public static Response addReport(ReportEventArgs report, long userid) {
+	/**
+	 * sets an event as reported when reported is true or as unreported when reported is false.
+	 * @param reportText the report justification when an event is being reported
+	 * @param reported a boolean which tells whether to report or to unreport
+	 * @param userid the id of the user performing the operation
+	 * @param eventId the id of the event
+	 * @return
+	 */
+	private static Response addReportAux(String reportText, boolean reported, long userid, long eventId) {
 		Response result=null;
 		Datastore datastore = Constants.datastore;
 		try {
-			com.google.cloud.datastore.Key eventKey = datastore.newKeyFactory().setKind(EVENTS).newKey(report.getEventId());
+			com.google.cloud.datastore.Key eventKey = datastore.newKeyFactory().setKind(EVENTS).newKey(eventId);
 			Transaction txn = datastore.newTransaction();
 			Entity event = txn.get(eventKey);
 			if(event!=null) {
-				if(event.getLong(EVENT_OWNER)==userid) {
+				if(reported&&event.getLong(EVENT_OWNER)==userid) {
 					return Response.status(Status.UNAUTHORIZED).build();
 				}
+				
 				/*
 				Entity user = StorageMethods.getUser(datastore, userid);
 				if(!user.getString(StorageMethods.ROLE_PROP).equals(StorageMethods.SU)) {
 					return Response.status(Status.CONFLICT).build();
 				}*/
 				ReportProperty rep = Constants.g.fromJson(event.getString(REPORT_TEXTS_PROPERTY),ReportProperty.class);
-				rep.addReport(report.getReportText());
+				if(reported) {
+					rep.addReport(reportText);
+				}
 				Entity.Builder  builder =Entity.newBuilder(eventKey)
 						.set(NAME,event.getString(NAME))
 						.set(DESCRIPTION,event.getString(DESCRIPTION))
@@ -126,7 +132,7 @@ public class EventsDatabaseManagement {
 						.set(VOLUNTEERS,event.getLong(VOLUNTEERS))
 						.set(EVENT_OWNER,event.getLong(EVENT_OWNER))
 						.set(Constants.EVENT_PICS_FORMDATA_KEY,event.getString(Constants.EVENT_PICS_FORMDATA_KEY))
-						.set(REPORTED_PROP,true)
+						.set(REPORTED_PROP,reported)
 						.set(REPORT_TEXTS_PROPERTY,noIndexProperties(Constants.g.toJson(rep)));
 						//.set(REPORT_PROPERTY,event.getString(REPORT_PROPERTY));
 				
@@ -142,6 +148,16 @@ public class EventsDatabaseManagement {
 			result=Response.status(Status.BAD_REQUEST).build();
 		}
 		return result;
+	}
+	public static Response addReport(ReportEventArgs report, long userid) {
+		return addReportAux(report.getReportText(),true,userid, report.getEventId());
+	}
+	public static Response unReport(long eventId, long userid) {
+		if(StorageMethods.isSuperUser(userid)) {
+			return addReportAux("",false,userid, eventId);
+		}else {
+			return Response.status(Status.FORBIDDEN).build();
+		}
 	}
 	/**
 	 * creates and stores an event into the database
@@ -309,10 +325,7 @@ public class EventsDatabaseManagement {
 			QueryResults<ProjectionEntity> tasks = Constants.datastore.run(query);
 			ProjectionEntity e;
 			List<EventLocation> events = new LinkedList<>();
-			System.out.println("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP ");
 			while(tasks.hasNext()){
-				System.out.println("oooooooooooooooooooooo");
-
 				e = tasks.next();
 				events.add(new EventLocation(e.getString(LOCATION),e.getKey().getId(),e.getString(NAME)));
 			}
@@ -323,6 +336,39 @@ public class EventsDatabaseManagement {
 			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
 			e.printStackTrace();
 		}
+		
+		return null;
+	}
+	public static Pair<String,String> getReportedEvents(String startCursor, long userid) {
+			try {
+				Cursor startcursor=null;
+				Query<Entity> query=null;
+				//Timestamp.no
+				Filter filter=  PropertyFilter.eq(REPORTED_PROP,true);
+				Builder b=Query.newEntityQueryBuilder()
+					    .setKind(EVENTS).setFilter(filter)
+					    .setLimit(PAGESIGE);
+				if (startCursor!=null) {
+			      startcursor = Cursor.fromUrlSafe(startCursor); 
+				  b=b.setStartCursor(startcursor);
+			    }
+				query=b.build();
+				QueryResults<Entity> tasks = Constants.datastore.run(query);
+			    Entity e;
+				List<EventData2> events = new LinkedList<>();
+				while(tasks.hasNext()){
+					e = tasks.next();
+					EventData2 event = getEvent(e,userid,false);
+					event.setReports(e.getString(REPORT_TEXTS_PROPERTY));
+					events.add(event);
+				}
+				return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+
+			}catch(Exception e) {
+				Constants.LOG.severe("");
+				Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
+				e.printStackTrace();
+			}
 		
 		return null;
 	}
@@ -391,9 +437,9 @@ public class EventsDatabaseManagement {
 			Entity ev = txn.get(eventKey);
 			if(ev!=null) {
 				long ownerid = ev.getLong(EVENT_OWNER);
-				if(userid==ownerid) {
+				if(userid==ownerid||StorageMethods.isSuperUser(userid)) {
 					txn.delete(eventKey);
-				    CountEventsUtils.makeUserEventCounterKind(userid, datastore,false,txn);
+				    CountEventsUtils.makeUserEventCounterKind(ownerid, datastore,false,txn);
 				    EventParticipationMethods.removeParticipants(event,txn);
 				    txn.commit();
 				    GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventId);

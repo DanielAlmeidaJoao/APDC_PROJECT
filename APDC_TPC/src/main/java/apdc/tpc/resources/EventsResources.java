@@ -3,6 +3,7 @@ package apdc.tpc.resources;
 
 import java.util.logging.Logger;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -20,15 +21,11 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.repackaged.com.google.datastore.v1.PropertyFilter;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Transaction;
 
 import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.EventsDatabaseManagement;
-import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.Pair;
 import apdc.events.utils.jsonclasses.EventData2;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
@@ -79,6 +76,21 @@ public class EventsResources {
 		try {
 			long userid = HandleTokens.validateToken(value);			
 			response = EventsDatabaseManagement.addReport(args,userid);	
+		}catch(Exception e) {
+			response = Response.status(Status.BAD_REQUEST).build();
+		}
+		return response;
+	}
+	@DELETE
+	@Path("/unreport/{eventId}")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response unreportEvent(@CookieParam(Constants.COOKIE_TOKEN) String value, @PathParam("eventId") long eventId){
+		Response response;
+		System.out.println("I AM GOING TO UNREPORT THIS EVENT "+eventId);
+		try {
+			long userid = HandleTokens.validateToken(value);			
+			response = EventsDatabaseManagement.unReport(eventId,userid);	
 		}catch(Exception e) {
 			response = Response.status(Status.BAD_REQUEST).build();
 		}

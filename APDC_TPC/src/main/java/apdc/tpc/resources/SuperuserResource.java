@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.datastore.Entity;
 
+import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.Pair;
 import apdc.events.utils.superuser.Operations;
 import apdc.tpc.utils.StorageMethods;
@@ -51,6 +52,7 @@ public class SuperuserResource {
 		Response resp;
 		//list, cursor
 		Pair<String,String> result=null;
+		print("GOING TO LOAD USERS");
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
 			if(isSuperuser(userid)) {
@@ -144,7 +146,30 @@ public class SuperuserResource {
 		}
 		return resp;
 	}
-	
+	/**
+	 * loads upcoming events 
+	 * @param value offset value stored in the specified cookie
+	 * @param token session token stored in the specified token
+	 * @return 200 if the operation is success
+	 */
+	@GET
+	@Path("/reported")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_REPORTED_EVENTS_CURSOR_CK) String value, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+		Response resp;
+		try {
+			System.out.println("REPORTED EVENTS ");
+			long userid = HandleTokens.validateToken(token.getValue());
+			//data, cursor
+			Pair<String,String> pair = EventsDatabaseManagement.getReportedEvents(value,userid);
+			NewCookie nk = HandleTokens.makeCookie(Constants.GET_REPORTED_EVENTS_CURSOR_CK,pair.getV2(),token.getDomain());
+			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
+		}catch(Exception e) {
+			resp = Response.status(Status.FORBIDDEN).build();
+		}
+		return resp;
+	}
 	
 	public static void print(String msg) {
 		Constants.LOG.severe(msg);

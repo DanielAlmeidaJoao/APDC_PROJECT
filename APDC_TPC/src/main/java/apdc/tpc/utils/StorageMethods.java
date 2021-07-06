@@ -88,8 +88,19 @@ public class StorageMethods {
 		}catch(Exception e) {
 			
 		}
-
 		return person;
+	}
+
+	public static boolean isSuperUser(long userid) {
+		try {
+			Entity person = getUser(Constants.datastore,userid);
+			if(person.getString(StorageMethods.ROLE_PROP).equals(StorageMethods.SU)) {
+				return true;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	public static Entity getUser(Datastore datastore,String email) {
 		Entity user=null;

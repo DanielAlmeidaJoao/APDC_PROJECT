@@ -49,3 +49,40 @@
 .usr_evtsnr div{
     margin: 0px 5px;
 }
+.spdv{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 800px;
+}
+.sp_nvb{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: inherit;
+}
+.sp_nvb button{
+    border: none;
+    background-color: inherit;
+    padding: 10px 10px;
+    font-weight: bold;
+    font-size: 20px;
+    margin: auto 10%;
+}
+
+.sp_nvb button:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+.shus{
+    text-decoration: underline;
+}
+.hidespdvs{
+    display: none;
+}
+.dispn{
+    display: none;
+}
+.dispb{
+    display: block;
+}

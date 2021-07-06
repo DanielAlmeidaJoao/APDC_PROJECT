@@ -3,7 +3,13 @@ package apdc.events.utils.jsonclasses;
 public class EventData2 extends EventData {
 
 	boolean owner, participating;
-	String participants,imgUrl;
+	String participants,imgUrl, reports;
+	public String getReports() {
+		return reports;
+	}
+	public void setReports(String reports) {
+		this.reports = reports;
+	}
 	int currentParticipants;
 	long countComments;
 	
@@ -15,6 +21,7 @@ public class EventData2 extends EventData {
 	}
 	public EventData2() {
 		currentParticipants=0;
+		reports="";
 	}
 	public boolean isParticipating() {
 		return participating;

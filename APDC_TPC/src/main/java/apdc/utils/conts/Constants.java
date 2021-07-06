@@ -18,6 +18,7 @@ public interface Constants {
 	public static final String GET_EVENT_CURSOR_CK ="crsck";
 	public static final String ALL_USERS_CURSOR ="kjdsalj";
 
+	public static final String GET_REPORTED_EVENTS_CURSOR_CK ="rptdcrsck";
 	public static final String FINISHED_EVENTS_CURSOR_CK ="fnesck";
 	public static final String USER_EVENTS_CURSOR_CK ="userevntscrs";
 	public static final String USER_INTERESTED_EVENTS_CURSOR_CK ="useritrstdscrs";

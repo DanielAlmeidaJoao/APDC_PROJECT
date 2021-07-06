@@ -32,6 +32,17 @@
     width: 60%;
     height: auto;
 }
+.upld7{
+    cursor: pointer;
+    background-color: #556e6c;
+    padding: 10px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+}
+#gtimg{
+    opacity: 0;
+}
 .imgs{
     display: flex;
     flex-direction: column;
@@ -51,17 +62,18 @@
 }
 
 .crt_inp{
-    height: 30px;
     font-size: 20px;
     padding: 2px 2px;
     border: 1px solid rgb(21, 201, 177);
 }
 .sbt_crt_btn{
-    width: 130px;
-    align-self: center;
-    background-color: green;
+    width: auto;
+    background-color: rgb(16, 173, 229);
     color: #fff;
     font-weight: bold;
+    border-radius: 5px;
+    padding: 10px 10px;
+    border: none;
 }
 
 .evnt_desc{
@@ -80,10 +92,11 @@
     justify-content: space-around;
 }
 #nclbtn{
-    background-color: rgb(121, 21, 21);
+    background-color: rgb(90 85 85);
     font-weight: normal;
 }
 
 .crtb:hover{
     cursor: pointer;
+    text-decoration: underline;
 }

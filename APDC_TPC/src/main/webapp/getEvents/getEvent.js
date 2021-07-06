@@ -331,6 +331,20 @@ function deleteEvent(eventId,btn) {
         console.error('Error:', error);
     });
 }
+function unreportEvent(eventId,btn) {
+    fetch('/rest/events/unreport/'+eventId,{method:'DELETE'})
+    .then(response =>{
+        console.log(response.status+" i am status code");
+        if(response.status==HttpCodes.success){
+            btn.parentElement.parentElement.remove();
+        }else if(response.status==HttpCodes.unauthorized||response.status==HttpCodes.forbidden){
+            alert("You have no authorization!");
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
 /**
  * creates a button to revome this particular event
  * @param {*} eventId 
@@ -457,7 +471,7 @@ function makeShowInfoString(eventObj,where,ownEvents) {
                         </div>
                     </div>`;
     }else{
-        funcString=`<button class='vlts prt' >${GOING_TEXT}</button>`;
+        funcString=`<button class='vlts prt'>${GOING_TEXT}</button>`;
     }
     let removeDiv="";
     if(ownEvents){
@@ -521,6 +535,90 @@ function makeShowInfoString(eventObj,where,ownEvents) {
                 ${reportBtn}
             </div>`;
 }
+function makeShowInfoStringForSu(eventObj,where) {
+    let goingText="";
+    if(eventObj.participating){
+        goingText=GOING_TEXT;
+    }else{
+        goingText=WANTING_TO_GO;
+    }
+    let funcString;
+    let reportBtn="";
+    funcString=`<button class='vlts prt'>${goingText}</button>`;
+
+    let reprts="";
+    let reportObj = JSON.parse(eventObj.reports);
+    let allReports = reportObj.reports;
+    for(let x=0; x<allReports.length;x++){
+        reprts +=`
+        <h1 class="rpt_titl">COMPLAINTS</h1>
+        <div class="rpt_txt">${allReports[x]}</div>
+        `;
+    }
+    reportBtn=`<div>
+                    <button class='rptbtn' onclick=reportEvent(this);>REPORT</button>
+                    <div class="rptdv hiderptdv">
+                        ${reprts}
+                    </div>
+                </div>`;
+
+    let removeDiv="";
+    removeDiv =
+    `<div class="rmv_evt">
+        <button onclick=unreportEvent(${eventObj.eventId},this)>Unreport</button>
+        <button onclick=deleteEvent(${eventObj.eventId},this)>Remove</button>
+    </div>`
+    return `<div class="one_ev">
+                <div class="evt_disp">
+                    <div class="blk_desc">
+                        <div class="dlfx mgpd abt_orzr">
+                            <div class="orgd"><img class="nav_img_prfl"
+                                    src=${eventObj.imgUrl}
+                                    alt="profile-pic"></div>
+                            <div class="orgd">${eventObj.organizer}</div>
+                        </div>
+                        <div class="dlfx mgpd abt_evt">
+                            <h2 class="">${eventObj.name}</h2>
+                            <div class="txtDesc">${eventObj.description}</div>
+                            <div class="dlfx mgpd abt_evt">
+                                <div class="mrd plc">
+                                    <div class="mrdso">Where:</div>
+                                    <div class="mrdso">${where}</div>
+                                </div>
+                                <div class="mrd dte">
+                                    <div class="mrdso">When:</div>
+                                    <div class="mrdso">${eventObj.startDate+" Until "+eventObj.endDate}</div>
+                                </div>
+                            </div>
+                            <div class="mgpd">
+                                <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${eventObj.volunteers}</span>
+                                </div>
+                                <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${eventObj.currentParticipants}</span></div>
+                                ${funcString}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventObj.images} alt="eventimage1"></div>
+                </div>
+                
+                <div class="cmt_mndv">
+                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span>${eventObj.countComments}</span> </button>
+                    <div class="cmtchlddv hidecmts">
+                        <div class="pstcmtdv dlfx">
+                            <textarea class="pstcmtxta"></textarea>
+                            <button class="pstcmtbtn" onclick=publishComment(this,${eventObj.eventId});>COMMENT</button>
+                        </div>
+                        <div class="allcmts">
+                                                        
+                        </div>
+                        <button>MORE COMMENTS</button>
+                    </div>
+                </div>
+                ${removeDiv}
+                ${reportBtn}
+            </div>`;
+}
+
 /**
  * Convert a template string into HTML DOM nodes
  * @param  {String} str The template string

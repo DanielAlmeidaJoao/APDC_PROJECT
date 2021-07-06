@@ -1,0 +1,17 @@
+
+.desc_dv{
+    color: #111;
+    line-height: 1.2rem;
+    font-size: 17px;
+}
+.title_dv{
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px 10px;
+    margin: 10px 10px;
+    border-bottom: 1px dotted rgb(16 173 229 / 20%);
+    color: rgb(16, 173, 229);
+}
+.main_section_son2{
+    margin-bottom: 50px;
+}

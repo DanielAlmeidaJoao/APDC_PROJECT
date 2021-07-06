@@ -23,6 +23,9 @@ body{
 }
 .main_body{
     margin-top: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .info_div{
     display: flex;
@@ -93,8 +96,6 @@ body{
 }
 .mpd{
     display: block;
-    width: 60%;
-    margin-left: 23.5%;
 }
 .hdmap{
     display: none;
@@ -122,6 +123,7 @@ body{
     color: white;
     margin: 1px 1px;
     text-align: center;
+    border: none;
 }
 .edt_fn:hover{
     cursor: pointer;
@@ -133,3 +135,5 @@ body{
     border-radius: 50% 50%;
     padding: 10px 10px;
 }
+
+/* **/
