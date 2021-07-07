@@ -178,6 +178,21 @@ function removeAccount() {
         })
     }
 }
+function resetCookies() {
+    fetch("../rest/login/recks").then(response=>{}).catch(err=>{console.log(err);});
+}
+function pageRefreshed(){
+    console.log("PAGE REFRESH DETECTOR IS WORKING!");
+    if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+        console.log("PAGE REFRESHED");
+        resetCookies()
+    } else if(localStorage.getItem("email")!=null) {
+        console.log("PAGE REFRESHED");
+        resetCookies();
+    }else{
+        console.info( "This page is not reloaded");
+    }
+}
 function sendLogOff() {
     let spanText= document.getElementById("rs_sn");
     let xmlHttpReq = getHttpXmlRequest();
@@ -195,7 +210,7 @@ function sendLogOff() {
 
 function isLogged() {
     email = localStorage.getItem("email");
-    if(token==null){
+    if(email==null){
         localStorage.clear();
         window.location.href="/register.html";
     }
@@ -261,9 +276,8 @@ function handShowButtons() {
         hideAllBlocksButOne("change_pwd_block");
     }*/
 }
-
-//isLogged();
-
+isLogged();
+pageRefreshed();
 updateNavAttribues();
 updateAttributes();
 logOff();

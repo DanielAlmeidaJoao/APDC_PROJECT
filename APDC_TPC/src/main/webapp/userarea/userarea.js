@@ -45,7 +45,15 @@ function updateProfilePicture() {
             body:formDataForProfilePicture()
         }).then(response=>{
             profileFile=null;
-            document.getElementById("updateImgPic").classList.add("updateImgPic");
+            return response.json();
+        }).then(text=>{
+            console.log("Text "+text);
+            if(text){
+                document.getElementById("updateImgPic").classList.add("updateImgPic");
+                document.getElementById("nav_profile_pic").setAttribute("src",text);
+            }else{
+                alert("Unexpected Error!");
+            }
         }).catch(err=>{
             console.log(err);
         })

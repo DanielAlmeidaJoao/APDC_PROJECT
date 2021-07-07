@@ -251,6 +251,7 @@ public class LoginManager {
 	//@Context HttpHeaders headers
 	public Response doLogout(@Context HttpHeaders headers) {
 		//HandleTokens.destroyToken(token);
+		LOG.severe("GOING TO LOGOFF");
 		ResponseBuilder rb = Response.ok();
 		java.util.Map.Entry<String,Cookie> en;
 		Iterator<java.util.Map.Entry<String,Cookie>> entries = headers.getCookies().entrySet().iterator();
@@ -258,6 +259,25 @@ public class LoginManager {
 			en=entries.next();
 			NewCookie destroyed = HandleTokens.destroyCookie(en.getKey());
 			rb=rb.cookie(destroyed);
+		}
+		return rb.build();
+	}
+	@GET
+	@Path("/recks")
+	//@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
+	//@Context HttpHeaders headers
+	public Response resetCookies(@Context HttpHeaders headers) {
+		//HandleTokens.destroyToken(token);
+		LOG.severe("GOING TO RESET COOKIE");
+		ResponseBuilder rb = Response.ok();
+		java.util.Map.Entry<String,Cookie> en;
+		Iterator<java.util.Map.Entry<String,Cookie>> entries = headers.getCookies().entrySet().iterator();
+		while(entries.hasNext()) {
+			en=entries.next();
+			if(!Constants.COOKIE_TOKEN.equals(en.getKey())) {
+				NewCookie destroyed = HandleTokens.destroyCookie(en.getKey());
+				rb=rb.cookie(destroyed);	
+			}
 		}
 		return rb.build();
 	}
@@ -314,30 +334,5 @@ public class LoginManager {
 		}
 		return Response.ok().entity(u).build();
 	}*/
-	@POST
-	@Path("/op11")
-	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
-	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doChangePassword(RegisterData data) {
-		
-		/**
-		 * name: oldPass,
-	       password: newPass,
-	       email: token,
-		 */
-		/*
-		String email=null;
-		try {
-			email = HandleTokens.validateToken(data.getEmail());
-		}catch(Exception e) {
-			
-		}
-		if(email!=null) {
-			email = StorageMethods.updatePassword(Constants.datastore, email,data.getPassword(),data.getName()); //result
-		}else {
-			email="-1";
-		}
-		return Response.ok().entity(email).build();*/
-		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	}
+
 }

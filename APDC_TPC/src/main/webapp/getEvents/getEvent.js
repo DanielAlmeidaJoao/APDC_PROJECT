@@ -519,7 +519,7 @@ function makeShowInfoString(eventObj,where,ownEvents) {
                 </div>
                 
                 <div class="cmt_mndv">
-                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span>${eventObj.countComments}</span> </button>
+                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span class="cnt_cmts">${eventObj.countComments}</span> </button>
                     <div class="cmtchlddv hidecmts">
                         <div class="pstcmtdv dlfx">
                             <textarea class="pstcmtxta"></textarea>
@@ -602,7 +602,7 @@ function makeShowInfoStringForSu(eventObj,where) {
                 </div>
                 
                 <div class="cmt_mndv">
-                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span>${eventObj.countComments}</span> </button>
+                    <button class="ldcmtsbtn" id="shwcmts" onclick=handleShowCommentsButton(this,${eventObj.eventId});>COMMENTS: <span class="cnt_cmts">${eventObj.countComments}</span> </button>
                     <div class="cmtchlddv hidecmts">
                         <div class="pstcmtdv dlfx">
                             <textarea class="pstcmtxta"></textarea>

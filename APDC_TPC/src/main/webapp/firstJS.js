@@ -36,6 +36,12 @@ function registerUser(name,email,password){
         console.log(e);
     });
 }
+function isTheUserLogged() {
+    email = localStorage.getItem("email");
+    if(email!=null){
+        window.location.href="/logged/logged.html";
+    }
+}
 function redirectOnLogin(rt) {
     localStorage.setItem("email",rt.email);
     localStorage.setItem("name",rt.name);
@@ -149,3 +155,4 @@ function showLoginForm() {
 handleLogin();
 registerUserForm();
 showLoginForm();
+isTheUserLogged();

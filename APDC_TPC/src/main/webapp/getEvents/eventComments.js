@@ -5,6 +5,8 @@ function removeComment(commentId,btn) {
     })
     .then(response=>{
         if(response.ok){
+            let commentCounter = btn.parentElement.parentElement.parentElement.parentElement.querySelector(".cnt_cmts");
+            updateNumberOfElements(null,false,commentCounter);
             btn.parentElement.remove();
         }else{
             alert("BAD REQUEST!");
@@ -75,6 +77,8 @@ function publishComment(btn,eventid){
             let commentBlock=singleCommentBlockHtmlStr(commentObj);
             btn.parentElement.parentElement.children[1].appendChild(stringToDom(commentBlock));
             textArea.value="";
+            let commentCounter = btn.parentElement.parentElement.parentElement.querySelector(".cnt_cmts");
+            updateNumberOfElements(null,true,commentCounter);
         }
     })
     .catch(e=>{
