@@ -5,6 +5,8 @@
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
 
+const { func } = require("prop-types");
+
 let destination=null;
 let origin=null;
 let markers1 = [];
@@ -68,54 +70,54 @@ function initAutocomplete() {
 
   // Listen for the event fired when the user selects a prediction and retrieve
   // more details for that place.
-  searchBox.addListener("places_changed", () => {
-    const places = searchBox.getPlaces();
-    
-    if (places.length == 0) {
-      return;
-    }
-    
-    clearMarkers();
-    // For each place, get the icon, name and location.
-    const bounds = new google.maps.LatLngBounds();
-    places.forEach((place) => {
-      if (!place.geometry || !place.geometry.location) {
-        console.log("Returned place contains no geometry");
+  function handleSearchBox(searchBox,func){
+    searchBox.addListener("places_changed", () => {
+      const places = searchBox.getPlaces();
+      
+      if (places.length == 0) {
         return;
       }
-      const icon = {
-        url: place.icon,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25),
-      };
-      // Create a marker for each place.
-      markers1.push(
-        new google.maps.Marker({
-          map,
-          //icon,
-          title: getPlaceName(place),
-          position: place.geometry.location,
-        })
-      );
+      clearMarkers();
+      // For each place, get the icon, name and location.
+      const bounds = new google.maps.LatLngBounds();
+      places.forEach((place) => {
+        if (!place.geometry || !place.geometry.location) {
+          console.log("Returned place contains no geometry");
+          return;
+        }
+        const icon = {
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25),
+        };
+        // Create a marker for each place.
+        markers1.push(
+          new google.maps.Marker({
+            map,
+            //icon,
+            title: getPlaceName(place),
+            position: place.geometry.location,
+          })
+        );
+        if (place.geometry.viewport) {
+          // Only geocodes have viewport.
+          bounds.union(place.geometry.viewport);
+        } else {
+          bounds.extend(place.geometry.location);
+        }
         console.log(place);
-      if (place.geometry.viewport) {
-        // Only geocodes have viewport.
-        bounds.union(place.geometry.viewport);
-      } else {
-        bounds.extend(place.geometry.location);
-      }
-      let validAddress = validPlace(place);
-      console.log(validAddress);
-      if(validAddress!=null){
-        destination=validAddress;
-      }
+        func(place);
+      });
+      map.fitBounds(bounds);
     });
-    map.fitBounds(bounds);
-  });
+  }
+  handleSearchBox(searchBox,validPlace);
+  handleSearchBox(searchBox2,searchEventParams);
 }
 function validPlace(place){
+  resetFetchEventsArgs();
   let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
   let postalCode=newDiv.querySelector(".postal-code");
   let locality=newDiv.querySelector(".locality");
@@ -123,10 +125,9 @@ function validPlace(place){
   let street_address = newDiv.querySelector(".street-address");
   console.log(newDiv);
 
-
   if(street_address==undefined || postalCode==undefined || locality==undefined || countryName==undefined){
     alert("The Address must have a street address, postal code, locality and a country name!");
-    return null;
+    return;
   }
   let obj={
     loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
@@ -135,7 +136,33 @@ function validPlace(place){
     locality:locality.textContent,
     country_name:countryName.textContent
   };
-  return obj;
+  destination=validAddress;
+}
+
+function resetFetchEventsArgs() {
+  locality="";
+  postal_code="";
+  country_name="";
+}
+function searchEventParams(place) {
+  resetFetchEventsArgs();
+  let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
+  let postalCode=newDiv.querySelector(".postal-code");
+  let localityP=newDiv.querySelector(".locality");
+  let countryName = newDiv.querySelector(".country-name");
+
+  if(postalCode!=undefined && countryName!=undefined ){
+    postal_code=postalCode.textContent;
+    country_name=countryName.textContent;
+    document.getElementById("vwmrpnt").click();
+  }else if(localityP!=undefined && countryName!=undefined){
+    locality=localityP.textContent;
+    country_name=countryName.textContent;
+    document.getElementById("vwmrpnt").click();
+  }else{
+    alert("Insert a Valid Locality!");
+  }
+  console.log(newDiv);
 }
 function getPlaceName(place){
   let name;
@@ -176,7 +203,6 @@ function makeMarker(eventObj) {
   
   let contentString = null;
   let infowindow = null;
-  console.log("I AM CLICKED! "+clicked);
   marker.addListener('click', function() {
     console.log("MARKER CLICKED "+clicked);
     if(clicked==false){
@@ -260,6 +286,7 @@ function loadsEventsNearTheLoggedUser() {
   postal_code = pps[pps.length-1].long_name;
   postal_code = postal_code.split("-")[0];
   country_name = pps[pps.length-2].long_name;
+  locality="";
 
   console.log(postal_code);
   console.log(country_name);

@@ -22,6 +22,8 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Transaction;
 
@@ -57,18 +59,18 @@ public class EventsResources {
 	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
 	//@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
+	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value, @FormDataParam(Constants.EVENT_FORMDATA_KEY) String data){
 		try {
-			System.out.println("BEFORE ---------------> "+httpRequest.getCharacterEncoding());
 			httpRequest.setCharacterEncoding("UTF-8");
-			System.out.println("AFTER ---------------> "+httpRequest.getCharacterEncoding());
+			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 		Response response;
 		Datastore ds = Constants.datastore;
 		try {
-			
+			System.out.println("VOU IMPRIMIR DATA ------------------------------------------------------->");
+			System.out.println(data);
 			long userid = HandleTokens.validateToken(value);			
 			//response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
 			response = Response.status(Status.UNAUTHORIZED).build();
@@ -111,6 +113,8 @@ public class EventsResources {
 	}
 	public final static String POSTAL_CODE = "pc";
 	public final static String COUNTRY_NAME = "cn";
+	public final static String LOCALITY = "lc";
+
 
 	/**
 	 * loads upcoming events 
@@ -123,14 +127,16 @@ public class EventsResources {
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
-			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,@QueryParam(POSTAL_CODE) String postalCode,@QueryParam(COUNTRY_NAME) String country) {
+			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,
+			@QueryParam(POSTAL_CODE) String postalCode,@QueryParam(COUNTRY_NAME) String country,
+			@QueryParam(LOCALITY) String locality) {
 		Response resp;
 		try {
 			System.out.println(postalCode+" "+country);
 			System.out.println("CURSOR -> "+value);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
-			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,postalCode,country);
+			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,postalCode,country,locality);
 			NewCookie nk = HandleTokens.makeCookie(Constants.GET_EVENT_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {

@@ -325,7 +325,7 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid, String postalCode,String country) {
+	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid, String postalCode,String country,String locality) {
 		try {
 			postalCode=postalCode.toLowerCase();
 			country=country.toLowerCase();
@@ -334,7 +334,12 @@ public class EventsDatabaseManagement {
 			Query<ProjectionEntity> query=null;
 			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
-			Filter postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
+			Filter postalCodeFilter;
+			if(postalCode.isEmpty()) {
+				postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
+			}else {
+				postalCodeFilter= PropertyFilter.eq(LOCALITY_EVENT_PROP,locality);
+			}
 			Filter countryFilter= PropertyFilter.eq(COUNTRY_NAME_EVENT_PROP,country);
 
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()

@@ -6,7 +6,7 @@ const HTML_EVENT_ID_SUFFIX="usev";
 const GOING_TEXT="GOING";
 const WANTING_TO_GO="I WILL GO";
 
-let postal_code, country_name;
+let postal_code, country_name, locality;
 
 function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
@@ -94,7 +94,7 @@ function loadFinishedEvents() {
 }
 function loadUpcomingEvents() {
     let mainBlock = document.getElementById("events_blk");
-    let path = `/rest/events/view?pc=${postal_code}&cn=${country_name}`;
+    let path = `/rest/events/view?pc=${postal_code}&cn=${country_name}&lc=${locality}`;
     loadEvents(path,false,mainBlock);
 }
 
