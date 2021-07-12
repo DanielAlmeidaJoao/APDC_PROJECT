@@ -3,7 +3,7 @@ package apdc.tpc.resources;
 
 import java.util.logging.Logger;
 
-
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -59,7 +59,7 @@ public class EventsResources {
 	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
 	//@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value, @FormDataParam(Constants.EVENT_FORMDATA_KEY) String data){
+	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		try {
 			httpRequest.setCharacterEncoding("UTF-8");
 			
@@ -69,8 +69,6 @@ public class EventsResources {
 		Response response;
 		Datastore ds = Constants.datastore;
 		try {
-			System.out.println("VOU IMPRIMIR DATA ------------------------------------------------------->");
-			System.out.println(data);
 			long userid = HandleTokens.validateToken(value);			
 			//response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
 			response = Response.status(Status.UNAUTHORIZED).build();
@@ -132,7 +130,7 @@ public class EventsResources {
 			@QueryParam(LOCALITY) String locality) {
 		Response resp;
 		try {
-			System.out.println(postalCode+" "+country);
+			System.out.println("ARGS --------------------------------------------------------------> "+ postalCode+" "+country+" --- "+locality);
 			System.out.println("CURSOR -> "+value);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor

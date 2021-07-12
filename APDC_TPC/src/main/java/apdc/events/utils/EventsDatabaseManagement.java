@@ -335,7 +335,7 @@ public class EventsDatabaseManagement {
 			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
 			Filter postalCodeFilter;
-			if(postalCode.isEmpty()) {
+			if(!postalCode.isEmpty()) {
 				postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
 			}else {
 				postalCodeFilter= PropertyFilter.eq(LOCALITY_EVENT_PROP,locality);

@@ -5,8 +5,6 @@
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
 
-const { func } = require("prop-types");
-
 let destination=null;
 let origin=null;
 let markers1 = [];
@@ -22,7 +20,7 @@ let map;
 function initAutocomplete() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: -33.8688, lng: 151.2195 },
-    zoom: 10,
+    zoom: 16,
     mapTypeId: "roadmap",
   });
   navigator.geolocation.getCurrentPosition(function(position) {
@@ -70,51 +68,52 @@ function initAutocomplete() {
 
   // Listen for the event fired when the user selects a prediction and retrieve
   // more details for that place.
-  function handleSearchBox(searchBox,func){
-    searchBox.addListener("places_changed", () => {
-      const places = searchBox.getPlaces();
-      
-      if (places.length == 0) {
+
+  handleSearchBox(searchBox,searchEventParams);
+  handleSearchBox(searchBox2,validPlace);
+}
+function handleSearchBox(searchBox,func){
+  searchBox.addListener("places_changed", () => {
+    const places = searchBox.getPlaces();
+    
+    if (places.length == 0) {
+      return;
+    }
+    clearMarkers();
+    // For each place, get the icon, name and location.
+    const bounds = new google.maps.LatLngBounds();
+    places.forEach((place) => {
+      if (!place.geometry || !place.geometry.location) {
+        console.log("Returned place contains no geometry");
         return;
       }
-      clearMarkers();
-      // For each place, get the icon, name and location.
-      const bounds = new google.maps.LatLngBounds();
-      places.forEach((place) => {
-        if (!place.geometry || !place.geometry.location) {
-          console.log("Returned place contains no geometry");
-          return;
-        }
-        const icon = {
-          url: place.icon,
-          size: new google.maps.Size(71, 71),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(17, 34),
-          scaledSize: new google.maps.Size(25, 25),
-        };
-        // Create a marker for each place.
-        markers1.push(
-          new google.maps.Marker({
-            map,
-            //icon,
-            title: getPlaceName(place),
-            position: place.geometry.location,
-          })
-        );
-        if (place.geometry.viewport) {
-          // Only geocodes have viewport.
-          bounds.union(place.geometry.viewport);
-        } else {
-          bounds.extend(place.geometry.location);
-        }
-        console.log(place);
-        func(place);
-      });
-      map.fitBounds(bounds);
+      const icon = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25),
+      };
+      // Create a marker for each place.
+      markers1.push(
+        new google.maps.Marker({
+          map,
+          //icon,
+          title: getPlaceName(place),
+          position: place.geometry.location,
+        })
+      );
+      if (place.geometry.viewport) {
+        // Only geocodes have viewport.
+        bounds.union(place.geometry.viewport);
+      } else {
+        bounds.extend(place.geometry.location);
+      }
+      console.log(place);
+      func(place);
     });
-  }
-  handleSearchBox(searchBox,validPlace);
-  handleSearchBox(searchBox2,searchEventParams);
+    map.fitBounds(bounds);
+  });
 }
 function validPlace(place){
   resetFetchEventsArgs();
@@ -136,7 +135,7 @@ function validPlace(place){
     locality:locality.textContent,
     country_name:countryName.textContent
   };
-  destination=validAddress;
+  destination=obj;
 }
 
 function resetFetchEventsArgs() {
@@ -264,12 +263,13 @@ function geocodeLatLng(map,lat,lng) {
         pps = response.results[0].address_components;
       if (response.results[0]) {
         loadsEventsNearTheLoggedUser();
-        map.setZoom(11);
+        map.setZoom(16);
         const marker = new google.maps.Marker({
           title: response.results[0].formatted_address,
           position: new google.maps.LatLng(lat,lng),
           map: map,
         });
+        markers1.push(marker);
         infowindow.setContent(response.results[0].formatted_address);
         infowindow.open(map, marker);
         marker.addListener('click', function() {
@@ -283,6 +283,7 @@ function geocodeLatLng(map,lat,lng) {
 }
 
 function loadsEventsNearTheLoggedUser() {
+  resetFetchEventsArgs();
   postal_code = pps[pps.length-1].long_name;
   postal_code = postal_code.split("-")[0];
   country_name = pps[pps.length-2].long_name;

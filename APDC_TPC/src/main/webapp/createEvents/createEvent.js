@@ -65,6 +65,7 @@ function validDate() {
 function handleCreateEventSubmitForm() {
     sbmt.onsubmit=(e)=>{
         e.preventDefault();
+        
         if(destination==null){
             alert("Choose an origin and a destination!");
             return null;

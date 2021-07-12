@@ -10,6 +10,7 @@ indexes:
   properties:
   - name: COUNTRY_NAME
   - name: POSTAL_CODE
+  - name: LOCALITY
   - name: REPORTED
   - name: END_DATE
   - name: NAME
