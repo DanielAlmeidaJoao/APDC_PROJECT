@@ -22,10 +22,14 @@ body{
     margin: 0px;
 }
 .main_body{
+    width: 100%;
     margin-top: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.main_body_son2{
+    width: 100%;
 }
 .info_div{
     display: flex;
@@ -95,7 +99,8 @@ body{
     width: 500px;
 }
 .mpd{
-    display: block;
+    display: flex;
+    justify-content: center;
 }
 .hdmap{
     display: none;

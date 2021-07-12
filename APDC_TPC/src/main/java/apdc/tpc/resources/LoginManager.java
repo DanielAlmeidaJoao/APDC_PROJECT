@@ -258,6 +258,7 @@ public class LoginManager {
 		while(entries.hasNext()) {
 			en=entries.next();
 			NewCookie destroyed = HandleTokens.destroyCookie(en.getKey());
+			System.out.println("NNEW COOKIE "+destroyed.getValue()+ " "+en.getKey());
 			rb=rb.cookie(destroyed);
 		}
 		return rb.build();

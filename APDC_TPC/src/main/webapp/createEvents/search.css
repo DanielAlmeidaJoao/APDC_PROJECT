@@ -1,5 +1,9 @@
 /* Always set the map height explicitly to define the size of the div
        * element that contains the map. */
+      .map_nl{
+        margin-top: 10px;
+        width: 60%;
+      }
        #map {
         height: 600px;
         width: 100%;
@@ -58,7 +62,7 @@
         font-weight: 300;
       }
       
-      #pac-input {
+      #pac-input{
         background-color: #fff;
         font-family: Roboto;
         font-size: 15px;

@@ -3,7 +3,26 @@ package apdc.events.utils.jsonclasses;
 public class EventData2 extends EventData {
 
 	boolean owner, participating;
-	String participants,imgUrl, reports;
+	String participants,imgUrl, reports, eventAddress;
+	Coords loc;
+	public Coords getLoc() {
+		return loc;
+	}
+	public void setLoc(Coords loc) {
+		this.loc = loc;
+	}
+	public String getEventAddress() {
+		return eventAddress;
+	}
+	public Coords getEventCoords() {
+		return loc;
+	}
+	public void setEventAddress(String eventAddress) {
+		this.eventAddress = eventAddress;
+	}
+	public void setEventCoords(Coords eventCoords) {
+		this.loc = eventCoords;
+	}
 	public String getReports() {
 		return reports;
 	}

@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +38,7 @@ public class EventsResources {
 	//private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 	@Context
 	private HttpServletRequest httpRequest;
+	
 	public static final String bucketName = "daniel1624401699897";
 	private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 
@@ -56,12 +58,23 @@ public class EventsResources {
 	//@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
+		try {
+			System.out.println("BEFORE ---------------> "+httpRequest.getCharacterEncoding());
+			httpRequest.setCharacterEncoding("UTF-8");
+			System.out.println("AFTER ---------------> "+httpRequest.getCharacterEncoding());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		Response response;
 		Datastore ds = Constants.datastore;
 		try {
+			
 			long userid = HandleTokens.validateToken(value);			
-			response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);	
+			//response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
+			response = Response.status(Status.UNAUTHORIZED).build();
+
 		}catch(Exception e) {
+			e.printStackTrace();
 			response = Response.status(Status.UNAUTHORIZED).entity(Constants.g.toJson(e.getLocalizedMessage())).build();
 		}
 		return response;
@@ -96,6 +109,9 @@ public class EventsResources {
 		}
 		return response;
 	}
+	public final static String POSTAL_CODE = "pc";
+	public final static String COUNTRY_NAME = "cn";
+
 	/**
 	 * loads upcoming events 
 	 * @param value offset value stored in the specified cookie
@@ -106,13 +122,15 @@ public class EventsResources {
 	@Path("/view")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
+			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,@QueryParam(POSTAL_CODE) String postalCode,@QueryParam(COUNTRY_NAME) String country) {
 		Response resp;
 		try {
-			System.out.println("TOKEN "+token);
+			System.out.println(postalCode+" "+country);
+			System.out.println("CURSOR -> "+value);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
-			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvent(value,userid);
+			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,postalCode,country);
 			NewCookie nk = HandleTokens.makeCookie(Constants.GET_EVENT_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {

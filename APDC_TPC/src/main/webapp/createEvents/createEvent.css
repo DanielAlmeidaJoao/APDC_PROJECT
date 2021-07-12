@@ -22,6 +22,10 @@
 }
 .addEvt_frm{
     width: auto;
+    display: block;
+}
+.hidfrm{
+    display: none;
 }
 .gmap{
     display: flex;

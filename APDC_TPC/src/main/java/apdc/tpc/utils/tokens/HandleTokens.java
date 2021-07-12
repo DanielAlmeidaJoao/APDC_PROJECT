@@ -77,7 +77,7 @@ public class HandleTokens {
 	}
 	public static NewCookie destroyCookie(String name) {
 		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
-		Cookie ck = new Cookie(name,"", "/", null);
+		Cookie ck = new Cookie(name,null, "/", null);
 		NewCookie nk = new NewCookie(ck,null,-1,null,false,false);
 		return nk;
 	}

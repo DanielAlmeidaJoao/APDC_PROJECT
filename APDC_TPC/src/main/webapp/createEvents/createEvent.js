@@ -11,6 +11,11 @@ const HttpCodes = {
 }
 const sbmt = document.getElementById("addEvt_frm");
 const hideMapClass="hdmap";
+function toggleCreateEventForm() {
+    document.getElementById("tgl_crtevt").onclick=()=>{
+        document.getElementById("addEvt_frm").classList.toggle("hidfrm");
+    }
+}
 function showMap(){
     document.getElementById("map_div").classList.remove(hideMapClass);
 }
@@ -234,3 +239,4 @@ showCreateEventBlock();
 handleCreateEventSubmitForm();
 handleImages();
 cancelEventCreationEdition();
+toggleCreateEventForm();

@@ -27,8 +27,11 @@ function initAutocomplete() {
     if(map){
       let lat=position.coords.latitude;
       let lng=position.coords.longitude;
+        
       origin={lat:lat, lng: lng};
       map.setCenter(origin);
+      geocodeLatLng(map,lat,lng);
+
 
      /* const image = {
         url: "https://storage.googleapis.com/profile_pics46335560256500/5715241090416640"
@@ -40,18 +43,23 @@ function initAutocomplete() {
         // The anchor for this image is the base of the flagpole at (0, 32).
         anchor: new google.maps.Point(0, 32),
       }; */
-      
+      /*
       new google.maps.Marker({
         //icon:image,
         title: "I AM HERE",
         position: new google.maps.LatLng(lat,lng),
         map: map
-      });
+      });*/
     }
   });
   // Create the search box and link it to the UI element.
+  const input2 = document.getElementById("pac-input2");
   const input = document.getElementById("pac-input");
+
   const searchBox = new google.maps.places.SearchBox(input);
+  const searchBox2 = new google.maps.places.SearchBox(input2);
+
+
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
   // Bias the SearchBox results towards current map's viewport.
   map.addListener("bounds_changed", () => {
@@ -62,10 +70,11 @@ function initAutocomplete() {
   // more details for that place.
   searchBox.addListener("places_changed", () => {
     const places = searchBox.getPlaces();
-
+    
     if (places.length == 0) {
       return;
     }
+    
     clearMarkers();
     // For each place, get the icon, name and location.
     const bounds = new google.maps.LatLngBounds();
@@ -97,15 +106,36 @@ function initAutocomplete() {
       } else {
         bounds.extend(place.geometry.location);
       }
-      let obj={
-        place_id:place.place_id,
-        loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
-        name:getPlaceName(place)
-      };
-      destination=obj;
+      let validAddress = validPlace(place);
+      console.log(validAddress);
+      if(validAddress!=null){
+        destination=validAddress;
+      }
     });
     map.fitBounds(bounds);
   });
+}
+function validPlace(place){
+  let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
+  let postalCode=newDiv.querySelector(".postal-code");
+  let locality=newDiv.querySelector(".locality");
+  let countryName = newDiv.querySelector(".country-name");
+  let street_address = newDiv.querySelector(".street-address");
+  console.log(newDiv);
+
+
+  if(street_address==undefined || postalCode==undefined || locality==undefined || countryName==undefined){
+    alert("The Address must have a street address, postal code, locality and a country name!");
+    return null;
+  }
+  let obj={
+    loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
+    name:getPlaceName(place),
+    postal_code:postalCode.textContent,
+    locality:locality.textContent,
+    country_name:countryName.textContent
+  };
+  return obj;
 }
 function getPlaceName(place){
   let name;
@@ -133,11 +163,11 @@ DistHaversine = function(p1, p2) {
 }
 const currentPoints = [];
 function makeMarker(eventObj) {
-  let where =JSON.parse(eventObj.location);
+  let loc = eventObj.loc;//JSON.parse(eventObj.loc);
   let distDiv = document.getElementById("edist");
   let marker =  new google.maps.Marker({
       title: "Event: "+eventObj.name,
-      position: new google.maps.LatLng(where.loc.lat,where.loc.lng),
+      position: new google.maps.LatLng(loc.lat,loc.lng),
       map: map
   });
   marker.id=eventObj.eventId;
@@ -158,10 +188,10 @@ function makeMarker(eventObj) {
       }).then(event=>{
         if(event){
           clicked=true;
-          contentString = makeShowInfoString(event,where.name,false);
+          contentString = makeShowInfoString(event,eventObj.eventAddress,false);
           infowindow = new google.maps.InfoWindow({content: contentString,maxWidth:"800px"});
           infowindow.open(map, marker);
-          distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+          distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
         }
       }).catch(err=>{
         console.log("ERROR "+err);
@@ -169,45 +199,71 @@ function makeMarker(eventObj) {
     }
     else{
       infowindow.open(map, marker);
-      distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+      distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
     }
   });
 }
 
 function makeMarker2(eventObj) {
-  let where =JSON.parse(eventObj.location);
+  let loc = eventObj.loc; //JSON.parse(eventObj.loc);
   let distDiv = document.getElementById("edist");
   
   let marker =  new google.maps.Marker({
       title: "Event: "+eventObj.name,
-      position: new google.maps.LatLng(where.loc.lat,where.loc.lng),
+      position: new google.maps.LatLng(loc.lat,loc.lng),
       map: map
   });
   marker.id=eventObj.eventId;
   currentPoints.push(marker);
   let clicked=false;
   
-  let contentString = makeShowInfoString(eventObj,where.name,false);
+  let contentString = makeShowInfoString(eventObj,eventObj.eventAddress,false);
   let infowindow = new google.maps.InfoWindow({content: contentString});
   marker.addListener('click', function() {
     infowindow.open(map, marker);
-    distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
+    distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
   });
 }
-/**
- * if(notrunned){
-          notrunned=false;
-          fetch(`/rest/events/view/${eventObj.eventId}`)
-          .then(response => response.json())
-          .then( data => {
-            let contentString = makeShowInfoString(data,where.name);
-            infowindow = new google.maps.InfoWindow({content: contentString});
-            infowindow.open(map, marker);
-            distDiv.textContent=DistHaversine(origin, { lat: where.loc.lat, lng: where.loc.lng });
-          }
-          )
-          .catch((error) => {
-              console.log('Error: '+ error);
-          });
+let pps;
+function geocodeLatLng(map,lat,lng) {
+  const geocoder = new google.maps.Geocoder();
+  const infowindow = new google.maps.InfoWindow();
+  const latlng = {
+    lat: parseFloat(lat),
+    lng: parseFloat(lng),
+  };
+  geocoder
+    .geocode({ location: latlng })
+    .then((response) => {
+        pps = response.results[0].address_components;
+      if (response.results[0]) {
+        loadsEventsNearTheLoggedUser();
+        map.setZoom(11);
+        const marker = new google.maps.Marker({
+          title: response.results[0].formatted_address,
+          position: new google.maps.LatLng(lat,lng),
+          map: map,
+        });
+        infowindow.setContent(response.results[0].formatted_address);
+        infowindow.open(map, marker);
+        marker.addListener('click', function() {
+          infowindow.open(map, marker);
+        });
+      } else {
+        window.alert("Invalid Coordinates!");
       }
- */
+    })
+    .catch((e) => window.alert("Geocoder failed due to: " + e));
+}
+
+function loadsEventsNearTheLoggedUser() {
+  postal_code = pps[pps.length-1].long_name;
+  postal_code = postal_code.split("-")[0];
+  country_name = pps[pps.length-2].long_name;
+
+  console.log(postal_code);
+  console.log(country_name);
+  if(!isNaN(postal_code)){
+    pageRefreshed();
+  }
+}

@@ -39,16 +39,62 @@
     <div class="main_body">
         <div class="main_body_son2">
             <div id="map_div" class="mpd hdmap">
-                <input id="pac-input" class="controls" type="text"      placeholder="Search Box" />
-                <div id="map"></div>
-                <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initAutocomplete&libraries=places&v=weekly"
-                async></script>
-                <div>
-                    <label>Estimated Distance</label>
-                    <span id="edist"></span>
+                 <!--EVENT CREATION-->
+                <div class="view_user dispn" id="create_events">
+                    <div class="create_events">
+                        <button id="tgl_crtevt">CREATE EVENT</button>
+                        <form class="addEvt_frm hidfrm" id="addEvt_frm">
+                            <!--name, description, goals, volunteers,location,
+                                meetingPlace, startDate, endDate, duration;
+                            -->
+                            <div class="evnt_atrs" id="inp_data">
+                                <input class="crt_inp" id="pac-input2" type="text" name="name" class="txt_inpt" required placeholder="Full Address">
+                                <label>Event Name</label>
+                                <input class="crt_inp" type="text" name="name" class="txt_inpt" required>
+                                <label>Event Description</label>
+                                <textarea class="evnt_desc" name="description" id="desctxt" required></textarea>
+                                <label >Goals</label>
+                                <input class="crt_inp" name="goals" type="text" required>
+                                <label >Number of volunteers</label>
+                                <input class="crt_inp" name="volunteers" type="number" required>
+                                <label >Start Date</label>
+                                <input class="crt_inp" name="startDate" type="date" id="startDate" required>
+                                <label>End Date</label>
+                                <input class="crt_inp" name="endDate" type="date" id="endDate" required>
+                                <label>StartTime</label>
+                                <input class="crt_inp" name="startTime" type="time" id="startTime" required>
+                                <label>EndTime</label>
+                                <input class="crt_inp" name="endTime" type="time" id="endTime" required>
+                            </div>
+                            <div class="gmap" id="gmap">
+                                <div>
+                                    <label class="upld7" for="gtimg">Upload image</label>
+                                    <input id="gtimg" type="file" size="45" accept="image/*"/>
+                                </div>
+                                <div class="imgs" id="imgs_dv">
+                                </div>
+                                <div class="crt_btns">
+                                    <button class="crt_inp sbt_crt_btn crtb" type="submit">CREATE</button>
+                                    <button class="crt_inp sbt_crt_btn crtb" type="reset" id="nclbtn">CANCEL</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <button id="vwmrpnt" class="edt_fn">View More Points</button>
+                <div class="map_nl">
+                    <input id="pac-input" class="controls" type="text"      placeholder="Search Box" />
+                    <div id="map"></div>
+                    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDc_Myq2da75KNAaxf4cwI9TtAYGdvOwrc&callback=initAutocomplete&libraries=places&v=weekly"
+                    async></script>
+                    <div>
+                        <label>Estimated Distance</label>
+                        <span id="edist"></span>
+                    </div>
+                    <button id="vwmrpnt" class="edt_fn">View More Points</button>
+                </div>
+                
+                
             </div>
             <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
             <div class="additional_atrs view_user dispn dispb" name="gbo" id="my_inf">
@@ -143,48 +189,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--EVENT CREATION-->
-            <div class="view_user dispn" id="create_events">
-                <di class="create_events">
-                    <form class="addEvt_frm" id="addEvt_frm">
-                        <!--name, description, goals, volunteers,location,
-                            meetingPlace, startDate, endDate, duration;
-                        -->
-                        <div class="evnt_atrs" id="inp_data">
-                            <label>Event Name</label>
-                            <input class="crt_inp" type="text" name="name" class="txt_inpt" required>
-                            <label>Event Description</label>
-                            <textarea class="evnt_desc" name="description" id="desctxt" required></textarea>
-                            <label >Goals</label>
-                            <input class="crt_inp" name="goals" type="text" required>
-                            <label >Number of volunteers</label>
-                            <input class="crt_inp" name="volunteers" type="number" required>
-                            <label >Start Date</label>
-                            <input class="crt_inp" name="startDate" type="date" id="startDate" required>
-                            <label>End Date</label>
-                            <input class="crt_inp" name="endDate" type="date" id="endDate" required>
-                            <label>StartTime</label>
-                            <input class="crt_inp" name="startTime" type="time" id="startTime" required>
-                            <label>EndTime</label>
-                            <input class="crt_inp" name="endTime" type="time" id="endTime" required>
-                        </div>
-                        <div class="gmap" id="gmap">
-                            <div>
-                                <label class="upld7" for="gtimg">Upload image</label>
-                                <input id="gtimg" type="file" size="45" accept="image/*"/>
-                            </div>
-                            <div class="imgs" id="imgs_dv">
-                            </div>
-                            <div class="crt_btns">
-                                <button class="crt_inp sbt_crt_btn crtb" type="submit">CREATE</button>
-                                <button class="crt_inp sbt_crt_btn crtb" type="reset" id="nclbtn">CANCEL</button>
-                            </div>
-                        </div>
-                    </form>
-                </di>
-            </div>
-            
+            </div>            
             <!--FINISHED EVENTS-->
             <div class="dispn" id="show_fnd_evts_blk">
                 <div class="view_user dlfx ve">

@@ -6,6 +6,8 @@ const HTML_EVENT_ID_SUFFIX="usev";
 const GOING_TEXT="GOING";
 const WANTING_TO_GO="I WILL GO";
 
+let postal_code, country_name;
+
 function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
     show.onclick=()=>{
@@ -35,6 +37,18 @@ let markers = [];
     showMap();
     autoCompDirection.showOnTheMap(origin,destination);
 }*/
+function resetCookies() {
+    fetch("../rest/login/recks").then(response=>{
+        document.getElementById("vwmrpnt").click();
+    }).catch(err=>{console.log(err);});
+}
+function pageRefreshed(){
+    if (performance.navigation.type == performance.navigation.TYPE_RELOAD||localStorage.getItem("email")!=null) {
+        resetCookies()
+    }else{
+        document.getElementById("vwmrpnt").click();
+    }
+}
 const handleGetEventsButton = function () {
     let viewMoreEventsPoints = document.getElementById("vwmrpnt");
     viewMoreEventsPoints.onclick=()=>{
@@ -44,26 +58,27 @@ const handleGetEventsButton = function () {
     loadFinisheds.onclick=()=>{
         loadFinishedEvents();
     }
-    viewMoreEventsPoints.click();
 }
 function loadEvents(path,finished,divBlock) {
     fetch(path)
     .then(response => response.json())
     .then( data => {
-        let chld;
-        for(let x=0; x<data.length;x++){
-            try {
-                if(finished){
-                    let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
-                    divBlock.appendChild(chld);
-                }else{
-                    makeMarker(data[x]);
+        if(data){
+            let chld;
+            for(let x=0; x<data.length;x++){
+                try {
+                    if(finished){
+                        let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                        divBlock.appendChild(chld);
+                    }else{
+                        makeMarker(data[x]);
+                    }
+                } catch (error) {
+                    console.log(error+" HELLO");
                 }
-            } catch (error) {
-                console.log(error+" HELLO");
+                //chld = singleEventBlock(data[x],finished);
+                //divBlock.appendChild(chld);
             }
-            //chld = singleEventBlock(data[x],finished);
-            //divBlock.appendChild(chld);
         }
     }
     )
@@ -79,7 +94,7 @@ function loadFinishedEvents() {
 }
 function loadUpcomingEvents() {
     let mainBlock = document.getElementById("events_blk");
-    let path = `/rest/events/view`;
+    let path = `/rest/events/view?pc=${postal_code}&cn=${country_name}`;
     loadEvents(path,false,mainBlock);
 }
 

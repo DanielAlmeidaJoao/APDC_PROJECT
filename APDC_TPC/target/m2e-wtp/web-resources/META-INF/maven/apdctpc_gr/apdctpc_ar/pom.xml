@@ -131,6 +131,12 @@
 		</dependency>
 		
 		<dependency>
+		   <groupId>org.usergrid</groupId>
+		   <artifactId>geocell</artifactId>
+		   <version>0.0.11</version>
+		</dependency>
+		
+		<dependency>
 		  <!-- jsoup HTML parser library @ https://jsoup.org/ -->
 		  <groupId>org.jsoup</groupId>
 		  <artifactId>jsoup</artifactId>

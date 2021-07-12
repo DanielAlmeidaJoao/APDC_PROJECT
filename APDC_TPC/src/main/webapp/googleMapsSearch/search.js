@@ -27,6 +27,8 @@ function initAutocomplete() {
     if (places.length == 0) {
       return;
     }
+    
+
     // Clear out the old markers.
     markers.forEach((marker) => {
       marker.setMap(null);
@@ -39,6 +41,9 @@ function initAutocomplete() {
         console.log("Returned place contains no geometry");
         return;
       }
+      let vp = validPlace(place);
+      console.log(vp);
+
       const icon = {
         url: place.icon,
         size: new google.maps.Size(71, 71),
@@ -62,9 +67,46 @@ function initAutocomplete() {
       } else {
         bounds.extend(place.geometry.location);
       }
+      console.log(place);
+      console.log(place.geometry.location.lat()+"/-----/"+place.geometry.location.lng());
     });
     map.fitBounds(bounds);
   });
+}
+function getPlaceName(place){
+  let name;
+  if(place.formatted_address){
+    name=place.formatted_address;
+  }else{
+    name=place.place;
+  }
+  return name;
+}
+function stringToDom(str){
+  let doc = new DOMParser().parseFromString(str,'text/html');
+  return doc.body.firstChild;
+}
+function validPlace(place){
+  let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
+  let postalCode=newDiv.querySelector(".postal-code");
+  let locality=newDiv.querySelector(".locality");
+  let countryName = newDiv.querySelector(".country-name");
+  let street_address = newDiv.querySelector(".street-address");
+  console.log(newDiv);
+
+
+  if(street_address==undefined || postalCode==undefined || locality==undefined || countryName==undefined){
+    alert("The Address must have a street address, postal code, locality and a country name!");
+    return null;
+  }
+  let obj={
+    loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
+    name:getPlaceName(place),
+    postal_code:postalCode.textContent,
+    locality:locality.textContent,
+    country_name:countryName.textContent
+  };
+  return obj;
 }
   // Functions to compute distance between two points on earth's surface
 Rad = function(x) {return x*Math.PI/180;}

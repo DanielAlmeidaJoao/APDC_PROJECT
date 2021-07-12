@@ -178,21 +178,7 @@ function removeAccount() {
         })
     }
 }
-function resetCookies() {
-    fetch("../rest/login/recks").then(response=>{}).catch(err=>{console.log(err);});
-}
-function pageRefreshed(){
-    console.log("PAGE REFRESH DETECTOR IS WORKING!");
-    if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
-        console.log("PAGE REFRESHED");
-        resetCookies()
-    } else if(localStorage.getItem("email")!=null) {
-        console.log("PAGE REFRESHED");
-        resetCookies();
-    }else{
-        console.info( "This page is not reloaded");
-    }
-}
+
 function sendLogOff() {
     let spanText= document.getElementById("rs_sn");
     let xmlHttpReq = getHttpXmlRequest();
@@ -261,23 +247,8 @@ function handShowButtons() {
         selectNavBarButton(showInfo);
         getUserAbouts();
     }
-    
-
-
-    /*
-    let disableUser = document.getElementById("disable_user");
-    disableUser.onclick=()=>{
-        hideAllBlocksButOne("disable_user_b");
-    } */
-
-    /*
-    let changePassword = document.getElementById("change_pwd");
-    changePassword.onclick=()=>{
-        hideAllBlocksButOne("change_pwd_block");
-    }*/
 }
-isLogged();
-pageRefreshed();
+//isLogged();
 updateNavAttribues();
 updateAttributes();
 logOff();

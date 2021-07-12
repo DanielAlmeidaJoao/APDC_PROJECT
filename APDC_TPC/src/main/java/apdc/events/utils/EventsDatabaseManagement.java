@@ -2,8 +2,10 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
+
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.LatLng;
 import com.google.cloud.datastore.ProjectionEntity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -13,9 +15,11 @@ import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
 
+import apdc.events.utils.jsonclasses.Coords;
 import apdc.events.utils.jsonclasses.EventData;
 import apdc.events.utils.jsonclasses.EventData2;
-import apdc.events.utils.jsonclasses.EventLocation;
+import apdc.events.utils.jsonclasses.EventLocationArgs;
+import apdc.events.utils.jsonclasses.EventLocationResponse;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
 import apdc.events.utils.jsonclasses.ReportProperty;
 import apdc.tpc.resources.EventsResources;
@@ -33,16 +37,23 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
+
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
 public class EventsDatabaseManagement {
 
+	private static final String LATLNG_EVENT_PROP = "LATLNG";
+	private static final String FORMATTED_ADDRESS_EVENT_PROP = "FORMATTED_ADDRESS";
+	private static final String COUNTRY_NAME_EVENT_PROP = "COUNTRY_NAME";
+	private static final String LOCALITY_EVENT_PROP = "LOCALITY";
+	private static final String POSTAL_CODE_PROP = "POSTAL_CODE";
 	public static final String EVENTS="EVENTS";
 	//private static final String USERS = "Users";
 	private static final String NAME="NAME";
@@ -73,6 +84,9 @@ public class EventsDatabaseManagement {
 	 */
 	private static String getPartString(HttpServletRequest httpRequest) {
 		try {
+			System.out.println("GOING TO READ EVENT DATA "+ httpRequest.getCharacterEncoding());
+			System.out.println("GOING TO READ EVENT DATA "+ httpRequest.getContentType());
+
 			Part p = httpRequest.getPart(Constants.EVENT_FORMDATA_KEY);
 			/*
 			p.delete();
@@ -159,6 +173,10 @@ public class EventsDatabaseManagement {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 	}
+	private static String firstNumberPostCode(String postCode) {
+		String [] arr = postCode.split("-");
+		return arr[0];
+	}
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -177,9 +195,11 @@ public class EventsDatabaseManagement {
 			LOG.severe(et.getEventId()+" ia ma event id");
 			eventId	= et.getEventId();
 		}catch(Exception e) {
+			e.printStackTrace();
 			LOG.severe(" SOMETHING WENT WRONG "+e.getLocalizedMessage());
 
 		}
+		EventLocationArgs location = Constants.g.fromJson(et.getLocation(),EventLocationArgs.class);
 		Response result;
 		Transaction txn=null;
 		  try {
@@ -199,17 +219,25 @@ public class EventsDatabaseManagement {
 			  }		  
 		  //com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
 					//.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
-			
+			LatLng coords = LatLng.of(location.getLoc().getLat(),location.getLoc().getLng());
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
 					.set(GOAL,et.getGoals())
-					.set(LOCATION,et.getLocation())
+					//.set(LOCATION,et.getLocation())
+					//	String name, postal_code, locality, country_name;
+					.set(POSTAL_CODE_PROP,firstNumberPostCode(location.getPostal_code()))
+					.set(LOCALITY_EVENT_PROP,location.getLocality().toLowerCase())
+					.set(COUNTRY_NAME_EVENT_PROP,location.getCountry_name().toLowerCase())
+					.set(FORMATTED_ADDRESS_EVENT_PROP,location.getName())
+					.set(LATLNG_EVENT_PROP,coords)
 					//.set(MEETING_PLACE,noIndexProperties(et.getMeetingPlace()))
 					.set(START_DATE,makeTimeStamp(et.getStartDate(),et.getStartTime()))
 					.set(END_DATE,makeTimeStamp(et.getEndDate(),et.getEndTime()))
 					.set(VOLUNTEERS,et.getVolunteers())
 					.set(EVENT_OWNER,userid);
+			
+			System.out.println("LOCALITY "+location.getLocality().toLowerCase());
 			
 			//handles the reports
 			if(eventId<=Constants.ZERO) {
@@ -244,14 +272,6 @@ public class EventsDatabaseManagement {
 		    	eventId=ev.getKey().getId();
 		    }
 		    txn.commit();
-		    /*
-		    com.google.cloud.datastore.Key k = datastore.newKeyFactory().addAncestors(PathElement.of(USERS,userid)).setKind(EVENTS).newKey(eventId);
-
-			System.out.println(k.getKind()+" -------- KIND --------- "+eventId);
-			System.out.println(k.getId()+"---------------- ID ------- ");
-			Entity event = datastore.get(k);
-		    System.out.println("HAAAAAAAAAAAAAAAAAAAAAAA "+event);*/
-		    
 		    EventData2 obj = getEvent(ev,userid,false);
 		    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
 		  }catch(Exception e) {
@@ -305,17 +325,24 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static Pair<String,String> getUpcomingEvent(String startCursor, long userid) {
+	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid, String postalCode,String country) {
 		try {
+			postalCode=postalCode.toLowerCase();
+			country=country.toLowerCase();
+			System.out.println("HOLLLA:"+postalCode+":"+country);
 			Cursor startcursor=null;
 			Query<ProjectionEntity> query=null;
 			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
+			Filter postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
+			Filter countryFilter= PropertyFilter.eq(COUNTRY_NAME_EVENT_PROP,country);
 
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
-				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter.and(filter,unreportedEventFilter))
-				    .setProjection(NAME,LOCATION)
+				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter
+				    		.and(filter,unreportedEventFilter,postalCodeFilter,countryFilter))
+				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,LATLNG_EVENT_PROP)
 				    .setLimit(PAGESIGE);
+			
 			if (startCursor!=null) {
 			      startcursor = Cursor.fromUrlSafe(startCursor); 
 				  dd=dd.setStartCursor(startcursor);
@@ -324,10 +351,11 @@ public class EventsDatabaseManagement {
 			
 			QueryResults<ProjectionEntity> tasks = Constants.datastore.run(query);
 			ProjectionEntity e;
-			List<EventLocation> events = new LinkedList<>();
+			List<EventLocationResponse> events = new LinkedList<>();
 			while(tasks.hasNext()){
 				e = tasks.next();
-				events.add(new EventLocation(e.getString(LOCATION),e.getKey().getId(),e.getString(NAME)));
+				LatLng coords = e.getLatLng(LATLNG_EVENT_PROP);
+				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
 			}
 			//data,cursor
 			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
@@ -372,54 +400,7 @@ public class EventsDatabaseManagement {
 		
 		return null;
 	}
-	/**
-	 * Caution: Be careful when passing a cursor to a client, such as in a web form.
-	 * Although the client cannot change the cursor value to access results outside of the original query,
-	 *  it is possible for it to decode the cursor to expose information about result entities,
-	 *  such as the project ID, entity kind, key name or numeric ID, ancestor keys,
-	 *  and properties used in the query's filters and sort orders.
-	 *  If you don't want users to have access to that information,
-	 *  you can encrypt the cursor, or store it and provide the user with an opaque key
-	 * @param pageSize
-	 * @param pageCursor
-	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
-	 */
-	public static Pair<String,String> getEvents(String startCursor, long userid,boolean finished) {
-		try {
-			Cursor startcursor=null;
-			Query<Entity> query=null;
-			//Timestamp.no
-			Filter filter= null;
-			if(finished) {
-				filter=PropertyFilter.le(END_DATE,Timestamp.now());
-				System.out.println("FINISHED EVENTS!!!!!!");
-			}else {
-				filter=PropertyFilter.gt(END_DATE,Timestamp.now());
-			}
-			Builder b=Query.newEntityQueryBuilder()
-				    .setKind(EVENTS).setFilter(filter)
-				    .setLimit(PAGESIGE);
-			if (startCursor!=null) {
-		      startcursor = Cursor.fromUrlSafe(startCursor); 
-			  b=b.setStartCursor(startcursor);
-		    }
-			query=b.build();
-			QueryResults<Entity> tasks = Constants.datastore.run(query);
-		    Entity e;
-			List<EventData2> events = new LinkedList<>();
-			while(tasks.hasNext()){
-				e = tasks.next();
-				events.add(getEvent(e,userid,finished));
-			}
-			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
-
-		}catch(Exception e) {
-			Constants.LOG.severe("");
-			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}
+	
 	/**
 	 * deletes an event and every ither information related to the event
 	 * @param eventId the event to be deleted
@@ -482,7 +463,11 @@ public class EventsDatabaseManagement {
 		ed.setDescription(en.getString(DESCRIPTION));
 		ed.setEndDate(revertTimeStamp(en.getTimestamp(END_DATE)));
 		ed.setGoals(en.getString(GOAL));
-		ed.setLocation(en.getString(LOCATION));
+		//ed.setLocation(en.getString(LOCATION));
+		ed.setEventAddress(en.getString(FORMATTED_ADDRESS_EVENT_PROP));
+		LatLng coords = en.getLatLng(LATLNG_EVENT_PROP);
+		ed.setLoc(new Coords(coords.getLatitude(),coords.getLongitude()));
+		
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
 		ed.setVolunteers(en.getLong(VOLUNTEERS));
@@ -557,6 +542,63 @@ public class EventsDatabaseManagement {
 		}
 		
 		return results;
+	}
+	/**
+	 * Caution: Be careful when passing a cursor to a client, such as in a web form.
+	 * Although the client cannot change the cursor value to access results outside of the original query,
+	 *  it is possible for it to decode the cursor to expose information about result entities,
+	 *  such as the project ID, entity kind, key name or numeric ID, ancestor keys,
+	 *  and properties used in the query's filters and sort orders.
+	 *  If you don't want users to have access to that information,
+	 *  you can encrypt the cursor, or store it and provide the user with an opaque key
+	 * @param pageSize
+	 * @param pageCursor
+	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
+	 */
+	public static Pair<String,String> getEvents(String startCursor,long userid,boolean finished) {
+		try {
+			Datastore datastore = Constants.datastore;
+			Cursor startcursor=null;
+			Query<Entity> query=null;
+			//Timestamp.no
+			Filter filter= null;
+			if(finished) {
+				filter=PropertyFilter.le(END_DATE,Timestamp.now());
+				System.out.println("FINISHED EVENTS!!!!!!");
+			}else {
+				filter=PropertyFilter.gt(END_DATE,Timestamp.now());
+			}
+			Builder b=Query.newEntityQueryBuilder()
+				    .setKind(EVENTS).setFilter(filter)
+				    .setLimit(PAGESIGE);
+			if (startCursor!=null) {
+				b=Query.newEntityQueryBuilder()
+					    .setKind(EVENTS).setFilter(filter)
+					    .setLimit(PAGESIGE);
+				startcursor = Cursor.fromUrlSafe(startCursor); 
+		      
+				b=b.setStartCursor(startcursor);
+		    }
+			query=b.build();
+			QueryResults<Entity> tasks = datastore.run(query);
+		    Entity e;
+			List<EventData2> events = new LinkedList<>();
+			while(tasks.hasNext()){
+				e = tasks.next();
+				events.add(getEvent(e,userid,finished));
+			}
+			/*
+			if(events.isEmpty()) {
+				
+			}*/
+			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+
+		}catch(Exception e) {
+			Constants.LOG.severe("");
+			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+		return null;
 	}
 	/**
 	 * 

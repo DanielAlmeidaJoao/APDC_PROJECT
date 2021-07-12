@@ -15,8 +15,6 @@ public class AdditionalResponseHeadersFilter implements ContainerResponseFilter 
 //		responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
 //		responseContext.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, application/json");
 //		responseContext.getHeaders().add("Access-Control-Request-Headers", "Content-Type, application/json");
-		
-	
 		responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
 		responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
 		responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
