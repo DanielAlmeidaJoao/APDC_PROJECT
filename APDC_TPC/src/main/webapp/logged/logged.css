@@ -3,6 +3,10 @@ body{
     padding: 0px;
     background-color:  #FFF
 }
+.showInfo{
+    text-decoration: none;
+    color: inherit;
+}
 .nav_bar0{
     position: fixed;
     top: 0%;
@@ -13,6 +17,7 @@ body{
     height: 100px;
     z-index: 1;
 }
+
 .nav_logged{
     display: flex;
     justify-content: space-between;

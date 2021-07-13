@@ -59,4 +59,16 @@ function updateProfilePicture() {
         })
     }
 }
+function handleEditBtn() {
+    document.getElementById("edt_inf").onclick=()=>{
+        let textas=document.getElementsByClassName("txta");
+        for (let index = 0; index < textas.length; index++) {
+            const element = textas[index];
+            element.classList.add("shwtxa");
+            element.previousElementSibling.classList.add("hdtxa");
+            element.value=element.previousElementSibling.innerHTML;
+        }
+    }
+}
+handleEditBtn();
 updateProfilePicture();
