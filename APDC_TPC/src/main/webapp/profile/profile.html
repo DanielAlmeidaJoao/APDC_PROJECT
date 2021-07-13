@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../logged/logged.css">
+    <link rel="stylesheet" href="../viewusers/vusers.css">
+    <link rel="stylesheet" href="../userarea/userarea.css">
+    <link rel="stylesheet" href="./profile.css">
+
+    <title>Profile</title>
+</head>
+<body>
+    <nav class="nav_bar0">
+        <div class="nav_logged">
+            <div><img class="nav_img_prfl" id="nav_profile_pic" src="../imgs/Profile_avatar_placeholder_large.png" alt="prifile-pic"> </div>
+            <span id="name_sp" class="nv_el adt"></span>
+            <span id="email_sp" class="nv_el adt"></span>
+            <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
+            <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
+        </div>
+        <div class="nav_logged nav_btns">
+            <!--
+                <div class="usr_evtsnr">
+                            <div id="num_evts" class="num_evts">EVENTS CREATED:<span id="evt_counter">0</span> </div>
+                            <div id="intrdevts" class="num_evts">EVENTS INTERESTED:<span id="evtintr_counter">0</span></div>
+                        </div>
+            -->
+            <button id="about_nvb" class="nvb sltdnvb">ABOUT</button>
+            <button id="num_evts" class="nvb">EVENTS CREATED: <span id="evt_counter">0</span></button>
+            <button id="intrdevts" class="nvb">EVENTS INTERESTED: <span id="evtintr_counter">0</span></button>
+        </div>
+    </nav>
+
+    <div class="main_body">
+        <div class="user_plc_p user_plc" id="mbses">
+            <div class="user_plc" id="usr_bta76">
+                <div class="info_dv">
+                    <div id="vsb_btn" class="vsb_btn" >DANIEL JOAO</div>
+                    <div class="qtdv txt_pm">
+                        <span class="tag_nm">QuotE</span>
+                        <div class="qttxt txt_pm">PUM POM POM PUM POM PUM, CAUSE i CAN'T GET ENOUGH OF YOU!</div>
+                    </div>
+                    <div class="abt_prd txt_pm">
+                        <span class="tag_nm">About</span>
+                        <div class="abt_txt txt_pm">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
+                            totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae 
+                            vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut 
+                            odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. 
+                            Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, 
+                            sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. 
+                            Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid 
+                            ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil 
+                            molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+                        </div>
+                    </div>
+                    <div class="contas_pdv txt_pm">
+                        <span class="tag_nm">Redes Socias</span>
+                        <div id="contacts" class="contacts_dv txt_pm">
+                            <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Instagram</a>
+                            <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Facebook</a>
+                            <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Twitter</a>
+                        </div>
+                    </div>
+                    <div>
+
+                    </div>
+                </div>
+                <div class="pfpc_prnt" id="pfpc_prnt">
+                    <img class="img_prfl" id="prfl_img" src="../imgs/Profile_avatar_placeholder_large.png">
+                    <div class="prfpc_btns" id="prfpc_btns">
+                    <input id="profileimg"  class="edt_fn" type="file" size="45" accept="image/*"/>
+                    <span class="edt_fn updateImgPic" id="updateImgPic" >UPDATE</span>
+                    </div>
+                </div>
+            </div>
+            <div id="usrs_evts_disp" class="view_user dlfx ve usr_evts">
+                <div class="sec_name">EVENTS CREATED</div>
+                <div class="show_events" id="shusevnts">
+
+                </div>
+                <button id="load_mr_user_evnts">LOAD MORE</button>
+            </div>
+
+            <div id="usrs_evts_itrd" class="view_user dlfx ve usr_evts">
+                <div class="sec_name">EVENTS INTERESTED</div>
+                <div class="show_events" id="shusevntsitrd">
+
+                </div>
+                <button id="load_mr_itrstd">LOAD MORE</button>
+            </div>
+        </div>
+    </div>
+    <script src="../profile/profile.js"></script>
+</body>
+</html>

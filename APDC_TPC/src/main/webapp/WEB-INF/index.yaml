@@ -10,6 +10,15 @@ indexes:
   properties:
   - name: COUNTRY_NAME
   - name: POSTAL_CODE
+  - name: REPORTED
+  - name: END_DATE
+  - name: NAME
+  - name: FORMATTED_ADDRESS
+  - name: LATLNG
+
+- kind: EVENTS
+  properties:
+  - name: COUNTRY_NAME
   - name: LOCALITY
   - name: REPORTED
   - name: END_DATE

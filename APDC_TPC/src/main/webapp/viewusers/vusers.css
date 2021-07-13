@@ -27,9 +27,7 @@
     cursor: pointer;
     background-color: #1d1b1b;
 }
-.usr_evts{
-    display: none;
-}
+
 .num_evts span{
     padding: 10px 10px;
 }

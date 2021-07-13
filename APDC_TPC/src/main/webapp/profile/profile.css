@@ -1,0 +1,48 @@
+body{
+
+}
+.vsb_btn{
+    text-align: center;
+    padding: 10px 10px;
+    margin: 10px 10px;
+    border: none;
+    font-size: 17px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgb(21, 201, 177);
+    border-radius: 5px;
+}
+
+.tag_nm{
+    font-weight: bold;
+    font-size: 18px;
+}
+.qttxt{
+    font-style: italic;
+}
+.txt_pm{
+    padding: 5px 5px;
+    margin: 5px 5px;
+}
+.abt_prd{
+    
+}
+.abt_txt{
+    font-size: 18px;
+    border: 1px solid #0000000d;
+}
+
+.info_dv{
+    margin: 10px 10px;
+    padding: 10px 10px;
+    width: 40%;
+    border-right: 0.5px dotted #00000029;
+}
+
+.contacts_dv{
+    display: flex;
+    flex-direction: column;
+}
+.usr_evts{
+    display: none;
+}

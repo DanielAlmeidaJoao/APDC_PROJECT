@@ -1,9 +1,7 @@
 package apdc.tpc.resources;
 
-
 import java.util.logging.Logger;
 
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -14,15 +12,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Transaction;
@@ -32,6 +27,7 @@ import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.Pair;
 import apdc.events.utils.jsonclasses.EventData2;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
+import apdc.events.utils.jsonclasses.UpcomingEventsArgs;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
@@ -62,7 +58,6 @@ public class EventsResources {
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		try {
 			httpRequest.setCharacterEncoding("UTF-8");
-			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -70,8 +65,8 @@ public class EventsResources {
 		Datastore ds = Constants.datastore;
 		try {
 			long userid = HandleTokens.validateToken(value);			
-			//response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
-			response = Response.status(Status.UNAUTHORIZED).build();
+			response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
+			//response = Response.status(Status.UNAUTHORIZED).build();
 
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -120,21 +115,17 @@ public class EventsResources {
 	 * @param token session token stored in the specified token
 	 * @return 200 if the operation is success
 	 */
-	@GET
+	@POST
 	@Path("/view")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
-			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,
-			@QueryParam(POSTAL_CODE) String postalCode,@QueryParam(COUNTRY_NAME) String country,
-			@QueryParam(LOCALITY) String locality) {
+			@CookieParam(Constants.COOKIE_TOKEN) Cookie token, UpcomingEventsArgs args) {
 		Response resp;
 		try {
-			System.out.println("ARGS --------------------------------------------------------------> "+ postalCode+" "+country+" --- "+locality);
-			System.out.println("CURSOR -> "+value);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
-			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,postalCode,country,locality);
+			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,args.getPostal_code(),args.getCountry_name(),args.getLocality());
 			NewCookie nk = HandleTokens.makeCookie(Constants.GET_EVENT_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {

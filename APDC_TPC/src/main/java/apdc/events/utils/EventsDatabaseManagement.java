@@ -27,6 +27,7 @@ import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -192,7 +193,7 @@ public class EventsDatabaseManagement {
 		long eventId=-1;
 		try {
 			et = Constants.g.fromJson(eventJsonData,EventData.class);
-			LOG.severe(et.getEventId()+" ia ma event id");
+			LOG.severe(et.getEventId()+" ia ma event id ------------- : "+et.getName());
 			eventId	= et.getEventId();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -327,30 +328,39 @@ public class EventsDatabaseManagement {
 	 */
 	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid, String postalCode,String country,String locality) {
 		try {
+			String args="";
 			postalCode=postalCode.toLowerCase();
 			country=country.toLowerCase();
+			locality=locality.toLowerCase();
 			System.out.println("HOLLLA:"+postalCode+":"+country);
-			Cursor startcursor=null;
+			Cursor cursorObject=null;
 			Query<ProjectionEntity> query=null;
 			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
 			Filter postalCodeFilter;
+			
 			if(!postalCode.isEmpty()) {
+				System.out.println("POSTAL ");
 				postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
 			}else {
 				postalCodeFilter= PropertyFilter.eq(LOCALITY_EVENT_PROP,locality);
+				System.out.println("LOCALITY "+locality);
+				System.out.println(URLDecoder.decode(locality,"utf-8"));
 			}
 			Filter countryFilter= PropertyFilter.eq(COUNTRY_NAME_EVENT_PROP,country);
-
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
 				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter
 				    		.and(filter,unreportedEventFilter,postalCodeFilter,countryFilter))
 				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,LATLNG_EVENT_PROP)
 				    .setLimit(PAGESIGE);
-			
-			if (startCursor!=null) {
-			      startcursor = Cursor.fromUrlSafe(startCursor); 
-				  dd=dd.setStartCursor(startcursor);
+			if(startCursor!=null && !startCursor.isEmpty()) {
+					args=postalCode+""+locality+""+country;
+					String [] c = startCursor.split("_");
+					if(c.length>1&&args.equals(c[1])) {
+						startCursor=c[0];
+						cursorObject = Cursor.fromUrlSafe(startCursor); 
+						dd=dd.setStartCursor(cursorObject);
+					}
 			    }
 			query=dd.build();
 			
@@ -363,7 +373,14 @@ public class EventsDatabaseManagement {
 				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
 			}
 			//data,cursor
-			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+			
+			if(!events.isEmpty()) {
+				args=postalCode+""+locality+""+country;
+				startCursor=tasks.getCursorAfter().toUrlSafe()+"_"+args;
+			}else {
+				startCursor="";
+			}
+			return new Pair<String, String>(Constants.g.toJson(events),startCursor);
 		}catch(Exception e) {
 			Constants.LOG.severe("");
 			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
@@ -469,9 +486,14 @@ public class EventsDatabaseManagement {
 		ed.setEndDate(revertTimeStamp(en.getTimestamp(END_DATE)));
 		ed.setGoals(en.getString(GOAL));
 		//ed.setLocation(en.getString(LOCATION));
-		ed.setEventAddress(en.getString(FORMATTED_ADDRESS_EVENT_PROP));
-		LatLng coords = en.getLatLng(LATLNG_EVENT_PROP);
-		ed.setLoc(new Coords(coords.getLatitude(),coords.getLongitude()));
+		try {
+			ed.setEventAddress(en.getString(FORMATTED_ADDRESS_EVENT_PROP));
+			LatLng coords = en.getLatLng(LATLNG_EVENT_PROP);
+			ed.setLoc(new Coords(coords.getLatitude(),coords.getLongitude()));
+		}catch(Exception e) {
+			ed.setEventAddress(e.getLocalizedMessage());
+		}
+		
 		
 		ed.setName(en.getString(NAME));
 		ed.setStartDate(revertTimeStamp(en.getTimestamp(START_DATE)));
@@ -569,7 +591,6 @@ public class EventsDatabaseManagement {
 			Filter filter= null;
 			if(finished) {
 				filter=PropertyFilter.le(END_DATE,Timestamp.now());
-				System.out.println("FINISHED EVENTS!!!!!!");
 			}else {
 				filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			}

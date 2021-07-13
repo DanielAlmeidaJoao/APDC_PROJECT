@@ -210,47 +210,9 @@ function hideAllBlocksButOne(elementToShow) {
     }
     document.getElementById(elementToShow).classList.add(dispb);
 }
-function loadAdditionalInfos(){
-    let path="../rest/login/infos";
-    fetch(path).then(response=>{
-        if(response.ok){
-            return response.json();
-        }else if(response.status===401){
-            alert("Login Please!");
-        }
-    }).then(obj=>{
-        if(obj){
-            fillAdditionalAttributes(obj);
-        }
-    })
-}
-function runOnceOnly(func) {
-    let runned=false;
-    return ()=>{
-        if(!runned){
-            func();
-        }
-    }
-}
 
-function handShowButtons() {
-    let showInfo = document.getElementById("showInfo");
-
-    let getUserAbouts=runOnceOnly(loadAdditionalInfos);
-
-    showInfo.onclick=()=>{
-        /*if(profilePictureURL!="undefined"&&document.getElementById("prfl_img").getAttribute("src")!=profilePictureURL){
-        }*/
-        document.getElementById("prfl_img").setAttribute("src",profilePictureURL);
-        hideAllBlocksButOne("my_inf");
-        hideMap();
-        selectNavBarButton(showInfo);
-        getUserAbouts();
-    }
-}
 //isLogged();
 updateNavAttribues();
 updateAttributes();
 logOff();
 removeAccount();
-handShowButtons();

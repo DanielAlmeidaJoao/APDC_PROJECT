@@ -118,6 +118,7 @@ function updateNumberOfElements(elementid,inc,element) {
  * @param {*} datas 
  */
 function uploadData(datas) {
+    
     fetch('/rest/events/create', {
     method: 'POST', // or 'PUT'
     body:datas
@@ -149,6 +150,17 @@ function uploadData(datas) {
     .catch((error) => {
         console.error('Error:', error);
     });
+    
+    /*
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        console.log(this.responseText);
+    }
+    
+    xhttp.open("POST", '/rest/events/create');
+    //xhttp.setRequestHeader("Content-type", "multipart/form-data");
+    xhttp.send(datas);
+    */
 }
 let eventImages=null;
 function makeImgDiv(result,caption) {

@@ -92,10 +92,33 @@ function loadFinishedEvents() {
     let path = `/rest/events/view/finished`;
     loadEvents(path,true,mainBlock);
 }
+
 function loadUpcomingEvents() {
-    let mainBlock = document.getElementById("events_blk");
-    let path = `/rest/events/view?pc=${postal_code}&cn=${country_name}&lc=${locality}`;
-    loadEvents(path,false,mainBlock);
+    let path = `/rest/events/view`;
+    fetch(path,{
+        method:'POST',
+        headers:{
+            "Content-Type":"application/json;charset=utf-8"
+        },
+        body:JSON.stringify({postal_code:postal_code
+            ,locality:locality
+            ,country_name:country_name})
+    }).then(response=>{
+        return response.json();
+    }).then(data=>{
+        if(data){
+            let chld;
+            for(let x=0; x<data.length;x++){
+                try {
+                    makeMarker(data[x]);
+                } catch (error) {
+                    console.log(error+" HELLO");
+                }
+            }
+        }
+    }).catch(err=>{
+        console.log(err);
+    })
 }
 
 function makeElement(elementType,valueAtt) {

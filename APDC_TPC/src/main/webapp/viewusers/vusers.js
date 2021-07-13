@@ -1,18 +1,3 @@
-/**
- * <div class="user_disp">
-        <div class="users_d">
-            <span>NAME</span>
-            <span>EMAIL</span>
-            <span>USERID</span>
-            <span>ROLE</span>
-            <span>STATE</span>
-        </div>
-        <div class="users_d ops">
-            <button>REMOVE</button>
-            <button>CHANGE STATE</button>
-        </div>
-    </div>
- */
 function spanAttribues(parent,txtValue) {
     let spn = document.createElement("span");
     spn.textContent=txtValue;
@@ -214,49 +199,9 @@ function handleRole() {
         }
     })
 }
-/**
- * shows the number of events the user has posted and also loads all the events the user has posted
- * @param {*} numberEventsBtnId 
- * @param {*} dispBlockId 
- * @param {*} endpoint 
- */
-function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,otherDispblock,endpoint) {
-    let path="/rest/events/view/"+endpoint;
-    let numberEventsBtn=document.getElementById(numberEventsBtnId);
-    let dispBlock = document.getElementById(dispBlockId);
-    let otherDispBlock = document.getElementById(otherDispblock);
 
-    numberEventsBtn.onclick=()=>{
-        if(dispBlock.childElementCount==0&&dispBlock.parentElement.classList.contains("usr_evts")){
-            //load
-            
-            fetch(path).then(response => response.json()).then( data => {
-                    let chld;
-                    for(let x=0; x<data.length;x++){
-                        //makeSolidarityAction(data[x]);
-                        chld =  eventDivBlock(data[x],endpoint=="myevents"); //singleEventBlock(data[x],false);
-                        dispBlock.appendChild(chld);
-                    }
-                }
-                )
-                .catch((error) => {
-                    console.log('Error: '+ error);
-                });
-        }
-        dispBlock.parentElement.classList.remove("usr_evts");
-        otherDispBlock.parentElement.classList.add("usr_evts");
-    }
-}
-function eventDivBlock(eventObj,ownEvents) {
-    let where = JSON.parse(eventObj.location);
-    let str = makeShowInfoString(eventObj,where.name,ownEvents);
-    return stringToHTML(str);
-}
 function reportedEventDivBlock(eventObj) {
-    let where = JSON.parse(eventObj.location);
-    let str = makeShowInfoStringForSu(eventObj,where.name);
+    let str = makeShowInfoStringForSu(eventObj,eventObj.eventAddress);
     return stringToHTML(str);
 }
-handleNumberOfEventsButton("num_evts","shusevnts","shusevntsitrd","myevents"); //show events made by the user
-handleNumberOfEventsButton("intrdevts","shusevntsitrd","shusevnts","interested"); //show events the user has interests
 handleRole();

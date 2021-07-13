@@ -8,6 +8,7 @@
 let destination=null;
 let origin=null;
 let markers1 = [];
+const MAP_ZOOM=15;
 function clearMarkers() {
   // Clear out the old markers.
   markers1.forEach((marker) => {
@@ -20,7 +21,7 @@ let map;
 function initAutocomplete() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: -33.8688, lng: 151.2195 },
-    zoom: 16,
+    MAP_ZOOM: MAP_ZOOM,
     mapTypeId: "roadmap",
   });
   navigator.geolocation.getCurrentPosition(function(position) {
@@ -121,13 +122,15 @@ function validPlace(place){
   let postalCode=newDiv.querySelector(".postal-code");
   let locality=newDiv.querySelector(".locality");
   let countryName = newDiv.querySelector(".country-name");
-  let street_address = newDiv.querySelector(".street-address");
+  //let street_address = newDiv.querySelector(".street-address");
   console.log(newDiv);
 
-  if(street_address==undefined || postalCode==undefined || locality==undefined || countryName==undefined){
+  if(postalCode==undefined || locality==undefined || countryName==undefined){
     alert("The Address must have a street address, postal code, locality and a country name!");
     return;
   }
+  postal_code = postal_code.split("-")[0];
+
   let obj={
     loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
     name:getPlaceName(place),
@@ -152,6 +155,7 @@ function searchEventParams(place) {
 
   if(postalCode!=undefined && countryName!=undefined ){
     postal_code=postalCode.textContent;
+    postal_code = postal_code.split("-")[0];
     country_name=countryName.textContent;
     document.getElementById("vwmrpnt").click();
   }else if(localityP!=undefined && countryName!=undefined){
@@ -213,7 +217,7 @@ function makeMarker(eventObj) {
       }).then(event=>{
         if(event){
           clicked=true;
-          contentString = makeShowInfoString(event,eventObj.eventAddress,false);
+          contentString = makeShowInfoString(event,event.eventAddress,false);
           infowindow = new google.maps.InfoWindow({content: contentString,maxWidth:"800px"});
           infowindow.open(map, marker);
           distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
@@ -263,7 +267,7 @@ function geocodeLatLng(map,lat,lng) {
         pps = response.results[0].address_components;
       if (response.results[0]) {
         loadsEventsNearTheLoggedUser();
-        map.setZoom(16);
+        map.setZoom(MAP_ZOOM);
         const marker = new google.maps.Marker({
           title: response.results[0].formatted_address,
           position: new google.maps.LatLng(lat,lng),

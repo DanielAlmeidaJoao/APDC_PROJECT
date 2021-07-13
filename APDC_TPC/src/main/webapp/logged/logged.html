@@ -24,8 +24,8 @@
             <button class="nv_el nv_btn" id="logoff">LOGOUT</button>
             <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
         </div>
-        <div class="nav_logged">
-            <button id="showInfo" class="nvb">MY INFOS</button>
+        <div class="nav_logged nav_btns">
+            <a target="_blank" href="../profile/profile.html" id="showInfo" class="nvb">ABOUT</a>
             <button id="superu" style="display: none;" class="nvb">SUPER USER</button>
             <!--
                 <button id="disable_user">DISABLE USERS</button>
@@ -95,69 +95,6 @@
                 </div>
                 
                 
-            </div>
-            <!--LOGGED USER ADDITIONAL ATTRIBUTES-->
-            <div class="additional_atrs view_user dispn" name="gbo" id="my_inf">
-                <div class="user_plc_p user_plc">
-                    <div class="user_plc">
-                        <form id="frst_infos">
-                            <div class="info_div">
-                                <label>PERFIL:</label>
-                                <input class="sp_attr kj" type="text" name="perfil">
-                            </div>
-                            <div class="info_div">
-                                <label>TELEFONE FIXO:</label>
-                                <input class="sp_attr" type="number" name="telephone">
-                            </div>
-                            <div class="info_div">
-                                <label>TELEFONE MOVEL:</label>
-                                <input class="sp_attr" type="number" name="cellphone">
-                            </div>
-                            <div class="info_div">
-                                <label>MORADA:</label>
-                                <input class="sp_attr" type="text" name="address">
-                            </div>
-                            <div class="info_div">
-                                <label>MORADA COMPLEMENTAR:</label>
-                                <input class="sp_attr" type="text" name="more_address">
-                            </div>
-                            <div class="info_div">
-                                <label>LOCALIDADE:</label>
-                                <input class="sp_attr" type="text" name="locality">
-                            </div>
-                            <span id="edtadt" class="edt_fn">EDIT</span>
-                        </form>
-                        <div class="pfpc_prnt" id="pfpc_prnt">
-                            <img class="img_prfl" id="prfl_img" src="/imgs/Profile_avatar_placeholder_large.png">
-                            <div class="prfpc_btns" id="prfpc_btns">
-                            <input id="profileimg"  class="edt_fn" type="file" size="45" accept="image/*"/>
-                            <span class="edt_fn updateImgPic" id="updateImgPic" >UPDATE</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="usr_more_info">
-                        <div class="usr_evtsnr">
-                            <div id="num_evts" class="num_evts">EVENTS CREATED:<span id="evt_counter">0</span> </div>
-                            <div id="intrdevts" class="num_evts">EVENTS INTERESTED:<span id="evtintr_counter">0</span></div>
-                        </div>
-                        
-                        <div id="usrs_evts_disp" class="view_user dlfx ve usr_evts">
-                            <div class="sec_name">EVENTS CREATED</div>
-                            <div class="show_events" id="shusevnts">
-        
-                            </div>
-                            <button id="load_mr_user_evnts">LOAD MORE</button>
-                        </div>
-
-                        <div id="usrs_evts_itrd" class="view_user dlfx ve usr_evts">
-                            <div class="sec_name">EVENTS INTERESTED</div>
-                            <div class="show_events" id="shusevntsitrd">
-        
-                            </div>
-                            <button id="load_mr_itrstd">LOAD MORE</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             <!--OTHER USER INFORMATION-->
             <div class="view_user dispn" id="view_user">
@@ -241,5 +178,7 @@
     <script src="../viewusers/vusers.js"></script>
     <script src="../userarea/userarea.js"></script>
     <script src="../getEvents/eventComments.js"></script>
+    <script src="../profile/profile.js"></script>
+
 </body>
 </html>

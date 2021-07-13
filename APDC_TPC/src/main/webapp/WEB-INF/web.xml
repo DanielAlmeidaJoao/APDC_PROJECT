@@ -23,7 +23,7 @@
 		 
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
-			<param-value>apdc.tpc.headerFilters.ContainerResponseFilter</param-value>
+			<param-value>apdc.tpc.headerFilters.CharsetFilter</param-value>
 		</init-param>
 		 
 		<!-- 
