@@ -190,10 +190,6 @@ public class StorageMethods {
 						.build();
 				txn.put(person);
 			    txn.commit();
-				userid = userKey.getId();
-			    AdditionalAttributes ad = new AdditionalAttributes();
-			    ad.perfil=PRIVATE_VALUE;
-			    AdditionalAttributesOperations.addUserAdditionalInformation(datastore,ad,userid);
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());

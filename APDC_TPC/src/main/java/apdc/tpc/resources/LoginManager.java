@@ -187,10 +187,10 @@ public class LoginManager {
 				response=Response.status(Status.UNAUTHORIZED).build();
 			}else{
 				//AuthToken at = new AuthToken(user.getString("email"));
-			    String domain = httpHeaders.getHeaderString("host");
-			    domain=null;
+			    //String domain = httpHeaders.getHeaderString("host");
+			    //domain=null;
 			    long userid = user.getKey().getId();
-				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(userid),domain);
+				k = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,HandleTokens.generateToken(userid),null);
 				LoggedObject lo = new LoggedObject();
 				lo.setEmail(data.getEmail());
 				lo.setName(user.getString(StorageMethods.NAME_PROPERTY));
@@ -219,15 +219,23 @@ public class LoginManager {
 		return Response.status(result).build();
 	}
 	@GET
-	@Path("/infos")
+	@Path("/infos/{userid}")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
-	public Response getAdditionalInfos(@CookieParam(Constants.COOKIE_TOKEN) String value) {
+	public Response getAdditionalInfos(@CookieParam(Constants.COOKIE_TOKEN) String value, @PathParam("userid") String otheruser) {
 		long userid;
 		Response res=null;
 		AdditionalAttributes obj;
 		System.out.println("GOING TOOOOOOOOOOO LOAD ADDITIONAL INFORMATION");
 		try {
 			userid = HandleTokens.validateToken(value);
+			long otherUserId;
+			if(!otheruser.isEmpty()) {
+				try {
+					userid = Long.parseLong(otheruser);
+				}catch(Exception e) {
+					
+				}
+			}
 			obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid);
 			if(obj==null) {
 				Response.status(Status.NOT_FOUND).build();

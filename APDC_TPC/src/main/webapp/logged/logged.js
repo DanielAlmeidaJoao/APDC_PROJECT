@@ -35,22 +35,6 @@ function updateNavAttribues() {
     document.getElementById("nav_profile_pic").setAttribute("src",profilePictureURL);
     emailSpan.textContent=loggedUserEMail
 }
-//	String perfil, telephone, cellphone, address, more_address, locality;
-/**
- * updates users additional information
- * @param {Object} additionalAttributes 
- */
-function fillAdditionalAttributes(additionalAttributes) {
-    let attributes = document.getElementsByClassName("sp_attr");
-    attributes[0].value=additionalAttributes.perfil;
-    attributes[1].value=additionalAttributes.telephone;
-    attributes[2].value=additionalAttributes.cellphone;
-    attributes[3].value=additionalAttributes.address;
-    attributes[4].value=additionalAttributes.more_address;
-    attributes[5].value=additionalAttributes.locality;
-    document.getElementById("evt_counter").textContent=additionalAttributes.events;
-    document.getElementById("evtintr_counter").textContent=additionalAttributes.interestedEvents;
-}
 /**
  * make form inputs readonly if value is true else editable 
  * @param {boolean} value 
@@ -61,84 +45,7 @@ function disableInfoEditions(value) {
         inputs[x].readOnly=value;
     }
 }
-/*
-function updateInfos(obj){
-    let postString=JSON.stringify(obj);
-    let path="../rest/login/op3";
-    fetch(path,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:postString
-    }).then(response=>{
-        if(response.ok){
-            alert("UPDAETD WITH SUCCESS!");
-        }else if(response.status===401){
-            alert("Session Expired!");
-        }else{
-            alert("Invalid Data!");
-        }
-    }).catch(e=>{
-        alert(e);
-    })
-}*/
-function updateAditionalAttributes() {
-    let attributes = document.getElementsByClassName("sp_attr");
-    let obj={
-        perfil:attributes[0].textContent,
-        telefone:attributes[1].textContent,
-        telemovel:attributes[2].textContent,
-        morada:attributes[3].textContent,
-        morada_complementar:attributes[4].textContent,
-        localidade:attributes[5].textContent
-    }
-    alert(loggedUserEMail);
-    updateInfos(obj);
-}
-function updateAttributes() {
-    let additionalAttributesForm=document.getElementById("my_inf");
-    let editbtn = document.getElementById("edtadt");
-    let updatebtn = document.createElement("button");
-    updatebtn.setAttribute("id","updateadt");
-    updatebtn.textContent="UPDATE";
-    //document.getElementById("updateadt");
-/** <button type="submit" id="updateadt">UPDATE</button> */
-    editbtn.onclick=()=>{
-        editbtn.parentElement.appendChild(updatebtn);
-        editbtn.remove();
-        //updateAditionalAttributes();
-        disableInfoEditions(false);
-    }
-    additionalAttributesForm.onsubmit=(e)=>{
-        e.preventDefault();
-        const formInputs = new FormData(e.target);
-        const obj=Object.fromEntries(formInputs.entries());
-        let postString=JSON.stringify(obj);
-        let path="../rest/login/op3";
-        fetch(path,{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:postString
-        }).then(response=>{
-            if(response.ok){
-                alert("UPDAETD WITH SUCCESS!");
-                disableInfoEditions(true);
-                updatebtn.parentElement.appendChild(editbtn);
-                updatebtn.remove();
-            }else if(response.status==401){
-                alert("Session Expired!");
-            }else{
-                alert("Invalid Data!");
-            }
-        }).catch(e=>{
-            alert(e);
-        })
-    }
-    disableInfoEditions(true);
-}
+
 function logOff() {
     let legoffButton = document.getElementById("logoff");
     legoffButton.onclick=()=>{
@@ -213,6 +120,5 @@ function hideAllBlocksButOne(elementToShow) {
 
 //isLogged();
 updateNavAttribues();
-updateAttributes();
 logOff();
 removeAccount();

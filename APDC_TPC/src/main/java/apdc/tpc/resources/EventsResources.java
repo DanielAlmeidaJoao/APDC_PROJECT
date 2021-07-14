@@ -8,6 +8,7 @@ import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -32,6 +33,7 @@ import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
 
 @Path("/events")
+@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 public class EventsResources {
 	//private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 	@Context
@@ -52,7 +54,7 @@ public class EventsResources {
 	 */
 	@POST
 	@Path("/create")
-	@Consumes(MediaType.MULTIPART_FORM_DATA +";charset=utf-8")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	//@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
@@ -108,7 +110,6 @@ public class EventsResources {
 	public final static String COUNTRY_NAME = "cn";
 	public final static String LOCALITY = "lc";
 
-
 	/**
 	 * loads upcoming events 
 	 * @param value offset value stored in the specified cookie
@@ -118,11 +119,12 @@ public class EventsResources {
 	@POST
 	@Path("/view")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
-	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
-			@CookieParam(Constants.COOKIE_TOKEN) Cookie token, UpcomingEventsArgs args) {
+			@CookieParam(Constants.COOKIE_TOKEN) Cookie token, UpcomingEventsArgs args, @HeaderParam("Accept-Charset") String charset, @HeaderParam("Content-Type") String enc) {
 		Response resp;
 		try {
+			System.out.println("GOING TO READ "+args.getLocality()+" I AM CHARSET "+charset+" ENC "+enc);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
 			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,args.getPostal_code(),args.getCountry_name(),args.getLocality());

@@ -10,10 +10,12 @@ let postal_code, country_name, locality;
 
 function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
-    show.onclick=()=>{
-        hideAllBlocksButOne("show_fnd_evts_blk");
-        hideMap();
-        selectNavBarButton(show);
+    if(show){
+        show.onclick=()=>{
+            hideAllBlocksButOne("show_fnd_evts_blk");
+            hideMap();
+            selectNavBarButton(show);
+        }
     }
 }
 /*HTML key names */
@@ -98,7 +100,8 @@ function loadUpcomingEvents() {
     fetch(path,{
         method:'POST',
         headers:{
-            "Content-Type":"application/json;charset=utf-8"
+            "Content-Type":"application/json",
+            "Accept-Charset":"utf-8"
         },
         body:JSON.stringify({postal_code:postal_code
             ,locality:locality

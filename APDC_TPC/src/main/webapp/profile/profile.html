@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../logged/logged.css">
     <link rel="stylesheet" href="../viewusers/vusers.css">
     <link rel="stylesheet" href="../userarea/userarea.css">
+    <link rel="stylesheet" href="../getEvents/getEvent.css">
     <link rel="stylesheet" href="./profile.css">
 
     <title>Profile</title>
@@ -40,12 +41,12 @@
                     <div id="vsb_btn" class="vsb_btn" >DANIEL JOAO</div>
                     <div class="qtdv txt_pm">
                         <span class="tag_nm">QuotE</span>
-                        <div class="qttxt txt_pm">PUM POM POM PUM POM PUM, CAUSE i CAN'T GET ENOUGH OF YOU!</div>
-                        <textarea class="txta edt_txtar"></textarea>
+                        <div id="qtshdv" class="qttxt txt_pm">PUM POM POM PUM POM PUM, CAUSE i CAN'T GET ENOUGH OF YOU!</div>
+                        <textarea name="quote" class="txta edt_txtar"></textarea>
                     </div>
                     <div class="abt_prd txt_pm">
                         <span class="tag_nm">About</span>
-                        <div class="abt_txt txt_pm">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
+                        <div id="bioshdv" class="abt_txt txt_pm">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
                             totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae 
                             vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut 
                             odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. 
@@ -55,20 +56,26 @@
                             ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil 
                             molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
                         </div>
-                        <textarea class="txta edt_txtarrv"></textarea>
+                        <textarea name="bio" class="txta edt_txtarrv"></textarea>
 
                     </div>
                     <div class="contas_pdv txt_pm">
-                        <span class="tag_nm">Redes Socias</span>
+                        <span class="tag_nm">Social Networks</span>
                         <div id="contacts" class="contacts_dv txt_pm">
-                            <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Instagram</a>
-                            <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Facebook</a>
-                            <a target="_blank" rel="noopener noreferrer" href="https://whgjvww.instagram.com/elonmusk/">Twitter</a>
+                            <a name="instagram" target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Instagram Account</a>
+                            <a name="facebook" target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/elonmusk/">Facebook Account</a>
+                            <a name="twitter" target="_blank" rel="noopener noreferrer" href="https://whgjvww.instagram.com/elonmusk/">Twitter Account</a>
+                            <a name="instagram" target="_blank" rel="noopener noreferrer">Website</a>
+                        </div>
+                        <div class="scl_ntwks hdtxa" id="scl_ntwks">
+                            <input name="instagram" placeholder="Instagram">
+                            <input name="facebook" placeholder="Facebook">
+                            <input name="twitter" placeholder="Twitter">
+                            <input name="website" placeholder="Website">
                         </div>
                     </div>
                     <div>
                         <button id="edt_inf">EDIT</button>
-                        <button id="edt_inf">SAVE</button>
                     </div>
                 </div>
                 <div class="pfpc_prnt" id="pfpc_prnt">
@@ -96,7 +103,10 @@
             </div>
         </div>
     </div>
+    <script src="../logged/logged.js"></script>
     <script src="../userarea/userarea.js"></script>
     <script src="../profile/profile.js"></script>
+    <script src="../getEvents/getEvent.js"></script>
+
 </body>
 </html>

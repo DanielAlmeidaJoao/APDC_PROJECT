@@ -60,6 +60,39 @@ function showAboutDiv() {
         selectNavBarButton(showAboutBtn);
     }
 }
+const otheruser="";
+function showUserInfos(){
+    let other ="";
+    if(otheruser){
+        other = otheruser;
+    }else{
+        other=loggedUserEMail;
+    }
+    fetch("/rest/login/infos/"+other).then(response=>{
+        if(response.ok){
+            return response.json();
+        }
+    }).then(data => {
+        document.getElementById("evt_counter").textContent = data.events;
+        document.getElementById("evtintr_counter").textContent = data.interestedEvents;
+        document.getElementById("qtshdv").textContent = data.quote;
+        document.getElementById("bioshdv").textContent = data.bio;
+        let socialMedias = document.getElementById("contacts");
+        for (let index = 0; index < socialMedias.childElementCount; index++) {
+            const element = socialMedias.children[index];
+            let str = data[element.getAttribute("name")];
+
+            if(str){
+                element.setAttribute("href",str);
+            }else{
+                element.removeAttribute("href");
+            }
+        }
+    }).catch(err => {
+        console.log(err);
+    })
+}
+showUserInfos();
 showAboutDiv();
 handleNumberOfEventsButton("num_evts","shusevnts","myevents"); //show events made by the user
 handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested"); //show events the user has interests

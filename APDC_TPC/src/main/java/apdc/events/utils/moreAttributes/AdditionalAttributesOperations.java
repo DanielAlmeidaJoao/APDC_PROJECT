@@ -14,12 +14,12 @@ import apdc.utils.conts.Constants;
 
 public class AdditionalAttributesOperations {
 	public static final String ADITIONALS = "ADDITIONALS_INFO";
-	private static final String PERFIL = "PERFIL";
-	private static final String LOCALIDADE = "LOCALIDADE";
-	private static final String MORADA_COMPLEMENTAR = "MORADA_COMPLEMENTAR";
-	private static final String MORADA = "MORADA";
-	private static final String TELEFONE = "TELEFONE";
-	private static final String TELEMOVEL = "TELEMOVEL";
+	private static final String BIO = "BIO";
+	private static final String WEBSITE = "WEBSITE";
+	private static final String FACEBOOK = "FACEBOOK";
+	private static final String TWITTER = "TWITTER";
+	private static final String INSTAGRAM = "INSTAGRAM";
+	private static final String QUOTE = "QUOTE";
 	public AdditionalAttributesOperations() {
 		// TODO Auto-generated constructor stub
 	}
@@ -49,16 +49,15 @@ public class AdditionalAttributesOperations {
 	public static AdditionalAttributes getAdditionalInfos(Datastore datastore, long userid) {
 		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(ADITIONALS).newKey(userid);
 		 AdditionalAttributes ad=null;
-		
 		  try {
 			Entity stats=datastore.get(ctrsKey);
 			ad = new AdditionalAttributes();
-			ad.setPerfil(stats.getString(PERFIL));
-			ad.setTelephone(stats.getString(TELEFONE));
-			ad.setCellphone(stats.getString(TELEMOVEL));
-			ad.setAddress(stats.getString(MORADA));
-			ad.setMore_address(stats.getString(MORADA_COMPLEMENTAR));
-			ad.setLocality(stats.getString(LOCALIDADE));
+			ad.setBio(stats.getString(BIO));
+			ad.setQuote(stats.getString(QUOTE));
+			ad.setInstagram(stats.getString(INSTAGRAM));
+			ad.setTwitter(stats.getString(TWITTER));
+			ad.setFacebook(stats.getString(FACEBOOK));
+			ad.setWebsite(stats.getString(WEBSITE));
 			ad.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
 			ad.setInterestedEvents(EventParticipationMethods.getNumberOfInterestedEvents(userid));
 		  }catch(Exception e) {
@@ -74,12 +73,12 @@ public class AdditionalAttributesOperations {
 		  try {
 			Entity stats;
 			stats=Entity.newBuilder(ctrsKey)
-					.set(PERFIL,ad.getPerfil())
-					.set(TELEFONE,ad.getTelephone())
-					.set(TELEMOVEL,ad.getCellphone())
-					.set(MORADA,ad.getAddress())
-					.set(MORADA_COMPLEMENTAR,ad.getMore_address())
-					.set(LOCALIDADE,ad.getLocality())
+					.set(BIO,ad.getBio())
+					.set(QUOTE,ad.getQuote())
+					.set(INSTAGRAM,ad.getInstagram())
+					.set(TWITTER,ad.getTwitter())
+					.set(FACEBOOK,ad.getFacebook())
+					.set(WEBSITE,ad.getWebsite())
 					.build();
 			txn.put(stats);
 		    txn.commit();
@@ -94,16 +93,16 @@ public class AdditionalAttributesOperations {
 	public static AdditionalAttributes getAdditionalAttributes(Datastore datastore, long userid) {
 		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(ADITIONALS).newKey(userid);
 		  Entity stats=datastore.get(ctrsKey);
-		  AdditionalAttributes ad=null;
+		  AdditionalAttributes ad = new AdditionalAttributes();
+;
 		  if(stats!=null) {
-			  ad = new AdditionalAttributes();
 			  //,stats.getString(TELEFONE),stats.getString(TELEMOVEL),stats.getString(MORADA),stats.getString(MORADA_COMPLEMENTAR),stats.getString(LOCALIDADE)
-			  ad.setPerfil(stats.getString(PERFIL));
-			  ad.setCellphone(stats.getString(TELEMOVEL));
-			  ad.setTelephone(stats.getString(TELEFONE));
-			  ad.setAddress(stats.getString(MORADA));
-			  ad.setMore_address(stats.getString(MORADA_COMPLEMENTAR));
-			  ad.setLocality(stats.getString(LOCALIDADE));
+			  ad.setBio(stats.getString(BIO));
+			  ad.setQuote(stats.getString(QUOTE));
+			  ad.setInstagram(stats.getString(INSTAGRAM));
+			  ad.setTwitter(stats.getString(TWITTER));
+			  ad.setFacebook(stats.getString(FACEBOOK));
+			  ad.setWebsite(stats.getString(WEBSITE));
 		  }
 		return ad;
 	}

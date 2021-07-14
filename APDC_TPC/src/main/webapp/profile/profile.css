@@ -57,6 +57,10 @@ body{
     height: 300px;
     font-size: 18px;
 }
+.scl_ntwks{
+    display: flex;
+    flex-direction: column;
+}
 .txta{
     display: none;
 }

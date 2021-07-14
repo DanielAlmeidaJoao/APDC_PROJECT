@@ -2,57 +2,18 @@ package apdc.tpc.utils;
 
 public class AdditionalAttributes {
 
-    public String getPerfil() {
-		return perfil;
-	}
-
-	public void setPerfil(String perfil) {
-		this.perfil = perfil;
-	}
-
-	public String getTelephone() {
-		return telephone;
-	}
-
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
-
-	public String getCellphone() {
-		return cellphone;
-	}
-
-	public void setCellphone(String cellphone) {
-		this.cellphone = cellphone;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getMore_address() {
-		return more_address;
-	}
-
-	public void setMore_address(String more_address) {
-		this.more_address = more_address;
-	}
-
-	public String getLocality() {
-		return locality;
-	}
-
-	public void setLocality(String locality) {
-		this.locality = locality;
-	}
-
-	String perfil, telephone, cellphone, address, more_address, locality;
-	long events, interestedEvents;
     
+	
+	String bio, quote, instagram,facebook, twitter, website;
+	long events, interestedEvents;
+	public AdditionalAttributes(){
+		bio="";
+		quote="";
+		instagram="";
+		facebook="";
+		twitter="";
+		website="";
+    }
     public long getEvents() {
 		return events;
 	}
@@ -69,12 +30,53 @@ public class AdditionalAttributes {
 		this.events = events;
 	}
 
-	public AdditionalAttributes(){
-    	perfil="";
-    	telephone="";
-    	cellphone="";
-    	address="";
-    	more_address="";
-    	locality="";
-    }
+
+
+	public String getBio() {
+		return bio;
+	}
+
+	public String getQuote() {
+		return quote;
+	}
+
+	public String getInstagram() {
+		return instagram;
+	}
+
+	public String getFacebook() {
+		return facebook;
+	}
+
+	public String getTwitter() {
+		return twitter;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
+
+	public void setQuote(String quote) {
+		this.quote = quote;
+	}
+
+	public void setInstagram(String instagram) {
+		this.instagram = instagram;
+	}
+
+	public void setFacebook(String facebook) {
+		this.facebook = facebook;
+	}
+
+	public void setTwitter(String twitter) {
+		this.twitter = twitter;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
 }
