@@ -4,11 +4,27 @@
   <threadsafe>true</threadsafe>
   <sessions-enabled>false</sessions-enabled>
   <runtime>java8</runtime>
+  
 
+  
+  	<system-properties>
+	    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />
+	    <property name="appengine.file.encoding" value="UTF-8" />
+	    <property name="DEFAULT_ENCODING" value="UTF-8" />
+	</system-properties>
+
+<!-- 
+<env-variables>
+    <env-var name="DEFAULT_ENCODING" value="UTF-8" />
+</env-variables>
+ -->
+
+<!-- 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-  </system-properties>
+  </system-properties> 
 
+ -->
 <static-files>
 <include path="/**.html" expiration="0m" /> <!-- 1 minute, normal is 12h or more -->
 <include path="/**.css" expiration="0m" /> <!-- 1 minute, normal is 12h or more -->

@@ -10,8 +10,8 @@ import javax.ws.rs.core.MediaType;
 
 
 public class CharsetFilter implements ContainerRequestFilter {
-//	@Context
-//	private HttpServletRequest httpRequest;
+	@Context
+	private HttpServletRequest httpRequest;
 	public CharsetFilter() {
 		// TODO Auto-generated constructor stub
 	}
@@ -29,20 +29,18 @@ public class CharsetFilter implements ContainerRequestFilter {
 		}
 		*/
 		// TODO Auto-generated method stub
-		/*
+		
 		try {
-			requestContext.getHeaders().add("Character-Encoding","utf-8");
-			httpRequest.setCharacterEncoding("charset=utf-8");
-			
+			requestContext.getHeaders().add("Accept-Charset","utf-8");
+			httpRequest.setCharacterEncoding("charset=UTF-8");
 		}catch(Exception e) {
 			System.out.println(e.getLocalizedMessage());
-		} */
+		}
 		try {
 	        requestContext.getHeaders().putSingle("Accept-Charset","utf-8");
 		}catch(Exception e) {
 			System.out.println(e.getLocalizedMessage());
 		}
-		//System.out.println("----------------------------------------------------------------------------- FILTERING "+httpRequest.getCharacterEncoding());
 	}
 
 	

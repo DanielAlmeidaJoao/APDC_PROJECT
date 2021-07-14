@@ -22,7 +22,7 @@ public class Tester {
 	}
 
 	public static void main(String[] args) {
-		
+		/*
 		Filter propertyFilter =
 			    new FilterPredicate("height", FilterOperator.GREATER_THAN_OR_EQUAL, "");
 			Query q = new Query("Person").setFilter(propertyFilter);
@@ -39,6 +39,7 @@ public class Tester {
 	    // Creates the new bucket
 	    Bucket bucket = storage.create(BucketInfo.of(bucketName));
 
-	    System.out.printf("Bucket %s created.%n", bucket.getName());
+	    System.out.printf("Bucket %s created.%n", bucket.getName());*/
+		System.out.println("SÃO UM DEUS");
 	}
 }

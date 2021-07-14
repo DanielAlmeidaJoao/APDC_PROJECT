@@ -1,11 +1,13 @@
 package apdc.tpc.resources;
 
+import java.net.URLDecoder;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -118,13 +120,12 @@ public class EventsResources {
 	 */
 	@POST
 	@Path("/view")
-	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON +" ;charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +" ;charset=utf-8")
 	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
-			@CookieParam(Constants.COOKIE_TOKEN) Cookie token, UpcomingEventsArgs args, @HeaderParam("Accept-Charset") String charset, @HeaderParam("Content-Type") String enc) {
+			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,@Encoded UpcomingEventsArgs args, @HeaderParam("Accept-Charset") String charset, @HeaderParam("Content-Type") String enc) {
 		Response resp;
 		try {
-			System.out.println("GOING TO READ "+args.getLocality()+" I AM CHARSET "+charset+" ENC "+enc);
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
 			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,args.getPostal_code(),args.getCountry_name(),args.getLocality());
