@@ -1,6 +1,16 @@
 let loggedUserEMail;
 let profilePictureURL;
 let loggedUserName;
+
+const HttpCodes = {
+    success : 200,
+    notFound : 404,
+    badrequest : 400,
+    forbidden: 403,
+    unauthorized: 401,
+    conflict: 409
+    // etc
+}
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -51,6 +61,9 @@ function logOff() {
     legoffButton.onclick=()=>{
         console.log("CLIKED");
         sendLogOff();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href="/";
     }
 }
 function removeAccount() {
@@ -90,11 +103,7 @@ function sendLogOff() {
     let spanText= document.getElementById("rs_sn");
     let xmlHttpReq = getHttpXmlRequest();
     xmlHttpReq.onreadystatechange = function(){
-        if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
-            let rt = xmlHttpReq.responseText;
-            localStorage.clear();
-            window.location.href="/";
-        }
+        if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){}
     }
     xmlHttpReq.open("GET","../rest/login/op7",true);
     xmlHttpReq.setRequestHeader("Content-Type", "application/json");
@@ -117,8 +126,20 @@ function hideAllBlocksButOne(elementToShow) {
     }
     document.getElementById(elementToShow).classList.add(dispb);
 }
-
+function showProfilePage(){
+    let profile = document.getElementById("showInfo");
+    if(profile){
+        profile.onclick=()=>{
+            let btn = profile.firstElementChild;
+            btn.setAttribute("target","_blank");
+            btn.setAttribute("href","../profile/profile.html");
+            localStorage.setItem("ot",loggedUserEMail);
+            btn.click();
+        }
+    }
+}
 //isLogged();
+showProfilePage();
 updateNavAttribues();
 logOff();
 removeAccount();

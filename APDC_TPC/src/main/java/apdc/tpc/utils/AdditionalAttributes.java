@@ -5,6 +5,8 @@ public class AdditionalAttributes {
     
 	
 	String bio, quote, instagram,facebook, twitter, website;
+	
+
 	long events, interestedEvents;
 	public AdditionalAttributes(){
 		bio="";

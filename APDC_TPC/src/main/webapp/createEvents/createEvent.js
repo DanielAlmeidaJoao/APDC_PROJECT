@@ -1,14 +1,6 @@
 const MAX_IMAGE_sIZE=1000000;
 const max_images=1;
-const HttpCodes = {
-    success : 200,
-    notFound : 404,
-    badrequest : 400,
-    forbidden: 403,
-    unauthorized: 401,
-    conflict: 409
-    // etc
-}
+
 const sbmt = document.getElementById("addEvt_frm");
 const hideMapClass="hdmap";
 function toggleCreateEventForm() {

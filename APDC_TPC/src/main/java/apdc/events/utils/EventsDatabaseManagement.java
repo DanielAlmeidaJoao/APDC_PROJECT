@@ -480,6 +480,7 @@ public class EventsDatabaseManagement {
 	private static EventData2 getEvent(Entity en,long userid,boolean finished) {
 		EventData2 ed = new  EventData2();
 		long ownerid = en.getLong(EVENT_OWNER);
+		ed.setEventOwner(ownerid);
 		Entity parentEntity = StorageMethods.getUser(Constants.datastore,ownerid);
 		ed.setEventId(en.getKey().getId());
 		ed.setDescription(en.getString(DESCRIPTION));
@@ -544,7 +545,7 @@ public class EventsDatabaseManagement {
 			//Timestamp.no			
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EVENTS)
-				    .setFilter(PropertyFilter.eq(EVENT_OWNER,userid)).setLimit(PAGESIGE).setOrderBy(OrderBy.asc(START_DATE));
+				    .setFilter(PropertyFilter.eq(EVENT_OWNER,userid)).setLimit(3).setOrderBy(OrderBy.asc(START_DATE));
 			if (startCursor!=null) {
 		      startcursor = Cursor.fromUrlSafe(startCursor); 
 			  b=b.setStartCursor(startcursor);
@@ -567,7 +568,6 @@ public class EventsDatabaseManagement {
 			Constants.LOG.severe("GETTING THE EVENTS OF THE LOGGED USER "+e.getLocalizedMessage());
 			e.printStackTrace();
 		}
-		
 		return results;
 	}
 	/**
@@ -582,7 +582,7 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static Pair<String,String> getEvents(String startCursor,long userid,boolean finished) {
+	public static Pair<String,String> getEvents(String startCursor,long userid, boolean finished, int pageSize) {
 		try {
 			Datastore datastore = Constants.datastore;
 			Cursor startcursor=null;
@@ -596,11 +596,11 @@ public class EventsDatabaseManagement {
 			}
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EVENTS).setFilter(filter)
-				    .setLimit(PAGESIGE);
+				    .setLimit(pageSize);
 			if (startCursor!=null) {
 				b=Query.newEntityQueryBuilder()
 					    .setKind(EVENTS).setFilter(filter)
-					    .setLimit(PAGESIGE);
+					    .setLimit(pageSize);
 				startcursor = Cursor.fromUrlSafe(startCursor); 
 		      
 				b=b.setStartCursor(startcursor);
@@ -613,10 +613,6 @@ public class EventsDatabaseManagement {
 				e = tasks.next();
 				events.add(getEvent(e,userid,finished));
 			}
-			/*
-			if(events.isEmpty()) {
-				
-			}*/
 			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
 
 		}catch(Exception e) {
@@ -639,7 +635,7 @@ public class EventsDatabaseManagement {
 			Query<Entity> query=null;
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EventParticipationMethods.PARTICIPANTS_KIND)
-				    .setFilter(PropertyFilter.eq(EventParticipationMethods.PARTICIPANT_ID_PROP,userid)).setLimit(PAGESIGE);
+				    .setFilter(PropertyFilter.eq(EventParticipationMethods.PARTICIPANT_ID_PROP,userid)).setLimit(3);
 			if (startCursor!=null) {
 		      startcursor = Cursor.fromUrlSafe(startCursor); 
 			  b=b.setStartCursor(startcursor);

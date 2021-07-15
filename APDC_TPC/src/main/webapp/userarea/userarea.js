@@ -59,10 +59,14 @@ function updateProfilePicture() {
         })
     }
 }
-function handleEditBtn() {
+function handleEditBtn(ownProfile) {
     let saveBtn = document.createElement("button");
     saveBtn.textContent="SAVE";
     let editBtn = document.getElementById("edt_inf");
+    if(!ownProfile){
+        editBtn.remove();
+        return;
+    }
     editBtn.onclick=()=>{
         let textas=document.getElementsByClassName("txta");
         for (let index = 0; index < textas.length; index++) {
@@ -115,13 +119,6 @@ function handleEditBtn() {
         }
         saveBtn.parentElement.replaceChild(editBtn,saveBtn);
         updateInfos(postData);
-        /*
-        postData.quote=textas[0].value;
-        postData.bio=textas[1].value;
-        postData.instagram=linkInputs.children[x].value.trim();
-        postData.facebook=linkInputs.children[x].value.trim();
-        postData.instagram=linkInputs.children[x].value.trim();
-        postData.instagram=linkInputs.children[x].value.trim(); */
     }
 }
 function updateInfos(obj){
@@ -146,5 +143,4 @@ function updateInfos(obj){
         alert(e);
     })
 }
-handleEditBtn();
 updateProfilePicture();

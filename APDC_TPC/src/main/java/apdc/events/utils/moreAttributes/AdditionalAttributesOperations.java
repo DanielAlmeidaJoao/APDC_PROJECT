@@ -9,6 +9,7 @@ import com.google.cloud.datastore.Transaction;
 import apdc.events.utils.CountEventsUtils;
 import apdc.events.utils.EventParticipationMethods;
 import apdc.tpc.utils.AdditionalAttributes;
+import apdc.tpc.utils.ProfileResponse;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 
@@ -46,20 +47,25 @@ public class AdditionalAttributesOperations {
 	 * @param userid - userid
 	 * @return user additional information if success else null
 	 */
-	public static AdditionalAttributes getAdditionalInfos(Datastore datastore, long userid) {
+	public static ProfileResponse getAdditionalInfos(Datastore datastore, long userid, Entity user ) {
 		com.google.cloud.datastore.Key ctrsKey=datastore.newKeyFactory().setKind(ADITIONALS).newKey(userid);
-		 AdditionalAttributes ad=null;
+		ProfileResponse ad=null;
 		  try {
 			Entity stats=datastore.get(ctrsKey);
-			ad = new AdditionalAttributes();
+			ad = new ProfileResponse();
+
+			ad.setProfilePicture(user.getString(StorageMethods.PROFILE_PICTURE_URL_PROP));
+			ad.setName(user.getString(StorageMethods.NAME_PROPERTY));
+			ad.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
+			ad.setInterestedEvents(EventParticipationMethods.getNumberOfInterestedEvents(userid));
+			
 			ad.setBio(stats.getString(BIO));
 			ad.setQuote(stats.getString(QUOTE));
 			ad.setInstagram(stats.getString(INSTAGRAM));
 			ad.setTwitter(stats.getString(TWITTER));
 			ad.setFacebook(stats.getString(FACEBOOK));
 			ad.setWebsite(stats.getString(WEBSITE));
-			ad.setEvents(CountEventsUtils.getNumberOfEvents(userid,Constants.datastore));
-			ad.setInterestedEvents(EventParticipationMethods.getNumberOfInterestedEvents(userid));
+			//
 		  }catch(Exception e) {
 			  EventParticipationMethods.print("AdditionalAttributesOperations","AdditionalAttributes",e.getLocalizedMessage());
 		  }

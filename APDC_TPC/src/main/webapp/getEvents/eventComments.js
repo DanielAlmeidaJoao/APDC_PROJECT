@@ -45,10 +45,8 @@ function handleShowCommentsButton(btn,eventid){
         return response.json();
     }).then(obj=>{
         let list = obj.comments;
-        console.log(list);
         for (let index = 0; index < list.length; index++) {
             const element = list[index];
-            console.log(element);
             let str = singleCommentBlockHtmlStr(element);
             allcomentsBlock.appendChild(stringToDom(str));
         }

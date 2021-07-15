@@ -45,6 +45,7 @@ display: flex;
 }
 .orgd{
     margin-right: 5px;
+    cursor: pointer;
 }
 .abt_evt{
     flex-direction: column;

@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -172,7 +173,7 @@ public class EventsResources {
 		Response resp;
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
-			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true);
+			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true,3);
 			NewCookie nk = HandleTokens.makeCookie(Constants.FINISHED_EVENTS_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {
@@ -185,21 +186,26 @@ public class EventsResources {
 	 * loads all registered events 
 	 * @param value offset value stored in the specified cookie
 	 * @param token session token stored in the specified token
-	 * @return 200 if the operation is success
+	 * @return if success returns an array with the events array and the database cursor
 	 */
 	@GET
 	@Path("/view/myevents")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response loggedUserEvents(@CookieParam(Constants.USER_EVENTS_CURSOR_CK) String cursor, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+	public Response loggedUserEvents(@CookieParam(Constants.COOKIE_TOKEN) Cookie token, @QueryParam("userid") String user, @QueryParam("cursor") String cursor) {
+		//@CookieParam(Constants.USER_EVENTS_CURSOR_CK) String cursor
 		Response resp;
 		String result [] =null;
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
+			try {
+				System.out.println("I AM USER ID "+user);
+				userid = Long.parseLong(user);
+			}catch(Exception e) {}
 			Constants.LOG.severe(userid+"");
 			result = EventsDatabaseManagement.getLoggedUserEvents(cursor,userid);
-			NewCookie nk = HandleTokens.makeCookie(Constants.USER_EVENTS_CURSOR_CK,result[1],token.getDomain());
-			resp = Response.ok().cookie(nk).entity(result[0]).build();
+			//NewCookie nk = HandleTokens.makeCookie(Constants.USER_EVENTS_CURSOR_CK,result[1],token.getDomain());
+			resp = Response.ok().entity(Constants.g.toJson(result)).build();
 		}catch(Exception e) {
 			Constants.LOG.severe(e.getLocalizedMessage());
 			resp = Response.status(Status.FORBIDDEN).build();
@@ -207,23 +213,28 @@ public class EventsResources {
 		return resp;
 	}
 	/**
-	 * loads all registered events 
+	 * loads the events in which the user in the url is interested in.
 	 * @param value offset value stored in the specified cookie
 	 * @param token session token stored in the specified token
-	 * @return 200 if the operation is success
+	 * @return if success returns an array with the events array and the database cursor
 	 */
 	@GET
 	@Path("/view/interested")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response loggedUserInterestedEvents(@CookieParam(Constants.USER_INTERESTED_EVENTS_CURSOR_CK) String cursor, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+	public Response loggedUserInterestedEvents(@QueryParam("userid") String user, @QueryParam("cursor") String cursor, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
 		Response resp;
 		Pair<String,String> result =null;
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
+			try {
+				userid = Long.parseLong(user);
+			}catch(Exception e) {}
 			result = EventsDatabaseManagement.getLoggedUserInterestedEvents(cursor,userid);
-			NewCookie nk = HandleTokens.makeCookie(Constants.USER_INTERESTED_EVENTS_CURSOR_CK,result.getV2(),token.getDomain());
-			resp = Response.ok().cookie(nk).entity(result.getV1()).build();
+			String arr [] =new String[2];
+			arr[0] = result.getV1();
+			arr[1] = result.getV2();
+			resp = Response.ok().entity(Constants.g.toJson(arr)).build();
 		}catch(Exception e) {
 			Constants.LOG.severe(e.getLocalizedMessage());
 			resp = Response.status(Status.FORBIDDEN).build();

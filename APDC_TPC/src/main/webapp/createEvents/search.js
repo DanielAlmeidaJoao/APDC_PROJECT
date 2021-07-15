@@ -217,7 +217,7 @@ function makeMarker(eventObj) {
       }).then(event=>{
         if(event){
           clicked=true;
-          contentString = makeShowInfoString(event,event.eventAddress,false);
+          contentString = makeShowInfoString(event,event.eventAddress,event.owner);
           infowindow = new google.maps.InfoWindow({content: contentString,maxWidth:"800px"});
           infowindow.open(map, marker);
           distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
@@ -268,6 +268,7 @@ function geocodeLatLng(map,lat,lng) {
       if (response.results[0]) {
         loadsEventsNearTheLoggedUser();
         map.setZoom(MAP_ZOOM);
+        /*
         const marker = new google.maps.Marker({
           title: response.results[0].formatted_address,
           position: new google.maps.LatLng(lat,lng),
@@ -278,7 +279,7 @@ function geocodeLatLng(map,lat,lng) {
         infowindow.open(map, marker);
         marker.addListener('click', function() {
           infowindow.open(map, marker);
-        });
+        });*/
       } else {
         window.alert("Invalid Coordinates!");
       }

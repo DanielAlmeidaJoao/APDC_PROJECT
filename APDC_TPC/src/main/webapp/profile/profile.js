@@ -1,3 +1,9 @@
+if(sessionStorage.getItem("ot")&&!localStorage.getItem("ot")){
+    localStorage.setItem("ot",sessionStorage.getItem("ot"));
+}
+const otheruser=localStorage.getItem("ot");
+sessionStorage.setItem("ot",otheruser);
+localStorage.removeItem("ot");
 function hideAllDivButOne(theOne) {
     let hideClassList="usr_evts"
     let childs = document.getElementById("mbses").children;
@@ -22,30 +28,42 @@ function selectNavBarButton(btn){
  * @param {*} dispBlockId 
  * @param {*} endpoint 
  */
- function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,endpoint) {
-    let path="/rest/events/view/"+endpoint;
+ function handleNumberOfEventsButton(numberEventsBtnId,dispBlockId,endpoint,moreEventId) {
     let numberEventsBtn=document.getElementById(numberEventsBtnId);
     let dispBlock = document.getElementById(dispBlockId);
+    let cursor="";
 
+    function loadEvents() {
+        let path=`/rest/events/view/${endpoint}/?userid=${otheruser}&cursor=${cursor}`;
+        fetch(path).then(response => {
+            console.log(response);
+            return response.json();
+        }).then( data => {
+            if(data){
+                cursor = data[1];
+                data = JSON.parse(data[0]);
+                let chld;
+                for(let x=0; x<data.length;x++){
+                    chld =  eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                    dispBlock.appendChild(chld);
+                }
+            }
+        }
+        ).catch((error) => {
+            console.log('Error: '+ error);
+        });
+    }
     numberEventsBtn.onclick=()=>{
         if(dispBlock.childElementCount==0&&dispBlock.parentElement.classList.contains("usr_evts")){
             //load
-            fetch(path).then(response => response.json()).then( data => {
-                    let chld;
-                    for(let x=0; x<data.length;x++){
-                        //makeSolidarityAction(data[x]);
-                        chld =  eventDivBlock(data[x],endpoint=="myevents"); //singleEventBlock(data[x],false);
-                        dispBlock.appendChild(chld);
-                    }
-                }
-                )
-                .catch((error) => {
-                    console.log('Error: '+ error);
-                });
+            loadEvents();
         }
         selectNavBarButton(numberEventsBtn);
         hideAllDivButOne(dispBlockId);
         dispBlock.parentElement.classList.remove("usr_evts");
+    }
+    document.getElementById(moreEventId).onclick=()=>{
+        loadEvents();
     }
 }
 function eventDivBlock(eventObj,ownEvents) {
@@ -60,7 +78,6 @@ function showAboutDiv() {
         selectNavBarButton(showAboutBtn);
     }
 }
-const otheruser="";
 function showUserInfos(){
     let other ="";
     if(otheruser){
@@ -71,22 +88,29 @@ function showUserInfos(){
     fetch("/rest/login/infos/"+other).then(response=>{
         if(response.ok){
             return response.json();
+        }else if(response.status==404){
+            alert("User No Longer Exists!");
         }
+        return null;
     }).then(data => {
-        document.getElementById("evt_counter").textContent = data.events;
-        document.getElementById("evtintr_counter").textContent = data.interestedEvents;
-        document.getElementById("qtshdv").textContent = data.quote;
-        document.getElementById("bioshdv").textContent = data.bio;
-        let socialMedias = document.getElementById("contacts");
-        for (let index = 0; index < socialMedias.childElementCount; index++) {
-            const element = socialMedias.children[index];
-            let str = data[element.getAttribute("name")];
-
-            if(str){
-                element.setAttribute("href",str);
-            }else{
-                element.removeAttribute("href");
+        if(data){
+            document.getElementById("vsb_btn").textContent=data.name;
+            document.getElementById("evt_counter").textContent = data.events;
+            document.getElementById("evtintr_counter").textContent = data.interestedEvents;
+            document.getElementById("qtshdv").textContent = data.quote;
+            document.getElementById("bioshdv").textContent = data.bio;
+            document.getElementById("prfl_img").setAttribute("src",data.profilePicture);
+            let socialMedias = document.getElementById("contacts");
+            for (let index = 0; index < socialMedias.childElementCount; index++) {
+                const element = socialMedias.children[index];
+                let str = data[element.getAttribute("name")];
+                if(str){
+                    element.setAttribute("href",str);
+                }else{
+                    element.removeAttribute("href");
+                }
             }
+            handleEditBtn(data.viewingOwnProfile);
         }
     }).catch(err => {
         console.log(err);
@@ -94,5 +118,5 @@ function showUserInfos(){
 }
 showUserInfos();
 showAboutDiv();
-handleNumberOfEventsButton("num_evts","shusevnts","myevents"); //show events made by the user
-handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested"); //show events the user has interests
+handleNumberOfEventsButton("num_evts","shusevnts","myevents","load_mr_user_evnts"); //show events made by the user
+handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested","load_mr_itrstd"); //show events the user has interests

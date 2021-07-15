@@ -5,6 +5,14 @@ public class EventData2 extends EventData {
 	boolean owner, participating;
 	String participants,imgUrl, reports, eventAddress;
 	Coords loc;
+	long eventOwner;
+	
+	public long getEventOwner() {
+		return eventOwner;
+	}
+	public void setEventOwner(long eventOwner) {
+		this.eventOwner = eventOwner;
+	}
 	public Coords getLoc() {
 		return loc;
 	}

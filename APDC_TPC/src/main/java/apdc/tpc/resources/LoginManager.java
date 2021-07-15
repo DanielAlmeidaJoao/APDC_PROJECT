@@ -36,6 +36,7 @@ import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.LoggedObject;
 import apdc.tpc.utils.LoginData;
+import apdc.tpc.utils.ProfileResponse;
 import apdc.tpc.utils.RegisterData;
 import apdc.tpc.utils.StorageMethods;
 //import apdc.tpc.utils.UserInfo;
@@ -50,7 +51,6 @@ public class LoginManager {
 	private static final Logger LOG = Logger.getLogger(LoginManager.class.getName());
 	
 	public static final String profilePictureBucketName="profile_pics46335560256500";
-
 
 	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();
@@ -224,24 +224,26 @@ public class LoginManager {
 	public Response getAdditionalInfos(@CookieParam(Constants.COOKIE_TOKEN) String value, @PathParam("userid") String otheruser) {
 		long userid;
 		Response res=null;
-		AdditionalAttributes obj;
+		ProfileResponse obj;
 		System.out.println("GOING TOOOOOOOOOOO LOAD ADDITIONAL INFORMATION");
 		try {
+			boolean loggedUser=false;
 			userid = HandleTokens.validateToken(value);
-			long otherUserId;
-			if(!otheruser.isEmpty()) {
-				try {
-					userid = Long.parseLong(otheruser);
-				}catch(Exception e) {
-					
-				}
+			try {
+				userid = Long.parseLong(otheruser);
+			}catch(Exception e) {
+				loggedUser=true;
+				System.out.println(e.getLocalizedMessage());
 			}
-			obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid);
-			if(obj==null) {
-				Response.status(Status.NOT_FOUND).build();
+			Entity user = StorageMethods.getUser(Constants.datastore,userid);
+			if(user==null) {
+				res = Response.status(Status.NOT_FOUND).build();
 			}else {
+				obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid,user);
+				obj.setViewingOwnProfile(loggedUser);
 				res=Response.ok().entity(Constants.g.toJson(obj)).build();
 			}
+			
 		}catch(Exception e) {
 			Constants.LOG.severe(e.getLocalizedMessage());
 			res=Response.status(Status.UNAUTHORIZED).build();

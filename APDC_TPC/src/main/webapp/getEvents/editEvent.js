@@ -31,10 +31,10 @@ function editEvent(btn){
 	long eventId, volunteers;
     */
     let descriptionTextarea=document.getElementById("desctxt");
-    elems[0].value=eventObj.name;
+    elems[1].value=eventObj.name;
     descriptionTextarea.value=eventObj.description;
-    elems[1].value=eventObj.goals;
-    elems[2].value=eventObj.volunteers;
+    elems[2].value=eventObj.goals;
+    elems[3].value=eventObj.volunteers;
     //elems[3].value=eventObj.name;
     //elems[4].value=eventObj.name;
     //elems[5].value=eventObj.name;
@@ -44,6 +44,7 @@ function editEvent(btn){
     //
     document.getElementById("addEvt_frm").setAttribute(dv.NAME,eventObj.eventId);
     document.getElementById("create_events_btn").click();
+    document.getElementById("addEvt_frm").classList.remove("hidfrm");
 }
 function deleteMarker(id) {
     //Find and remove the marker from the Array

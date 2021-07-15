@@ -12,6 +12,9 @@ function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
     if(show){
         show.onclick=()=>{
+            if(document.getElementById("fnd_evnts_blk").childElementCount==0){
+                document.getElementById("load_fnshd").click();
+            }
             hideAllBlocksButOne("show_fnd_evts_blk");
             hideMap();
             selectNavBarButton(show);
@@ -53,30 +56,32 @@ function pageRefreshed(){
 }
 const handleGetEventsButton = function () {
     let viewMoreEventsPoints = document.getElementById("vwmrpnt");
-    viewMoreEventsPoints.onclick=()=>{
-        loadUpcomingEvents();
+    if(viewMoreEventsPoints){
+        viewMoreEventsPoints.onclick=()=>{
+            loadUpcomingEvents();
+        }
+        let loadFinisheds=document.getElementById("load_fnshd");
+        loadFinisheds.onclick=()=>{
+            loadFinishedEvents();
+        }
     }
-    let loadFinisheds=document.getElementById("load_fnshd");
-    loadFinisheds.onclick=()=>{
-        loadFinishedEvents();
-    }
+}
+function eventDivBlock(eventObj,ownEvents) {
+    let str = makeShowInfoString(eventObj,eventObj.eventAddress,ownEvents);
+    return stringToHTML(str);
 }
 function loadEvents(path,finished,divBlock) {
     fetch(path)
-    .then(response => response.json())
+    .then(response => {return response.json()})
     .then( data => {
         if(data){
             let chld;
             for(let x=0; x<data.length;x++){
-                try {
-                    if(finished){
-                        let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
-                        divBlock.appendChild(chld);
-                    }else{
-                        makeMarker(data[x]);
-                    }
-                } catch (error) {
-                    console.log(error+" HELLO");
+                if(finished){
+                    let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                    divBlock.appendChild(chld);
+                }else{
+                    makeMarker(data[x]);
                 }
                 //chld = singleEventBlock(data[x],finished);
                 //divBlock.appendChild(chld);
@@ -361,8 +366,8 @@ function deleteEvent(eventId,btn) {
         console.log(response.status+" i am status code");
         if(response.status==HttpCodes.success){
             alert("EventDeleted!");
-            btn.parentElement.parentElement.remove();
-            updateNumberOfElements("evt_counter",false);
+            //btn.parentElement.parentElement.remove();
+            //updateNumberOfElements("evt_counter",false);
             deleteMarker(eventId);
         }else if(response.status==HttpCodes.unauthorized||response.status==HttpCodes.forbidden){
             alert("You have no authorization!");
@@ -492,6 +497,13 @@ function submitReport(btn,eventid){
         console.log(err);
     });
 }
+function goToProfilePage(userid,btn){
+    btn = btn.children[1];
+    btn.setAttribute("target","_blank");
+    btn.setAttribute("href","../profile/profile.html");
+    localStorage.setItem("ot",userid);
+    btn.click();
+}
 //NOTE: THIS FUNCTION MUST CALL removeEventButton(eventId,parent,eventObj,finished) TO REMOVE AND EDIT AN EVENT
 function makeShowInfoString(eventObj,where,ownEvents) {
     let goingText="";
@@ -518,7 +530,7 @@ function makeShowInfoString(eventObj,where,ownEvents) {
     if(ownEvents){
         let canEdit = "";
         if(!eventObj.finished){
-            canEdit=`<button onclick=editEvent(this,); data-obj='${JSON.stringify(eventObj)}'>EDIT</button>`;
+            canEdit=`<button onclick=editEvent(this); data-obj='${JSON.stringify(eventObj)}'>EDIT</button>`;
         }
         removeDiv =
         `<div class="rmv_evt">
@@ -529,11 +541,11 @@ function makeShowInfoString(eventObj,where,ownEvents) {
     return `<div class="one_ev">
                 <div class="evt_disp">
                     <div class="blk_desc">
-                        <div class="dlfx mgpd abt_orzr">
+                        <div class="dlfx mgpd abt_orzr" onclick=goToProfilePage(${eventObj.eventOwner},this)>
                             <div class="orgd"><img class="nav_img_prfl"
                                     src=${eventObj.imgUrl}
                                     alt="profile-pic"></div>
-                            <div class="orgd">${eventObj.organizer}</div>
+                            <a class="orgd">${eventObj.organizer}</a>
                         </div>
                         <div class="dlfx mgpd abt_evt">
                             <h2 class="">${eventObj.name}</h2>
@@ -612,7 +624,7 @@ function makeShowInfoStringForSu(eventObj,where) {
     return `<div class="one_ev">
                 <div class="evt_disp">
                     <div class="blk_desc">
-                        <div class="dlfx mgpd abt_orzr">
+                        <div class="dlfx mgpd abt_orzr" onclick=goToProfilePage(${eventObj.eventOwner},this)>
                             <div class="orgd"><img class="nav_img_prfl"
                                     src=${eventObj.imgUrl}
                                     alt="profile-pic"></div>

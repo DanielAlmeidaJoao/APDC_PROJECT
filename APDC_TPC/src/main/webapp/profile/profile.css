@@ -19,6 +19,7 @@ body{
 }
 .qttxt{
     font-style: italic;
+    font-weight: bold;
 }
 .txt_pm{
     padding: 5px 5px;
