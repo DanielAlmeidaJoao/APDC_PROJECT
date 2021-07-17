@@ -266,9 +266,10 @@ public class EventsDatabaseManagement {
 		    if(eventId<=Constants.ZERO) {
 		    	eventId=ev.getKey().getId();
 			    CountEventsUtils.makeUserEventCounterKind(userid, datastore,true,txn);
+			    /*
 			    if(EventParticipationMethods.addOrRemoveParticipation(userid,eventId,txn)==false) {
 			    	throw new Exception("Participation does not exist, it should be false!");
-			    }
+			    }*/
 		    }else {
 		    	eventId=ev.getKey().getId();
 		    }

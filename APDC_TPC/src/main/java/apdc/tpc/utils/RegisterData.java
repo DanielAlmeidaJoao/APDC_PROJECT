@@ -2,7 +2,13 @@ package apdc.tpc.utils;
 
 public class RegisterData {
 
-	private String name, password, email, profilePictureUrl;
+	private String name, password, email, profilePictureUrl, vcode;
+	public String getVcode() {
+		return vcode;
+	}
+	public void setVcode(String vcode) {
+		this.vcode = vcode;
+	}
 	public String getProfilePictureUrl() {
 		return profilePictureUrl;
 	}

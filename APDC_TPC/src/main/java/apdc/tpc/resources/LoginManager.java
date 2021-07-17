@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -38,6 +39,7 @@ import apdc.tpc.utils.LoggedObject;
 import apdc.tpc.utils.LoginData;
 import apdc.tpc.utils.ProfileResponse;
 import apdc.tpc.utils.RegisterData;
+import apdc.tpc.utils.SendEmail;
 import apdc.tpc.utils.StorageMethods;
 //import apdc.tpc.utils.UserInfo;
 import apdc.tpc.utils.tokens.HandleTokens;
@@ -107,9 +109,12 @@ public class LoginManager {
 	@Path("/op1")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doRegister(RegisterData data) {
+	public Response doRegister(RegisterData data, @CookieParam(Constants.VERIFICATION_CODE_COOKIE) String serverVcode) {
 		LOG.severe("GOING TO REGISTER USER! pp "+data.getEmail());
 		Response res=null;
+		if(!validVerificationCode(serverVcode,data.getVcode())) {
+			return Response.status(Status.NOT_ACCEPTABLE).build();
+		}
 		if(invalidPassword(data.getPassword())) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -123,40 +128,54 @@ public class LoginManager {
 		if(userid>Constants.ZERO){
 			String token=HandleTokens.generateToken(userid);
 			NewCookie nk = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,token,null);
-			res= Response.ok().cookie(nk).build();
+			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);
+			res = Response.ok().cookie(nk,k).build();
 			LOG.severe("USER REGISTERED! pp "+data.getEmail());
 		}else {
 			res= Response.status(Status.BAD_REQUEST).build();
 		}
 		return res;
 	}
+	private NewCookie sendVerificationCode(String email) {
+		Random rand = new Random();
+		int number = rand.nextInt(999999);			
+		String vCode = String.format("%07d",number);
+		SendEmail.send(email,vCode);
+		//System.out.println(vCode);
+		NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,DigestUtils.sha512Hex(vCode),null,4*60);
+		return k;
+	}
 	@GET
 	@Path("/vcd/{email}")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response getVerificationCode(@PathParam("email") String email) {
+	public Response getVerificationCode(@PathParam("email") String email, @QueryParam("n") String newUser) {
 		LOG.severe("GOING TO SEND VERIFICATION CODE "+email);
 		Response res=null;
-		if(StorageMethods.getUser(Constants.datastore,email)!=null) {
-			Random rand = new Random();
-			int number = rand.nextInt(999999);			
-			String vCode = String.format("%07d",number);
-			System.out.println(vCode);
-			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,DigestUtils.sha512Hex(vCode),null,4*60);
-			res = Response.ok().cookie(k).build();
+		boolean userExists = StorageMethods.getUser(Constants.datastore,email)!=null;
+		boolean creatingNewUser = email.equals(newUser);
+		if(userExists && !creatingNewUser) {
+			res = Response.ok().cookie(sendVerificationCode(email)).build();
+		}else if(creatingNewUser && !userExists ) {
+			res = Response.ok().cookie(sendVerificationCode(email)).build();
+		}else if(creatingNewUser&&userExists) {
+			res = Response.status(Status.CONFLICT).build();
 		}else {
 			res = Response.status(Status.NOT_FOUND).build();
 		}		
 		return res;
 	}
+	private boolean validVerificationCode(String serverVcode, String clientVcode) {
+		return DigestUtils.sha512Hex(clientVcode).equals(serverVcode);
+	}
 	@POST
 	@Path("/chgpwd")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response getVerificationCode(@CookieParam(Constants.VERIFICATION_CODE_COOKIE) String value, ChangePasswordArgs args) {
+	public Response changePassword(@CookieParam(Constants.VERIFICATION_CODE_COOKIE) String serverVcode, ChangePasswordArgs args) {
 		Response res=null;
 		try {
-			if(DigestUtils.sha512Hex(args.getVcode()).equals(value)) {
+			if(validVerificationCode(serverVcode,args.getVcode())) {
 				StorageMethods.updatePassword(args.getEmail(),hashPassword(args.getPassword()));
 				NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);
 				res = Response.ok().cookie(k).build();

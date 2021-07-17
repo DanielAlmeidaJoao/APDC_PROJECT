@@ -112,7 +112,7 @@ public class StorageMethods {
 			QueryResults<Entity> tasks = datastore.run(query);
 			user = tasks.next();
 		}catch(Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 		return user;
@@ -190,6 +190,7 @@ public class StorageMethods {
 						.build();
 				txn.put(person);
 			    txn.commit();
+			    userid = person.getKey().getId();
 			}
 		  }catch(Exception e) {
 				LOG.severe(e.getLocalizedMessage());

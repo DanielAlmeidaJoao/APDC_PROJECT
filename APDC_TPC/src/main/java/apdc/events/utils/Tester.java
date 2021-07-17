@@ -15,6 +15,8 @@ import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
+import apdc.tpc.utils.SendEmail;
+
 public class Tester {
 
 	public Tester() {
@@ -40,6 +42,7 @@ public class Tester {
 	    Bucket bucket = storage.create(BucketInfo.of(bucketName));
 
 	    System.out.printf("Bucket %s created.%n", bucket.getName());*/
-		System.out.println("SÃO UM DEUS");
+		SendEmail.send("joao@gmail.com","100101");
+
 	}
 }

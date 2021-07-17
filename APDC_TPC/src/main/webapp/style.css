@@ -137,8 +137,11 @@ input:focus-visible{
 }
 .reg_form1{
   margin: 10px 10px;
+  width: 100%;
 }
-
+.rgdv{
+  width: 60%;
+}
 .reg_txt{
   font-size: 30px;
   font-weight: bolder;
@@ -162,7 +165,7 @@ input:focus-visible{
   width: 400px;
   height: 400px;
 }
-#sbm{
+.sbm{
   width: auto;
   background-color: rgb(34, 141, 180);
   padding: 10px 10px;
@@ -172,7 +175,7 @@ input:focus-visible{
   font-size: 20px;
   border-radius: 5px 5px;
 }
-#sbm:hover{
+.sbm:hover{
   cursor: pointer;
   background-color: rgb(16, 173, 229);
 }
@@ -186,4 +189,8 @@ input:focus-visible{
 }
 .abtus_a:hover{
   text-decoration: underline;
+}
+.emplh{
+  text-decoration: underline;
+  color: rgb(16, 173, 229);
 }

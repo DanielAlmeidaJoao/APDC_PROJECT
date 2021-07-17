@@ -8,11 +8,12 @@ function getHttpXmlRequest(){
 	}
 	return xmlHttpReq;
 }
-function registerUser(name,email,password){
+function registerUser(name,email,password,vcode){
     let user={
         name: name,
         email: email,
-        password: password
+        password: password,
+        vcode: vcode
     };
 	let postString = JSON.stringify(user);
     let path="rest/login/op1";
@@ -29,6 +30,8 @@ function registerUser(name,email,password){
             redirectOnLogin(user);
         }else if(response.status===409){
             alert("Email already registered!");
+        }else if(response.status==406){
+            alert("Ooops, wrong code!");
         }else{
             alert("Invalid Data!");
         }
@@ -79,14 +82,19 @@ function processLoginData(email,password) {
 }
 
 function registerUserForm() {
+    let submitVcode=document.getElementById("sbmvc");
     let regform = document.getElementById("myForm");
+    let name = document.getElementById("inp").value;
+    let email = document.getElementById("inp2").value;
+    let password = document.getElementById("inp3").value;
+    let conf_password = document.getElementById("inp4").value;
     regform.onsubmit=(e)=>{
         e.preventDefault();
         
-        let name = document.getElementById("inp").value;
-        let email = document.getElementById("inp2").value;
-        let password = document.getElementById("inp3").value;
-        let conf_password = document.getElementById("inp4").value;
+        name = document.getElementById("inp").value;
+        email = document.getElementById("inp2").value;
+        password = document.getElementById("inp3").value;
+        conf_password = document.getElementById("inp4").value;
     
         if(name.trim()===""){
             alert("Name is invalid!");
@@ -97,11 +105,47 @@ function registerUserForm() {
             alert("Passwords do not match!");
             return false;
         }
-    
-        registerUser(name,email,password);
+        if(!validatePassword(password)){
+            return false;
+        }
+        /*
+        if(password.length<6||password.length>15){ //Password Length Restriction
+            alert("Password length must be greater than 6 and less than 16!");
+            return false;
+        }*/
+        //Handle Verification Code Ops
+        {
+            fetch(`/rest/login/vcd/${email}?n=${email}`)
+            .then(response=>{
+                if(response.ok){
+                    document.getElementById("emplh").textContent=email;
+                    document.getElementById("myForm").classList.add("hidregfrm");
+                    document.getElementById("myForm2").classList.remove("hidregfrm");
+                }else if(response.status==409){
+                    alert("Email Already Registered!")
+                }else {
+                    alert("Unexpected Error!");
+                }
+            }).catch(err => {
+                console.log("ERROR: "+err);
+            })
+        }
+        //Try Again Button on Verification Code Div
+        document.getElementById("trgrg").onclick=()=>{
+            document.getElementById("myForm").classList.remove("hidregfrm");
+            document.getElementById("myForm2").classList.add("hidregfrm");
 
+        }
         return false;
     }
+    submitVcode.onclick=()=>{
+        registerUser(name,email,password,document.getElementById("inpvc").value);
+    }
+}
+
+function handleVerificationCodeOps(){
+    document.getElementById("myForm").classList.add("hidregfrm");
+    document.getElementById("myForm2").classList.remove("hidregfrm");
 }
 
 function handleLogin() {
@@ -145,13 +189,32 @@ function showLoginForm() {
     let goToLoginBtn=document.getElementById("gtlogin");
     openAccountBtn.onclick=()=>{
         openAccountBtn.parentElement.classList.toggle(hideClassName);
-        document.getElementById("myForm").classList.toggle(hideClassName);
+        document.getElementById("rgdv").classList.toggle(hideClassName);
     }
     goToLoginBtn.onclick=()=>{
         openAccountBtn.click();
     }
 }
-
+function validatePassword(pass) {
+    let errors = [];
+    if (pass.length < 8) {
+        errors.push("Your password must be at least 8 characters");
+    }
+    if(pass.length>15){
+        errors.push("Your password must be at less than 15 characters");
+    }
+    if (pass.search(/[a-z]/i) < 0) {
+        errors.push("Your password must contain at least one letter."); 
+    }
+    if (pass.search(/[0-9]/) < 0) {
+        errors.push("Your password must contain at least one digit.");
+    }
+    if (errors.length > 0) {
+        alert(errors.join("\n"));
+        return false;
+    }
+    return true;
+}
 handleLogin();
 registerUserForm();
 showLoginForm();
