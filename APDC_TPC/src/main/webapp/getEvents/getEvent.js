@@ -564,6 +564,7 @@ function makeShowInfoString(eventObj,where,ownEvents) {
                                 <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${eventObj.volunteers}</span>
                                 </div>
                                 <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${eventObj.currentParticipants}</span></div>
+                                <div class="mrdso">DIFFICULTY, 1-5: ${eventObj.difficulty}</div>
                                 ${funcString}
                             </div>
                         </div>
@@ -647,6 +648,7 @@ function makeShowInfoStringForSu(eventObj,where) {
                                 <div class="vlt"><span class="vlts1 vlts">Voluntarios:</span><span class="vlts1 vlts">${eventObj.volunteers}</span>
                                 </div>
                                 <div class="vlt"><span class="vlts">Interested:</span><span class="vlts">${eventObj.currentParticipants}</span></div>
+                                <div class="mrdso">DIFFICULTY, 1-5: ${eventObj.difficulty}</div>
                                 ${funcString}
                             </div>
                         </div>

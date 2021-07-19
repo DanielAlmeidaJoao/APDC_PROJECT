@@ -8,8 +8,10 @@ display: flex;
     flex-direction: column;
 }
 .show_events{
+    display: flex;
+    flex-direction: column;
+    align-content: center;
     border: 2px solid blue;
-    width: 800px;
     height: auto;
 }
 
@@ -20,14 +22,14 @@ display: flex;
     border-bottom: 1px solid rgba(119, 115, 115, 0.219);
 }
 .one_ev{
-    width: 100%;
+    width: 600px;
     display: flex;
     align-items: center;
     flex-direction: column;
     border: 2px solid green;
 }
 .blk_desc{
-    width: 400px;
+    width: 60%;
 }
 .dlfx{
     display: flex;
@@ -68,7 +70,8 @@ display: flex;
     justify-self: flex-end;
 }
 .evnts_pcs{
-    width: 300px;
+    /*width: 300px;*/
+    width: 40%;
     height: 300px;
     /*overflow-y: scroll;*/
 }
@@ -150,6 +153,10 @@ display: flex;
 }
 .cmtauthnm{
     font-weight: bold;
+    cursor: pointer;
+}
+.cmtpfp{
+    cursor: pointer;
 }
 .hiderptdv{
     display: none;

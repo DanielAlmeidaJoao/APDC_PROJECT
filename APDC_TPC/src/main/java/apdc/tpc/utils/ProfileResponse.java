@@ -2,7 +2,15 @@ package apdc.tpc.utils;
 
 public class ProfileResponse extends AdditionalAttributes {
 
-	String  profilePicture, name;
+	String  profilePicture, name, email;
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	boolean viewingOwnProfile;
 
 	public ProfileResponse() {

@@ -28,6 +28,11 @@ body{
 .abt_prd{
     
 }
+.ctedspn{
+    background-color: #fff;
+    outline: black;
+    color: black;
+}
 .abt_txt{
     font-size: 18px;
     border: 1px solid #0000000d;
@@ -64,6 +69,35 @@ body{
 }
 .txta{
     display: none;
+}
+
+/* CHANING EMAILS*/
+.emlwrp{
+    margin-bottom: 20px;
+}
+.frstpts{
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+}
+.secpts{
+    display: flex;
+    flex-direction: column;
+    margin: 10px 10px;
+}
+.ipt{
+    margin: 5px 10px;
+    height: 25px;
+}
+.gobtn{
+    width: fit-content;
+    padding: 10px 10px;
+    margin: 10px 10px;
+}
+.vcdpt{
+    width: 50%;
+    height: 25px;
+    font-size: 18px;
 }
 .hdtxa{
     display: none;

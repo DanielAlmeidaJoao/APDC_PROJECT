@@ -64,7 +64,7 @@ public class CommentDatastoreManagement {
 			txn.put(entity);
 			increaceOrDecreaseNumberOfCommentsForEvent(eventid,true,txn);
 			txn.commit();
-			CommentObject2 result =  new CommentObject2(eventid,comment,Timestamp.now().toDate().toString(),key.getId());
+			CommentObject2 result =  new CommentObject2(eventid,comment,Timestamp.now().toDate().toString(),key.getId(),userid);
 			//to fecth the name of the owner
 			Entity user = StorageMethods.getUser(Constants.datastore,userid);
 			result.setOwnerName(user.getString(StorageMethods.NAME_PROPERTY));
@@ -140,12 +140,14 @@ public class CommentDatastoreManagement {
 			List<CommentObject2> comments = new LinkedList<>();
 			CommentObject2 comment;
 			Timestamp date;
+			long ownerId;
 			while(tasks.hasNext()){
 				e = tasks.next();
+				ownerId = e.getLong(COMMENT_OWNER_PROP);
 				date = e.getTimestamp(COMMENT_DATE_PROP);
-				comment =  new CommentObject2(e.getLong(COMMENT_EVENT_PROP),e.getString(COMMENT_TEXT_PROP),date.toDate().toString(),e.getKey().getId());
+				comment =  new CommentObject2(e.getLong(COMMENT_EVENT_PROP),e.getString(COMMENT_TEXT_PROP),date.toDate().toString(),e.getKey().getId(),ownerId);
 				//to fecth the name of the owner
-				Entity user = StorageMethods.getUser(Constants.datastore,e.getLong(COMMENT_OWNER_PROP));
+				Entity user = StorageMethods.getUser(Constants.datastore,ownerId);
 				comment.setOwnerName(user.getString(StorageMethods.NAME_PROPERTY));
 				//fetch the owner profile picture object name
 				comment.setUrlProfilePicture(user.getString(StorageMethods.PROFILE_PICTURE_URL_PROP));

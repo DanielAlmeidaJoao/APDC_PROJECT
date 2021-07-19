@@ -47,16 +47,16 @@
                             <!--name, description, goals, volunteers,location,
                                 meetingPlace, startDate, endDate, duration;
                             -->
-                            <div class="evnt_atrs" id="inp_data">
-                                <input class="crt_inp" id="pac-input2" type="text" class="txt_inpt" autocomplete="off" required placeholder="Full Address">
+                            <div class="evnt_atrs" id="inp_data" autocomplete="off" list="autocompleteOff">
+                                <input class="crt_inp" id="pac-input2" type="text" class="txt_inpt" required placeholder="Full Address">
                                 <label>Event Name</label>
                                 <input class="crt_inp" type="text" name="name" class="txt_inpt" required>
                                 <label>Event Description</label>
                                 <textarea class="evnt_desc" name="description" id="desctxt" required></textarea>
-                                <label >Goals</label>
-                                <input class="crt_inp" name="goals" type="text" required>
+                                <label >Difficulty: 1 - 5</label>
+                                <input class="crt_inp" name="difficulty" type="number" min="1" max="5" required>
                                 <label >Number of volunteers</label>
-                                <input class="crt_inp" name="volunteers" type="number" required>
+                                <input class="crt_inp" name="volunteers" type="number" min="2" required>
                                 <label >Start Date</label>
                                 <input class="crt_inp" name="startDate" type="date" id="startDate" required>
                                 <label>End Date</label>

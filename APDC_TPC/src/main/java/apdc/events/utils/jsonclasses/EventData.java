@@ -9,7 +9,7 @@ import java.io.File;
  */
 public class EventData {
 
-	String name, description, goals, location,
+	String name, description, difficulty, location,
 	startDate, endDate, organizer, startTime, endTime, images;
 	File img_cover;
 	long eventId, volunteers;
@@ -99,10 +99,10 @@ public class EventData {
 		this.description = description;
 	}
 	public String getGoals() {
-		return goals;
+		return difficulty;
 	}
 	public void setGoals(String goals) {
-		this.goals = goals;
+		this.difficulty = goals;
 	}
 	public String getLocation() {
 		return location;

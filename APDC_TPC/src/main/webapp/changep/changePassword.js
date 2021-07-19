@@ -61,12 +61,31 @@ function validPassword(){
         alert("Passwords must match!");
         return null;
     }
-    if(pass1.length<6){
-        alert("Password length must be greater than 6!");
+    if(!validatePassword(pass1)){
         return null;
     }
     let email = document.getElementById("login_email").value;
     return {email:email,password:pass1};
+}
+function validatePassword(pass) {
+    let errors = [];
+    if (pass.length < 8) {
+        errors.push("Your password must be at least 8 characters");
+    }
+    if(pass.length>15){
+        errors.push("Your password must be at less than 15 characters");
+    }
+    if (pass.search(/[a-z]/i) < 0) {
+        errors.push("Your password must contain at least one letter."); 
+    }
+    if (pass.search(/[0-9]/) < 0) {
+        errors.push("Your password must contain at least one digit.");
+    }
+    if (errors.length > 0) {
+        alert(errors.join("\n"));
+        return false;
+    }
+    return true;
 }
 handleChangePassword();
 tryAgainButton();

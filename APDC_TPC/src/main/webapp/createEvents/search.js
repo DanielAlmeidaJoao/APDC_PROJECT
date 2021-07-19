@@ -59,9 +59,30 @@ function initAutocomplete() {
 
   const searchBox = new google.maps.places.SearchBox(input);
   const searchBox2 = new google.maps.places.SearchBox(input2);
+  /*
+  let mapZoom;
+  let startLocation
+  new google.maps.event.addListener(map, 'click', function(event) {
+    mapZoom = map.getZoom();
+    startLocation = event.latLng;
+    //setTimeout(placeMarker, 600);
+    placeMarker();
+    console.log(startLocation.lat(), startLocation.lng());
+    geocodeLatLng(map,startLocation.lat(),startLocation.lng()); 
+  });
 
+  function placeMarker() {
+    let marker;
+    if(mapZoom == map.getZoom()){
+      marker =  new google.maps.Marker({position: startLocation, map: map});
+      infowindow = new google.maps.InfoWindow({content:`<button>Do You Wish To Create An Event On This Location?</button>`,maxWidth:"800px"});
+      infowindow.open(map, marker);
+    }
+  }
+  **/
 
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
   // Bias the SearchBox results towards current map's viewport.
   map.addListener("bounds_changed", () => {
     searchBox.setBounds(map.getBounds());
@@ -246,7 +267,7 @@ function makeMarker2(eventObj) {
   currentPoints.push(marker);
   let clicked=false;
   
-  let contentString = makeShowInfoString(eventObj,eventObj.eventAddress,false);
+  let contentString = makeShowInfoString(eventObj,eventObj.eventAddress,true);
   let infowindow = new google.maps.InfoWindow({content: contentString});
   marker.addListener('click', function() {
     infowindow.open(map, marker);
@@ -265,6 +286,7 @@ function geocodeLatLng(map,lat,lng) {
     .geocode({ location: latlng })
     .then((response) => {
         pps = response.results[0].address_components;
+        console.log(response.results[0]);
       if (response.results[0]) {
         loadsEventsNearTheLoggedUser();
         map.setZoom(MAP_ZOOM);

@@ -2,8 +2,7 @@ package apdc.events.utils;
 
 //Imports the Google Cloud client library
 import com.google.cloud.storage.Bucket;
-
-
+import com.beoui.geocell.GeocellUtils;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 
@@ -16,6 +15,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
 import apdc.tpc.utils.SendEmail;
+import ch.hsr.geohash.GeoHash;
 
 public class Tester {
 
@@ -42,7 +42,11 @@ public class Tester {
 	    Bucket bucket = storage.create(BucketInfo.of(bucketName));
 
 	    System.out.printf("Bucket %s created.%n", bucket.getName());*/
-		SendEmail.send("joao@gmail.com","100101");
+		//SendEmail.send("joao@gmail.com","100101");
+		
+		GeoHash geohash = GeoHash. withCharacterPrecision(53.244664, -6.140530, 12);
+		String geohashString = geohash.toBase32().substring(0, 3); //3 characters for around 100km of precision
+
 
 	}
 }

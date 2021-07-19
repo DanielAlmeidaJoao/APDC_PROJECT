@@ -194,3 +194,8 @@ input:focus-visible{
   text-decoration: underline;
   color: rgb(16, 173, 229);
 }
+.passrt{
+  margin-top: 10px;
+  width: 80%;
+  color: #0000007a;
+}

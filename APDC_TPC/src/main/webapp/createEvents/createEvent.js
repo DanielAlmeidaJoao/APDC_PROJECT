@@ -129,12 +129,13 @@ function uploadData(datas) {
         return response.json();
     }).then(data=>{
         if(data){
-            let eventBlock = document.getElementById(HTML_EVENT_ID_SUFFIX+data.eventId);
+            /*let eventBlock = document.getElementById(HTML_EVENT_ID_SUFFIX+data.eventId);
             if(eventBlock){
                 deleteMarker(eventObj.eventId);
                 updateNumberOfElements("evt_counter",true);
                 eventBlock.parentElement.replaceChild(singleEventBlock(data,false),eventBlock);
-            }
+            }*/
+            deleteMarker(data.eventId);
             clearMarkers();
             makeMarker2(data);
         }
@@ -182,7 +183,6 @@ function handleImages(){
     eventImages=new Map();
     uploadImg.onchange=function(){
         const file = this.files[0];
-        fil=file;
         if(eventImages.size==max_images){
             alert("Only 5 images allowed!");
             return;
@@ -195,6 +195,7 @@ function handleImages(){
             const imgparnt = document.getElementById("imgs_dv");
             reader.onload=function () {
                 imgparnt.appendChild(makeImgDiv(this.result,file.name));
+                fil=file;
             }
             reader.readAsDataURL(file);
         }

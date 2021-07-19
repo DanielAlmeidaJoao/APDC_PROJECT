@@ -1,6 +1,5 @@
 package apdc.tpc.resources;
 
-import java.net.URLDecoder;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,8 +70,6 @@ public class EventsResources {
 		try {
 			long userid = HandleTokens.validateToken(value);			
 			response = EventsDatabaseManagement.createEvent(ds,httpRequest,userid);
-			//response = Response.status(Status.UNAUTHORIZED).build();
-
 		}catch(Exception e) {
 			e.printStackTrace();
 			response = Response.status(Status.UNAUTHORIZED).entity(Constants.g.toJson(e.getLocalizedMessage())).build();
@@ -155,6 +152,7 @@ public class EventsResources {
 			EventData2 event = EventsDatabaseManagement.getEvent(eventId,Constants.datastore,userid);
 			resp = Response.ok().entity(Constants.g.toJson(event)).build();
 		}catch(Exception e) {
+			e.printStackTrace();
 			resp = Response.status(Status.FORBIDDEN).build();
 		}
 		return resp;

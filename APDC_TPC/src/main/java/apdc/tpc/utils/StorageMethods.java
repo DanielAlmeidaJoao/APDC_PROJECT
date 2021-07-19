@@ -144,6 +144,26 @@ public class StorageMethods {
 			updateUser(user.getKey(),user,data);
 		}
 	}
+	public static void updateName(Entity user, String name) {
+		if(!user.getString(NAME_PROPERTY).equals(name)) {
+			RegisterData data = new RegisterData();
+			data.setEmail(user.getString(EMAIL_PROP));
+			data.setName(name);
+			data.setPassword(user.getString(PASSWORD));
+			data.setProfilePictureUrl(user.getString(PROFILE_PICTURE_URL_PROP));
+			updateUser(user.getKey(),user,data);
+		}
+	}
+	public static void updateEmail(Entity user, String email) {
+		if(!user.getString(EMAIL_PROP).equals(email)) {
+			RegisterData data = new RegisterData();
+			data.setEmail(email);
+			data.setName(user.getString(NAME_PROPERTY));
+			data.setPassword(user.getString(PASSWORD));
+			data.setProfilePictureUrl(user.getString(PROFILE_PICTURE_URL_PROP));
+			updateUser(user.getKey(),user,data);
+		}
+	}
 	/**
 	 * updates name, email, password or profile picture url
 	 * @param userid

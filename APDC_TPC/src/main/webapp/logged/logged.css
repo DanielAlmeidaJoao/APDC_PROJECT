@@ -3,6 +3,9 @@ body{
     padding: 0px;
     background-color:  #FFF
 }
+.txt_inpt{
+    height: 20px;
+}
 .showInfo{
     text-decoration: none;
     color: inherit;

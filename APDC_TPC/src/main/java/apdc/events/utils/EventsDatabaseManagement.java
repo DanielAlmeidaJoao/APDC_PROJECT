@@ -59,7 +59,7 @@ public class EventsDatabaseManagement {
 	//private static final String USERS = "Users";
 	private static final String NAME="NAME";
 	private static final String DESCRIPTION="DESCRIPTION";
-	private static final String GOAL="GOAL";
+	private static final String DIFFICULTY="DIFFICULTY";
 	private static final String LOCATION="LOCATION";
 	private static final String REPORT_TEXTS_PROPERTY="REPORT_TEXTS";
 	private static final String REPORTED_PROP="REPORTED";
@@ -140,7 +140,7 @@ public class EventsDatabaseManagement {
 				Entity.Builder  builder =Entity.newBuilder(eventKey)
 						.set(NAME,event.getString(NAME))
 						.set(DESCRIPTION,event.getString(DESCRIPTION))
-						.set(GOAL,event.getString(GOAL))
+						.set(DIFFICULTY,event.getString(DIFFICULTY))
 						.set(LOCATION,event.getString(LOCATION))
 						.set(START_DATE,event.getTimestamp(START_DATE))
 						.set(END_DATE,event.getTimestamp(END_DATE))
@@ -224,7 +224,7 @@ public class EventsDatabaseManagement {
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
-					.set(GOAL,et.getGoals())
+					.set(DIFFICULTY,et.getGoals())
 					//.set(LOCATION,et.getLocation())
 					//	String name, postal_code, locality, country_name;
 					.set(POSTAL_CODE_PROP,firstNumberPostCode(location.getPostal_code()))
@@ -486,7 +486,7 @@ public class EventsDatabaseManagement {
 		ed.setEventId(en.getKey().getId());
 		ed.setDescription(en.getString(DESCRIPTION));
 		ed.setEndDate(revertTimeStamp(en.getTimestamp(END_DATE)));
-		ed.setGoals(en.getString(GOAL));
+		ed.setGoals(en.getString(DIFFICULTY));
 		//ed.setLocation(en.getString(LOCATION));
 		try {
 			ed.setEventAddress(en.getString(FORMATTED_ADDRESS_EVENT_PROP));

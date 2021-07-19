@@ -2,6 +2,7 @@ if(sessionStorage.getItem("ot")&&!localStorage.getItem("ot")){
     localStorage.setItem("ot",sessionStorage.getItem("ot"));
 }
 const otheruser=localStorage.getItem("ot");
+console.log("I AM OTHER USER!");
 sessionStorage.setItem("ot",otheruser);
 localStorage.removeItem("ot");
 function hideAllDivButOne(theOne) {
@@ -110,7 +111,13 @@ function showUserInfos(){
                     element.removeAttribute("href");
                 }
             }
+            if(data.viewingOwnProfile){
+                document.getElementById("emlspn").textContent=data.email;
+            }
             handleEditBtn(data.viewingOwnProfile);
+            handleEditName(data.viewingOwnProfile);
+            handleEditEmailButton(data.viewingOwnProfile);
+            console.log(data.viewingOwnProfile);
         }
     }).catch(err => {
         console.log(err);

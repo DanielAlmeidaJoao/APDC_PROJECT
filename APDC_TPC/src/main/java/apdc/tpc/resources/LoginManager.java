@@ -12,6 +12,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -32,6 +33,7 @@ import com.google.gson.Gson;
 
 import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
+import apdc.events.utils.jsonclasses.ChangeEmailArgs;
 import apdc.events.utils.jsonclasses.ChangePasswordArgs;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
@@ -59,6 +61,9 @@ public class LoginManager {
 
 	public static String hashPassword(String password) {
 		return DigestUtils.sha512Hex(password);
+	}
+	public static boolean equalPasswords(String hashedPass,String password) {
+		return hashedPass.equals(hashPassword(password));
 	}
 	@GET
 	@Path("/{username}")
@@ -165,6 +170,56 @@ public class LoginManager {
 		}		
 		return res;
 	}
+	@POST
+	@Path("/chgmailvcd")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response sendVerificationCodeOnChangingEmail(@CookieParam(Constants.COOKIE_TOKEN) String value, ChangeEmailArgs args) {
+		Response res=null;
+		LOG.info("GOING TO SEND VERIFICATION CODE TO THE NEW EMAIL");
+		try {
+			long userid = HandleTokens.validateToken(value);
+			Entity user = StorageMethods.getUser(Constants.datastore,userid);
+			boolean emailTaken = StorageMethods.getUser(Constants.datastore,args.getNewEmail())!=null;
+			if(emailTaken) {
+				return Response.status(Status.CONFLICT).build();
+			}else if(user==null) {
+				return Response.status(Status.NOT_FOUND).build();
+			}else if(!equalPasswords(user.getString(StorageMethods.PASSWORD),args.getPassword())){
+				return Response.status(Status.FORBIDDEN).build();
+			}else {
+				NewCookie nc = sendVerificationCode(args.getNewEmail());
+				return Response.ok().cookie(nc).build();
+			}
+		}catch(Exception e) {
+			res=Response.status(Status.UNAUTHORIZED).build();
+		}
+		return res;
+	}
+	@PUT
+	@Path("/chgmail")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response ChangeEmail(@CookieParam(Constants.COOKIE_TOKEN) String loginToken, 
+			@CookieParam(Constants.VERIFICATION_CODE_COOKIE) String serverVcode, ChangeEmailArgs args) {
+		Response res=null;
+		try {
+			long userid = HandleTokens.validateToken(loginToken);
+			Entity user = StorageMethods.getUser(Constants.datastore,userid);
+			//THE PASSWORD ATTRIBUTE HAS THE VERIFICATION CODE
+			if(user==null) {
+				res=Response.status(Status.NOT_FOUND).build();
+			}else if(validVerificationCode(serverVcode,args.getPassword())) {
+				StorageMethods.updateEmail(user,args.getNewEmail());
+				res=Response.ok().build();
+			}else {
+				res = Response.status(Status.NOT_ACCEPTABLE).build();
+			}
+		}catch(Exception e) {
+			res=Response.status(Status.UNAUTHORIZED).build();
+		}
+		return res;
+	}
 	private boolean validVerificationCode(String serverVcode, String clientVcode) {
 		return DigestUtils.sha512Hex(clientVcode).equals(serverVcode);
 	}
@@ -248,7 +303,10 @@ public class LoginManager {
 		try {
 			boolean loggedUser=false;
 			userid = HandleTokens.validateToken(value);
+			System.out.println("LOGGGGED USER "+userid+" ---- OTHERUSER: "+otheruser);
 			try {
+				long ot = Long.parseLong(otheruser);
+				loggedUser = ot==userid;
 				userid = Long.parseLong(otheruser);
 			}catch(Exception e) {
 				loggedUser=true;
@@ -260,7 +318,11 @@ public class LoginManager {
 			}else {
 				obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid,user);
 				obj.setViewingOwnProfile(loggedUser);
+				if(loggedUser) {
+					obj.setEmail(user.getString(StorageMethods.EMAIL_PROP));
+				}
 				res=Response.ok().entity(Constants.g.toJson(obj)).build();
+				
 			}
 			
 		}catch(Exception e) {
@@ -331,6 +393,26 @@ public class LoginManager {
 			rb=Response.status(Status.BAD_REQUEST);
 		}
 		return rb.build();
+	}
+	@PUT
+	@Path("/updatename/{name}")
+	public Response updateName(@CookieParam(Constants.COOKIE_TOKEN) String token, @PathParam("name") String newName) {
+		Response resp=null;
+		long userid;
+		try {
+			userid = HandleTokens.validateToken(token);
+			Entity user = StorageMethods.getUser(Constants.datastore,userid);
+			if(user!=null) {
+				StorageMethods.updateName(user,newName);
+				resp = Response.noContent().build();
+			}else {
+				resp = Response.status(Status.NOT_FOUND).build();
+			}
+		}catch(Exception e)
+		{
+			resp=Response.status(Status.UNAUTHORIZED).build();
+		}
+		return resp;
 	}
 	/*
 	@POST

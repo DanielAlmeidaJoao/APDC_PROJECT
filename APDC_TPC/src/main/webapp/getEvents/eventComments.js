@@ -15,16 +15,22 @@ function removeComment(commentId,btn) {
         console.log("Error "+err);
     })
 }
+function goToProfilePageFromComments(userid,btn){
+    btn.setAttribute("target","_blank");
+    btn.setAttribute("href","../profile/profile.html");
+    localStorage.setItem("ot",userid);
+    btn.click();
+}
 function singleCommentBlockHtmlStr(element){
     let removeBtn="";
     if(element.owner){
         removeBtn=`<button class="rmvcmt" onclick=removeComment(${element.commentid},this)>REMOVE</button>`;
     }
     return `<div class="snglsmt">
-        <div class="orgd"><img class="nav_img_prfl cmtpfimg" src=${element.urlProfilePicture} alt="profile-pic"></div>
+        <a class="orgd cmtpfp" onclick=goToProfilePageFromComments(${element.ownerId},this)><img class="nav_img_prfl cmtpfimg" src=${element.urlProfilePicture} alt="profile-pic"></a>
         <div>
             <div class="cmtername">
-                <span class="cmtauthnm">${element.ownerName}</span>
+                <a class="cmtauthnm" onclick=goToProfilePageFromComments(${element.ownerId},this)>${element.ownerName}</a>
                 <span class="cmtdate">${element.date}</span>
             </div>
             <div>${element.comment}</div>

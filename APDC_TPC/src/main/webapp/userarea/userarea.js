@@ -59,14 +59,50 @@ function updateProfilePicture() {
         })
     }
 }
-function handleEditBtn(ownProfile) {
+function handleEditName(ownProfile) {
+    if(!ownProfile){
+        return;
+    }
+    let editBtn = document.createElement("button");
+    editBtn.textContent="EDIT";
     let saveBtn = document.createElement("button");
     saveBtn.textContent="SAVE";
+    let nameHolder = document.getElementById("vsb_btn");
+    document.getElementById("nmdv").appendChild(editBtn);
+
+    editBtn.onclick=()=>{
+        nameHolder.classList.add("ctedspn");
+        nameHolder.setAttribute("contenteditable","true");
+        editBtn.parentElement.appendChild(saveBtn);
+        editBtn.remove();
+    }
+
+    saveBtn.onclick=()=>{
+        fetch(`/rest/login/updatename/${nameHolder.textContent}`,{
+            method:'PUT'
+        }).then(response=>{
+            nameHolder.classList.remove("ctedspn");
+            nameHolder.setAttribute("contenteditable","false");
+            if(response.ok){
+                alert("Name Updated!");
+                saveBtn.parentElement.appendChild(editBtn);
+            }else if(response.status==401){
+                alert("Session Ended!");
+            }else if(response.status==404){
+                alert("Unknown User!");
+            }
+            saveBtn.remove();
+        });
+    }
+}
+function handleEditBtn(ownProfile) {
     let editBtn = document.getElementById("edt_inf");
     if(!ownProfile){
         editBtn.remove();
         return;
     }
+    let saveBtn = document.createElement("button");
+    saveBtn.textContent="SAVE";
     editBtn.onclick=()=>{
         let textas=document.getElementsByClassName("txta");
         for (let index = 0; index < textas.length; index++) {
@@ -143,4 +179,72 @@ function updateInfos(obj){
         alert(e);
     })
 }
+function handleEditEmailButton(ownProfile) {
+    let emailParentDiv = document.getElementById("wrprt");
+    let editBtn = document.getElementById("dtamil");
+    if(!ownProfile){
+        document.getElementById("dtmlla").remove();
+        editBtn.parentElement.remove();
+        return;
+    }
+    emailParentDiv.classList.remove("hdtxa");
+    let firstInputs = document.getElementById("frstpts");
+    let secInputs = document.getElementById("secpts");
+    let changeBtn = document.getElementById("gobtn");
+    let submitVerificationCodeBtn = document.getElementById("sbmvc");
+    let obj=null;
+    editBtn.onclick=()=>{
+        firstInputs.classList.remove("hdtxa");
+    }
+    changeBtn.onclick=()=>{
+        obj={
+            newEmail:firstInputs.children[0].value,
+            password:firstInputs.children[1].value
+        }
+        fetch(`../rest/login/chgmailvcd`,{
+            method:'POST',
+            headers:{
+                "Content-Type":"application/json",
+            },
+            body:JSON.stringify(obj)
+        }).then(response => {
+            if(response.ok){
+                secInputs.classList.remove("hdtxa");
+                firstInputs.remove();
+            }else if(response.status==409){
+                alert("Email Registered Already!");
+            }else if(response.status==404){
+                alert("Unknown User!");
+            }else if(response.status==403){
+                alert("Wrong Password!");
+            }else if(response.status==401){
+                alert("Session Expired!");
+            }
+        })
+    }
+    submitVerificationCodeBtn.onclick=()=>{
+        obj.password=document.getElementById("vcdpt").value;
+        fetch(`../rest/login/chgmail`,{
+            method:'PUT',
+            headers:{
+                "Content-Type":"application/json",
+            },
+            body:JSON.stringify(obj)
+        }).then(response => {
+            if(response.ok){
+                alert("Email Changed!");
+                document.getElementById("emlspn").textContent=obj.newEmail;
+                document.getElementById("dtmlla").remove();
+                editBtn.remove();
+            }else if(response.status==404){
+                alert("Unknown User!");
+            }else if(response.status==406){
+                alert("Wrong Code!");
+            }else if(response.status==401){
+                alert("Session Expired!");
+            }
+        })
+    }
+}
+//handleEditEmailButton(true);
 updateProfilePicture();
