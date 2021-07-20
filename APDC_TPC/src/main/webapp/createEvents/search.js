@@ -4,11 +4,21 @@
 // This example requires the Places library. Include the libraries=places
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-
+/*let   image = {
+  //url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/parking_lot_maps.png",
+  url:"http://localhost:8080/imgs/app_images/logoAtivo%201mdpi.png",
+  // This marker is 20 pixels wide by 32 pixels high.
+  size: new google.maps.Size(25, 25),
+  // The origin for this image is (0, 0).
+  origin: new google.maps.Point(0, 0),
+  // The anchor for this image is the base of the flagpole at (0, 32).
+  anchor: new google.maps.Point(0, 32),
+}; */
 let destination=null;
 let origin=null;
 let markers1 = [];
 const MAP_ZOOM=15;
+const fields =["place_id","plus_code"];
 function clearMarkers() {
   // Clear out the old markers.
   markers1.forEach((marker) => {
@@ -24,6 +34,7 @@ function initAutocomplete() {
     MAP_ZOOM: MAP_ZOOM,
     mapTypeId: "roadmap",
   });
+
   navigator.geolocation.getCurrentPosition(function(position) {
     if(map){
       let lat=position.coords.latitude;
@@ -58,6 +69,7 @@ function initAutocomplete() {
   const input = document.getElementById("pac-input");
 
   const searchBox = new google.maps.places.SearchBox(input);
+  //searchBox.setFields(fields);
   const searchBox2 = new google.maps.places.SearchBox(input2);
   /*
   let mapZoom;
@@ -89,17 +101,18 @@ function initAutocomplete() {
   });
 
   // Listen for the event fired when the user selects a prediction and retrieve
-  // more details for that place.
-
   handleSearchBox(searchBox,searchEventParams);
   handleSearchBox(searchBox2,validPlace);
 }
 function handleSearchBox(searchBox,func){
+  //searchBox.bindTo("bounds",map);
   searchBox.addListener("places_changed", () => {
     const places = searchBox.getPlaces();
-    
     if (places.length == 0) {
+      console.log("PLACES LENGTH "+places.length);
       return;
+    }else{
+      console.log("PLACES LENGTH "+places.length);
     }
     clearMarkers();
     // For each place, get the icon, name and location.
@@ -109,6 +122,7 @@ function handleSearchBox(searchBox,func){
         console.log("Returned place contains no geometry");
         return;
       }
+      console.log(place.geometry.location.lat() +","+ place.geometry.location.lng());
       const icon = {
         url: place.icon,
         size: new google.maps.Size(71, 71),
@@ -138,7 +152,6 @@ function handleSearchBox(searchBox,func){
   });
 }
 function validPlace(place){
-  resetFetchEventsArgs();
   let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
   let postalCode=newDiv.querySelector(".postal-code");
   let locality=newDiv.querySelector(".locality");
@@ -150,43 +163,20 @@ function validPlace(place){
     alert("The Address must have a street address, postal code, locality and a country name!");
     return;
   }
-  postal_code = postal_code.split("-")[0];
 
   let obj={
     loc:{ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() },
     name:getPlaceName(place),
-    postal_code:postalCode.textContent,
-    locality:locality.textContent,
-    country_name:countryName.textContent
   };
   destination=obj;
 }
 
-function resetFetchEventsArgs() {
-  locality="";
-  postal_code="";
-  country_name="";
-}
 function searchEventParams(place) {
-  resetFetchEventsArgs();
-  let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
-  let postalCode=newDiv.querySelector(".postal-code");
-  let localityP=newDiv.querySelector(".locality");
-  let countryName = newDiv.querySelector(".country-name");
-
-  if(postalCode!=undefined && countryName!=undefined ){
-    postal_code=postalCode.textContent;
-    postal_code = postal_code.split("-")[0];
-    country_name=countryName.textContent;
-    document.getElementById("vwmrpnt").click();
-  }else if(localityP!=undefined && countryName!=undefined){
-    locality=localityP.textContent;
-    country_name=countryName.textContent;
-    document.getElementById("vwmrpnt").click();
-  }else{
-    alert("Insert a Valid Locality!");
+  areaToSearch = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng()
   }
-  console.log(newDiv);
+  document.getElementById("vwmrpnt").click();
 }
 function getPlaceName(place){
   let name;
@@ -282,14 +272,15 @@ function geocodeLatLng(map,lat,lng) {
     lat: parseFloat(lat),
     lng: parseFloat(lng),
   };
+  areaToSearch=latlng;
   geocoder
     .geocode({ location: latlng })
     .then((response) => {
         pps = response.results[0].address_components;
         console.log(response.results[0]);
       if (response.results[0]) {
-        loadsEventsNearTheLoggedUser();
         map.setZoom(MAP_ZOOM);
+        pageRefreshed();
         /*
         const marker = new google.maps.Marker({
           title: response.results[0].formatted_address,
@@ -307,18 +298,4 @@ function geocodeLatLng(map,lat,lng) {
       }
     })
     .catch((e) => window.alert("Geocoder failed due to: " + e));
-}
-
-function loadsEventsNearTheLoggedUser() {
-  resetFetchEventsArgs();
-  postal_code = pps[pps.length-1].long_name;
-  postal_code = postal_code.split("-")[0];
-  country_name = pps[pps.length-2].long_name;
-  locality="";
-
-  console.log(postal_code);
-  console.log(country_name);
-  if(!isNaN(postal_code)){
-    pageRefreshed();
-  }
 }

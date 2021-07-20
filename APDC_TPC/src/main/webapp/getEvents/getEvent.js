@@ -6,7 +6,7 @@ const HTML_EVENT_ID_SUFFIX="usev";
 const GOING_TEXT="GOING";
 const WANTING_TO_GO="I WILL GO";
 
-let postal_code, country_name, locality;
+let areaToSearch;
 
 function showFinishedEventsBlock() {
     let show = document.getElementById("sh_fnshd_evts");
@@ -108,9 +108,7 @@ function loadUpcomingEvents() {
             "Content-Type":"application/json",
             "Accept-Charset":"utf-8"
         },
-        body:JSON.stringify({postal_code:postal_code
-            ,locality:locality
-            ,country_name:country_name})
+        body:JSON.stringify(areaToSearch)
     }).then(response=>{
         return response.json();
     }).then(data=>{

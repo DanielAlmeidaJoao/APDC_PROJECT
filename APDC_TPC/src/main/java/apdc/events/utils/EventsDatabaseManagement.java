@@ -13,6 +13,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.openlocationcode.OpenLocationCode;
 import com.google.cloud.datastore.Transaction;
 
 import apdc.events.utils.jsonclasses.Coords;
@@ -22,6 +23,7 @@ import apdc.events.utils.jsonclasses.EventLocationArgs;
 import apdc.events.utils.jsonclasses.EventLocationResponse;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
 import apdc.events.utils.jsonclasses.ReportProperty;
+import apdc.events.utils.jsonclasses.UpcomingEventsArgs;
 import apdc.tpc.resources.EventsResources;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
@@ -50,11 +52,9 @@ import com.google.cloud.datastore.Datastore;
 
 public class EventsDatabaseManagement {
 
+	public static final String AREA_PLUS_CODE = "AREA_PLUS_CODE";
 	private static final String LATLNG_EVENT_PROP = "LATLNG";
 	private static final String FORMATTED_ADDRESS_EVENT_PROP = "FORMATTED_ADDRESS";
-	private static final String COUNTRY_NAME_EVENT_PROP = "COUNTRY_NAME";
-	private static final String LOCALITY_EVENT_PROP = "LOCALITY";
-	private static final String POSTAL_CODE_PROP = "POSTAL_CODE";
 	public static final String EVENTS="EVENTS";
 	//private static final String USERS = "Users";
 	private static final String NAME="NAME";
@@ -174,10 +174,6 @@ public class EventsDatabaseManagement {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 	}
-	private static String firstNumberPostCode(String postCode) {
-		String [] arr = postCode.split("-");
-		return arr[0];
-	}
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -221,25 +217,21 @@ public class EventsDatabaseManagement {
 		  //com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
 					//.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
 			LatLng coords = LatLng.of(location.getLoc().getLat(),location.getLoc().getLng());
+			String code = getAreaPlusCode(location.getLoc().getLat(),location.getLoc().getLng());
+			
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
 					.set(DIFFICULTY,et.getGoals())
 					//.set(LOCATION,et.getLocation())
-					//	String name, postal_code, locality, country_name;
-					.set(POSTAL_CODE_PROP,firstNumberPostCode(location.getPostal_code()))
-					.set(LOCALITY_EVENT_PROP,location.getLocality().toLowerCase())
-					.set(COUNTRY_NAME_EVENT_PROP,location.getCountry_name().toLowerCase())
-					.set(FORMATTED_ADDRESS_EVENT_PROP,location.getName())
 					.set(LATLNG_EVENT_PROP,coords)
-					//.set(MEETING_PLACE,noIndexProperties(et.getMeetingPlace()))
+					.set(AREA_PLUS_CODE,code)
+					.set(FORMATTED_ADDRESS_EVENT_PROP,location.getName())
 					.set(START_DATE,makeTimeStamp(et.getStartDate(),et.getStartTime()))
 					.set(END_DATE,makeTimeStamp(et.getEndDate(),et.getEndTime()))
 					.set(VOLUNTEERS,et.getVolunteers())
 					.set(EVENT_OWNER,userid);
-			
-			System.out.println("LOCALITY "+location.getLocality().toLowerCase());
-			
+						
 			//handles the reports
 			if(eventId<=Constants.ZERO) {
 				builder.set(REPORTED_PROP,false);
@@ -285,6 +277,10 @@ public class EventsDatabaseManagement {
 		  }
 		  return result;
 	}
+	private static String getAreaPlusCode(double lat, double lng) {
+		OpenLocationCode olc = new OpenLocationCode(lat,lng, 10); // the last parameter specifies the number of digits
+		return olc.getCode().substring(0,5);
+	}
 	/**
 	 * creates a google timestamp object from the string of a date representation
 	 * @param date the date to be converted to a timestamp
@@ -327,42 +323,24 @@ public class EventsDatabaseManagement {
 	 * @param pageCursor
 	 * @return an array of size 2, one entry has the operation status and the other has a collection of pageSize events fetched
 	 */
-	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid, String postalCode,String country,String locality) {
+	public static Pair<String,String> getUpcomingEvents(String startCursor, long userid,UpcomingEventsArgs args) {
 		try {
-			String args="";
-			postalCode=postalCode.toLowerCase();
-			country=country.toLowerCase();
-			locality=locality.toLowerCase();
-			System.out.println("HOLLLA:"+postalCode+":"+country);
 			Cursor cursorObject=null;
 			Query<ProjectionEntity> query=null;
 			Filter filter=PropertyFilter.gt(END_DATE,Timestamp.now());
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
-			Filter postalCodeFilter;
+			String code = getAreaPlusCode(args.getLat(),args.getLng());
+			Filter postalCodeFilter=PropertyFilter.eq(AREA_PLUS_CODE,code);
 			
-			if(!postalCode.isEmpty()) {
-				System.out.println("POSTAL ");
-				postalCodeFilter= PropertyFilter.eq(POSTAL_CODE_PROP,postalCode);
-			}else {
-				postalCodeFilter= PropertyFilter.eq(LOCALITY_EVENT_PROP,locality);
-				System.out.println("LOCALITY "+locality);
-				System.out.println(URLDecoder.decode(locality,"utf-8"));
-			}
-			Filter countryFilter= PropertyFilter.eq(COUNTRY_NAME_EVENT_PROP,country);
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
 				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter
-				    		.and(filter,unreportedEventFilter,postalCodeFilter,countryFilter))
+				    		.and(filter,unreportedEventFilter,postalCodeFilter))
 				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,LATLNG_EVENT_PROP)
 				    .setLimit(PAGESIGE);
-			if(startCursor!=null && !startCursor.isEmpty()) {
-					args=postalCode+""+locality+""+country;
-					String [] c = startCursor.split("_");
-					if(c.length>1&&args.equals(c[1])) {
-						startCursor=c[0];
-						cursorObject = Cursor.fromUrlSafe(startCursor); 
-						dd=dd.setStartCursor(cursorObject);
-					}
-			    }
+			if(startCursor!=null && !startCursor.isEmpty()){
+				cursorObject = Cursor.fromUrlSafe(startCursor); 
+				dd=dd.setStartCursor(cursorObject);
+			}
 			query=dd.build();
 			
 			QueryResults<ProjectionEntity> tasks = Constants.datastore.run(query);
@@ -374,13 +352,6 @@ public class EventsDatabaseManagement {
 				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
 			}
 			//data,cursor
-			
-			if(!events.isEmpty()) {
-				args=postalCode+""+locality+""+country;
-				startCursor=tasks.getCursorAfter().toUrlSafe()+"_"+args;
-			}else {
-				startCursor="";
-			}
 			return new Pair<String, String>(Constants.g.toJson(events),startCursor);
 		}catch(Exception e) {
 			Constants.LOG.severe("");

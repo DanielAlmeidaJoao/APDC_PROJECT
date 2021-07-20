@@ -56,8 +56,7 @@ public class EventsResources {
 	 */
 	@POST
 	@Path("/create")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	//@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Consumes(MediaType.MULTIPART_FORM_DATA+";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
 	public Response doCreateEvent(@CookieParam(Constants.COOKIE_TOKEN) String value){
 		try {
@@ -112,7 +111,7 @@ public class EventsResources {
 
 	/**
 	 * loads upcoming events 
-	 * @param value offset value stored in the specified cookie
+	 * @param cursor offset value stored in the specified cookie
 	 * @param token session token stored in the specified token
 	 * @return 200 if the operation is success
 	 */
@@ -120,13 +119,14 @@ public class EventsResources {
 	@Path("/view")
 	@Consumes(MediaType.APPLICATION_JSON +" ;charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +" ;charset=utf-8")
-	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String value, 
+	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_EVENT_CURSOR_CK) String cursor, 
 			@CookieParam(Constants.COOKIE_TOKEN) Cookie token,@Encoded UpcomingEventsArgs args, @HeaderParam("Accept-Charset") String charset, @HeaderParam("Content-Type") String enc) {
 		Response resp;
 		try {
+			System.out.println("GOING TO GET UPCOMING EVENTS");
 			long userid = HandleTokens.validateToken(token.getValue());
 			//data, cursor
-			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(value,userid,args.getPostal_code(),args.getCountry_name(),args.getLocality());
+			Pair<String,String> pair = EventsDatabaseManagement.getUpcomingEvents(cursor,userid,args);
 			NewCookie nk = HandleTokens.makeCookie(Constants.GET_EVENT_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {

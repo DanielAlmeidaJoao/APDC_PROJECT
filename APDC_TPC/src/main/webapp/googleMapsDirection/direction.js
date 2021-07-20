@@ -25,10 +25,10 @@ class AutocompleteDirectionsHandler {
     const modeSelector = document.getElementById("mode-selector");
     const originAutocomplete = new google.maps.places.Autocomplete(originInput);
     // Specify just the place data fields that you need.
-    originAutocomplete.setFields(["place_id"]);
+    //originAutocomplete.setFields(["place_id","plus_code"]);
     const destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput);
     // Specify just the place data fields that you need.
-    destinationAutocomplete.setFields(["place_id"]);
+    destinationAutocomplete.setFields(["place_id","plus_code"]);
     this.setupClickListener(
       "changemode-walking",
       google.maps.TravelMode.WALKING
@@ -60,6 +60,8 @@ class AutocompleteDirectionsHandler {
     autocomplete.bindTo("bounds", this.map);
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
+      console.log(place.plus_code+" ia m plus code!");
+      console.log(place);
 
       if (!place.place_id) {
         window.alert("Please select an option from the dropdown list.");

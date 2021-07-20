@@ -28,7 +28,6 @@ function initAutocomplete() {
       return;
     }
     
-
     // Clear out the old markers.
     markers.forEach((marker) => {
       marker.setMap(null);
@@ -67,8 +66,6 @@ function initAutocomplete() {
       } else {
         bounds.extend(place.geometry.location);
       }
-      console.log(place);
-      console.log(place.geometry.location.lat()+"/-----/"+place.geometry.location.lng());
     });
     map.fitBounds(bounds);
   });
