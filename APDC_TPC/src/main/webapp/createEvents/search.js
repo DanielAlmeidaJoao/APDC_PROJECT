@@ -134,7 +134,7 @@ function handleSearchBox(searchBox,func){
       markers1.push(
         new google.maps.Marker({
           map,
-          //icon,
+          icon,
           title: getPlaceName(place),
           position: place.geometry.location,
         })

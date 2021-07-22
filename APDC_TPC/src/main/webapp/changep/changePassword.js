@@ -1,4 +1,20 @@
 const toggleClassName="hidregfrm";
+let minPasswordSize=0;
+let  maxPasswordSize=16;
+function loadPasswordSizeRestrictions(){
+    let path="../rest/login/p/rtcs";
+    fetch(path).then(response=>{
+        if(response.ok){
+            return response.json();
+        }else{
+            return null;
+        }
+    }).then(data => {
+        minPasswordSize=data.minPasswordSize;
+        maxPasswordSize=data.maxPasswordSize;
+    });
+}
+loadPasswordSizeRestrictions();
 function handleChangePassword(){
     let postData=null;
     let changeBtn = document.getElementById("chgbtn");
@@ -69,10 +85,10 @@ function validPassword(){
 }
 function validatePassword(pass) {
     let errors = [];
-    if (pass.length < 8) {
+    if (pass.length < minPasswordSize) {
         errors.push("Your password must be at least 8 characters");
     }
-    if(pass.length>15){
+    if(pass.length>maxPasswordSize){
         errors.push("Your password must be at less than 15 characters");
     }
     if (pass.search(/[a-z]/i) < 0) {

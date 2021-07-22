@@ -35,6 +35,7 @@ import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.jsonclasses.ChangeEmailArgs;
 import apdc.events.utils.jsonclasses.ChangePasswordArgs;
+import apdc.events.utils.jsonclasses.PasswordSizeRestrictions;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
 import apdc.tpc.utils.AdditionalAttributes;
 import apdc.tpc.utils.LoggedObject;
@@ -46,6 +47,7 @@ import apdc.tpc.utils.StorageMethods;
 //import apdc.tpc.utils.UserInfo;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
+import apdc.utils.conts.DatastoreConstants;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -108,7 +110,7 @@ public class LoginManager {
 	}
 	
 	private boolean invalidPassword(String password) {
-		return password.length()<Constants.PASSWORD_MINLENGTH||password.length()>Constants.PASSWORD_MAXLENGTH;
+		return password.length()<DatastoreConstants.getMinPasswordLength()||password.length()>DatastoreConstants.getMaxPasswordLength();
 	}
 	@POST
 	@Path("/op1")
@@ -133,7 +135,7 @@ public class LoginManager {
 		if(userid>Constants.ZERO){
 			String token=HandleTokens.generateToken(userid);
 			NewCookie nk = HandleTokens.makeCookie(Constants.COOKIE_TOKEN,token,null);
-			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);
+			NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,null,null,0);//removes
 			res = Response.ok().cookie(nk,k).build();
 			LOG.severe("USER REGISTERED! pp "+data.getEmail());
 		}else {
@@ -147,7 +149,7 @@ public class LoginManager {
 		String vCode = String.format("%07d",number);
 		SendEmail.send(email,vCode);
 		//System.out.println(vCode);
-		NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,DigestUtils.sha512Hex(vCode),null,4*60);
+		NewCookie k = HandleTokens.makeCookie(Constants.VERIFICATION_CODE_COOKIE,DigestUtils.sha512Hex(vCode),null,DatastoreConstants.getVerificationCodeCookieTime());
 		return k;
 	}
 	@GET
@@ -292,6 +294,9 @@ public class LoginManager {
 		}		
 		return Response.status(result).build();
 	}
+	public static final int CREATED_EVENTS_MULTPLIER = 10;
+	public static final double INTERESTED_EVENTS_MULTPLIER = 2.5;
+
 	@GET
 	@Path("/infos/{userid}")
 	@Produces(MediaType.TEXT_PLAIN +";charset=utf-8")
@@ -299,11 +304,9 @@ public class LoginManager {
 		long userid;
 		Response res=null;
 		ProfileResponse obj;
-		System.out.println("GOING TOOOOOOOOOOO LOAD ADDITIONAL INFORMATION");
 		try {
 			boolean loggedUser=false;
 			userid = HandleTokens.validateToken(value);
-			System.out.println("LOGGGGED USER "+userid+" ---- OTHERUSER: "+otheruser);
 			try {
 				long ot = Long.parseLong(otheruser);
 				loggedUser = ot==userid;
@@ -318,13 +321,12 @@ public class LoginManager {
 			}else {
 				obj=AdditionalAttributesOperations.getAdditionalInfos(Constants.datastore,userid,user);
 				obj.setViewingOwnProfile(loggedUser);
+				obj.setParticipationScore(obj.getEvents()*CREATED_EVENTS_MULTPLIER+obj.getInterestedEvents()*INTERESTED_EVENTS_MULTPLIER);
 				if(loggedUser) {
 					obj.setEmail(user.getString(StorageMethods.EMAIL_PROP));
 				}
 				res=Response.ok().entity(Constants.g.toJson(obj)).build();
-				
-			}
-			
+			}			
 		}catch(Exception e) {
 			Constants.LOG.severe(e.getLocalizedMessage());
 			res=Response.status(Status.UNAUTHORIZED).build();
@@ -412,6 +414,22 @@ public class LoginManager {
 		{
 			resp=Response.status(Status.UNAUTHORIZED).build();
 		}
+		return resp;
+	}
+	@GET
+	@Path("/p/rtcs")
+	public Response loadPasswordSizeRestrictions() {
+		Response resp=null;
+		try {
+			PasswordSizeRestrictions p = DatastoreConstants.getRestrictions();
+			if(p!=null) {
+				return Response.ok().entity(p).build();
+			}
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		resp = Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		return resp;
 	}
 	/*

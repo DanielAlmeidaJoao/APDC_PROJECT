@@ -3,6 +3,15 @@ package apdc.tpc.utils;
 public class ProfileResponse extends AdditionalAttributes {
 
 	String  profilePicture, name, email;
+	double participationScore;
+	public double getParticipationScore() {
+		return participationScore;
+	}
+
+	public void setParticipationScore(double participationScore) {
+		this.participationScore = participationScore;
+	}
+
 	public String getEmail() {
 		return email;
 	}

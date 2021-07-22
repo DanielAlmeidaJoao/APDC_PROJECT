@@ -27,6 +27,7 @@ import apdc.events.utils.jsonclasses.UpcomingEventsArgs;
 import apdc.tpc.resources.EventsResources;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
+import apdc.utils.conts.DatastoreConstants;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -72,7 +73,6 @@ public class EventsDatabaseManagement {
 	private static final String EVENT_OWNER="OWNER";
 
 
-	private static final int PAGESIGE = 6;
 	private static final int TWO= 2;
 	private static final Logger LOG = Logger.getLogger(EventsDatabaseManagement.class.getName());
 
@@ -183,18 +183,15 @@ public class EventsDatabaseManagement {
 	 */
 	public static Response createEvent(Datastore datastore,HttpServletRequest httpRequest,long userid) {
 		//Generate automatically a key
-		LOG.severe("GOING TO CREATE EVENT!!! -> "+userid);
 		String eventJsonData = getPartString(httpRequest);
 		EventData et =null;
 		long eventId=-1;
 		try {
 			et = Constants.g.fromJson(eventJsonData,EventData.class);
-			LOG.severe(et.getEventId()+" ia ma event id ------------- : "+et.getName());
 			eventId	= et.getEventId();
 		}catch(Exception e) {
 			e.printStackTrace();
 			LOG.severe(" SOMETHING WENT WRONG "+e.getLocalizedMessage());
-
 		}
 		EventLocationArgs location = Constants.g.fromJson(et.getLocation(),EventLocationArgs.class);
 		Response result;
@@ -245,7 +242,8 @@ public class EventsDatabaseManagement {
 			try {
 				Part p = httpRequest.getPart("img_cover");
 				if(p!=null) {
-					String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,eventKey.getId()+"",p.getInputStream());
+					String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,System.currentTimeMillis()+"",p.getInputStream());
+					eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
 					builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
 				}
 			}catch(Exception e) {
@@ -336,7 +334,7 @@ public class EventsDatabaseManagement {
 				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter
 				    		.and(filter,unreportedEventFilter,postalCodeFilter))
 				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,LATLNG_EVENT_PROP)
-				    .setLimit(PAGESIGE);
+				    .setLimit(DatastoreConstants.getUpcomingEventsPagesize());
 			if(startCursor!=null && !startCursor.isEmpty()){
 				cursorObject = Cursor.fromUrlSafe(startCursor); 
 				dd=dd.setStartCursor(cursorObject);
@@ -369,7 +367,7 @@ public class EventsDatabaseManagement {
 				Filter filter=  PropertyFilter.eq(REPORTED_PROP,true);
 				Builder b=Query.newEntityQueryBuilder()
 					    .setKind(EVENTS).setFilter(filter)
-					    .setLimit(PAGESIGE);
+					    .setLimit(DatastoreConstants.getReportedEventsPagesize());
 				if (startCursor!=null) {
 			      startcursor = Cursor.fromUrlSafe(startCursor); 
 				  b=b.setStartCursor(startcursor);
@@ -494,8 +492,7 @@ public class EventsDatabaseManagement {
 		LOG.severe("GOING TO FETCH THE IMAGES ");
 		try {
 			//String.format("https://storage.googleapis.com/%s/%s",EventsResources.bucketName,en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
-			String imgurl=GoogleCloudUtils.publicURL(EventsResources.bucketName,en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
-			ed.setImages(imgurl);
+			ed.setImages(en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
 		}catch(Exception e){LOG.severe("ERRROR: "+e.getLocalizedMessage());}
 		return ed;
 	}
@@ -517,7 +514,8 @@ public class EventsDatabaseManagement {
 			//Timestamp.no			
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EVENTS)
-				    .setFilter(PropertyFilter.eq(EVENT_OWNER,userid)).setLimit(3).setOrderBy(OrderBy.asc(START_DATE));
+				    .setFilter(PropertyFilter.eq(EVENT_OWNER,userid)).
+				    setLimit(DatastoreConstants.getFetchUsersEventsPagesize()).setOrderBy(OrderBy.asc(START_DATE));
 			if (startCursor!=null) {
 		      startcursor = Cursor.fromUrlSafe(startCursor); 
 			  b=b.setStartCursor(startcursor);
@@ -607,7 +605,8 @@ public class EventsDatabaseManagement {
 			Query<Entity> query=null;
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EventParticipationMethods.PARTICIPANTS_KIND)
-				    .setFilter(PropertyFilter.eq(EventParticipationMethods.PARTICIPANT_ID_PROP,userid)).setLimit(3);
+				    .setFilter(PropertyFilter.eq(EventParticipationMethods.PARTICIPANT_ID_PROP,userid))
+				    .setLimit(DatastoreConstants.getInterestedEventsPagesize());
 			if (startCursor!=null) {
 		      startcursor = Cursor.fromUrlSafe(startCursor); 
 			  b=b.setStartCursor(startcursor);

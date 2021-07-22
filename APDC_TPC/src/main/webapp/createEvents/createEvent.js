@@ -75,6 +75,14 @@ function handleCreateEventSubmitForm() {
         if(data==null){
             return false;
         }
+        if(data.difficulty>5||data.difficulty<1){
+            alert("Difficulty must be between 1 and 5!");
+            return false;
+        }
+        if(data.volunteers<2){
+            alert("Number of volunteers must be greater than 2!");
+            return false;
+        }
         if(!validDate()){
             alert("Date is Invalid! Start Date must be before End Date!");
             return false;
@@ -156,7 +164,7 @@ function uploadData(datas) {
     */
 }
 let eventImages=null;
-function makeImgDiv(result,caption) {
+function makeImgDiv(result,caption,file) {
     let ppp = document.createElement("div");
  
     let imgele = document.createElement("img");
@@ -172,7 +180,7 @@ function makeImgDiv(result,caption) {
     ppp.appendChild(imgele);
     ppp.appendChild(rmv);
     ppp.setAttribute("class","admg");
-    eventImages.set(caption,result);
+    eventImages.set(caption,file);
     return ppp;
 }
 let fil;

@@ -156,7 +156,7 @@ public class SuperuserResource {
 	@Path("/reported")
 	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
-	public Response doGetUpcomingEvents(@CookieParam(Constants.GET_REPORTED_EVENTS_CURSOR_CK) String value, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+	public Response getReportedEvents(@CookieParam(Constants.GET_REPORTED_EVENTS_CURSOR_CK) String value, @CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
 		Response resp;
 		try {
 			System.out.println("REPORTED EVENTS ");

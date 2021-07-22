@@ -22,12 +22,6 @@
             <button class="nv_el nv_btn btnoff" id="rmv">REMOVE ACCOUNT</button>
         </div>
         <div class="nav_logged nav_btns">
-            <!--
-                <div class="usr_evtsnr">
-                            <div id="num_evts" class="num_evts">EVENTS CREATED:<span id="evt_counter">0</span> </div>
-                            <div id="intrdevts" class="num_evts">EVENTS INTERESTED:<span id="evtintr_counter">0</span></div>
-                        </div>
-            -->
             <button id="about_nvb" class="nvb sltdnvb">ABOUT</button>
             <button id="num_evts" class="nvb">EVENTS CREATED: <span id="evt_counter">0</span></button>
             <button id="intrdevts" class="nvb">EVENTS INTERESTED: <span id="evtintr_counter">0</span></button>
@@ -40,7 +34,7 @@
                 <div class="info_dv">
                     <div class="hdtxa" id="wrprt">
                         <div class="emlwrp">
-                            <span class="vsb_btn" id="emlspn">EMAIL@GMAIL.COM</span>
+                            <span class="vsb_btn" id="emlspn"></span>
                             <button id="dtamil">Edit</button>
                         </div>
                         <div id="dtmlla">
@@ -59,6 +53,12 @@
                     <div id="nmdv" class="vsb_btn">
                         <span class="txt_pm" id="vsb_btn" ></span>
                     </div>
+                    <div class="txt_pm prscr">
+                        <span class="scr_tg">PARTICIPATION SCORE:</span>
+                        <div class="scr_sp">
+                            <span id="pscrnr" class="pscrnr"></span>
+                        </div>
+                    </div>
                     <div class="qtdv txt_pm">
                         <span class="tag_nm">QuotE</span>
                         <div id="qtshdv" class="qttxt txt_pm"></div>
@@ -68,7 +68,6 @@
                         <span class="tag_nm">About</span>
                         <div id="bioshdv" class="abt_txt txt_pm"></div>
                         <textarea name="bio" class="txta edt_txtarrv"></textarea>
-
                     </div>
                     <div class="contas_pdv txt_pm">
                         <span class="tag_nm">Social Networks</span>

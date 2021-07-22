@@ -7,6 +7,7 @@ import java.util.Date;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 
+import apdc.utils.conts.DatastoreConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -72,7 +73,7 @@ public class HandleTokens {
 	public static NewCookie makeCookie(String name,String value,String domain) {
 		//Cookie cookie, String comment, int maxAge, Date expiry, boolean secure, boolean httpOnly
 		Cookie ck = new Cookie(name, value, "/", domain);
-		NewCookie nk = new NewCookie(ck,null,-1,null,true,true);
+		NewCookie nk = new NewCookie(ck,null,DatastoreConstants.getSessionTime(),null,true,true);
 		return nk;
 	}
 	public static NewCookie destroyCookie(String name) {

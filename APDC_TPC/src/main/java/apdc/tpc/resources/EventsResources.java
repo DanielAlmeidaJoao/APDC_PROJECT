@@ -33,6 +33,7 @@ import apdc.events.utils.jsonclasses.ReportEventArgs;
 import apdc.events.utils.jsonclasses.UpcomingEventsArgs;
 import apdc.tpc.utils.tokens.HandleTokens;
 import apdc.utils.conts.Constants;
+import apdc.utils.conts.DatastoreConstants;
 
 @Path("/events")
 @Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
@@ -105,10 +106,6 @@ public class EventsResources {
 		}
 		return response;
 	}
-	public final static String POSTAL_CODE = "pc";
-	public final static String COUNTRY_NAME = "cn";
-	public final static String LOCALITY = "lc";
-
 	/**
 	 * loads upcoming events 
 	 * @param cursor offset value stored in the specified cookie
@@ -171,7 +168,7 @@ public class EventsResources {
 		Response resp;
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
-			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true,3);
+			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true,DatastoreConstants.getFinishedEventsPagesize());
 			NewCookie nk = HandleTokens.makeCookie(Constants.FINISHED_EVENTS_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
 		}catch(Exception e) {

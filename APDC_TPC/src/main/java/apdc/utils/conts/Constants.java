@@ -39,9 +39,7 @@ public interface Constants {
 	
 	public static final Logger LOG = Logger.getLogger("GENERAL_LOG");
 
-	public static final int PASSWORD_MINLENGTH=6;
-	public static final int PASSWORD_MAXLENGTH=15;
-
-
+	//public static final int PASSWORD_MINLENGTH=6;
+	//public static final int PASSWORD_MAXLENGTH=15;
 
 }

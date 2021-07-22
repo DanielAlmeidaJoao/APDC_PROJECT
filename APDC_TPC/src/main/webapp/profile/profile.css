@@ -99,6 +99,31 @@ body{
     height: 25px;
     font-size: 18px;
 }
+.prscr{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.scr_tg{
+    font-style: italic;
+    font-weight: bold;
+    border-bottom: 1px dotted #00000005;
+}
+.scr_sp{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(21, 201, 177);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+.pscrnr{
+    font-size: 40px;
+    color: #fff;
+    font-weight: bold;
+}
 .hdtxa{
     display: none;
 }

@@ -33,7 +33,7 @@ function editEvent(btn){
     let descriptionTextarea=document.getElementById("desctxt");
     elems[1].value=eventObj.name;
     descriptionTextarea.value=eventObj.description;
-    elems[2].value=eventObj.goals;
+    elems[2].value=eventObj.difficulty;
     elems[3].value=eventObj.volunteers;
     //elems[3].value=eventObj.name;
     //elems[4].value=eventObj.name;

@@ -95,6 +95,7 @@ function showUserInfos(){
         return null;
     }).then(data => {
         if(data){
+            document.getElementById("pscrnr").textContent=data.participationScore;
             document.getElementById("vsb_btn").textContent=data.name;
             document.getElementById("evt_counter").textContent = data.events;
             document.getElementById("evtintr_counter").textContent = data.interestedEvents;

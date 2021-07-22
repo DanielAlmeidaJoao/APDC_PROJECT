@@ -1,4 +1,6 @@
 const endpoint = document.location.host+"/rest/";
+let minPasswordSize=0;
+let  maxPasswordSize=16;
 function getHttpXmlRequest(){
 	let xmlHttpReq;
 	if(window.XMLHttpRequest){
@@ -184,10 +186,15 @@ addEventListener('beforeunload', function (event) {
 });
 
 function showLoginForm() {
+    let clicked = false;
     let hideClassName="hidregfrm";
     let openAccountBtn = document.getElementById("open_acc");
     let goToLoginBtn=document.getElementById("gtlogin");
     openAccountBtn.onclick=()=>{
+        if(clicked==false){
+            loadPasswordSizeRestrictions();
+            clicked=true;
+        }
         openAccountBtn.parentElement.classList.toggle(hideClassName);
         document.getElementById("rgdv").classList.toggle(hideClassName);
     }
@@ -195,12 +202,25 @@ function showLoginForm() {
         openAccountBtn.click();
     }
 }
+function loadPasswordSizeRestrictions(){
+    let path="rest/login/p/rtcs";
+    fetch(path).then(response=>{
+        if(response.ok){
+            return response.json();
+        }else{
+            return null;
+        }
+    }).then(data => {
+        minPasswordSize=data.minPasswordSize;
+        maxPasswordSize=data.maxPasswordSize;
+    });
+}
 function validatePassword(pass) {
     let errors = [];
-    if (pass.length < 8) {
+    if (pass.length < minPasswordSize) {
         errors.push("Your password must be at least 8 characters");
     }
-    if(pass.length>15){
+    if(pass.length>maxPasswordSize){
         errors.push("Your password must be at less than 15 characters");
     }
     if (pass.search(/[a-z]/i) < 0) {
