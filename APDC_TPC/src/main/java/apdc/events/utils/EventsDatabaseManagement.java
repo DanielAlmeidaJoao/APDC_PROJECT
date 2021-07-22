@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -71,6 +73,9 @@ public class EventsDatabaseManagement {
 	private static final String END_DATE="END_DATE";
 	private static final String VOLUNTEERS="N_VOLUNTEERS";
 	private static final String EVENT_OWNER="OWNER";
+	
+	public static final String EDITING_FORMDATA_KEY="editing";
+
 
 
 	private static final int TWO= 2;
@@ -85,9 +90,6 @@ public class EventsDatabaseManagement {
 	 */
 	private static String getPartString(HttpServletRequest httpRequest) {
 		try {
-			System.out.println("GOING TO READ EVENT DATA "+ httpRequest.getCharacterEncoding());
-			System.out.println("GOING TO READ EVENT DATA "+ httpRequest.getContentType());
-
 			Part p = httpRequest.getPart(Constants.EVENT_FORMDATA_KEY);
 			/*
 			p.delete();
@@ -100,6 +102,40 @@ public class EventsDatabaseManagement {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	@SuppressWarnings("unchecked")
+	private static ArrayList<String> imagesToRemoveWhenEditing(HttpServletRequest httpRequest, long eventid){
+		ArrayList<String> urls;
+		ArrayList<String> savedUrls=null;
+		try {
+			Part p = httpRequest.getPart(EDITING_FORMDATA_KEY);
+			/*
+			p.delete();
+			byte [] b = new byte[(int) p.getSize()];
+			InputStream is = p.getInputStream();
+			is.read(b);*/
+			String h = new String(IOUtils.toByteArray(p.getInputStream()));
+			urls = Constants.g.fromJson(h,ArrayList.class);
+			String imageName =null;
+			String splitted [] = null;
+			com.google.cloud.datastore.Key eventKey = Constants.datastore.newKeyFactory().setKind(EVENTS).newKey(eventid);
+			Entity ev = Constants.datastore.get(eventKey);
+			savedUrls = Constants.g.fromJson(ev.getString(Constants.EVENT_PICS_FORMDATA_KEY),ArrayList.class);
+			Iterator<String> it = urls.iterator();
+			while(it.hasNext()) {
+				String toRemove = it.next();
+				splitted = toRemove.split("/");
+				if(savedUrls!=null) {
+					System.out.println(savedUrls.remove(toRemove)+" <-------- REMOVED ---");
+				}
+				imageName = splitted[splitted.length-1];
+				GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventid+"/"+imageName);
+				System.out.println("REMOVING IMAGE ---- > "+imageName);
+			}
+		} catch (IOException | ServletException e) {
+			e.printStackTrace();
+		}
+		return savedUrls;
 	}
 	
 	public static EventData2 getEvent(long eventid,Datastore datastore,long userid) {
@@ -174,6 +210,7 @@ public class EventsDatabaseManagement {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 	}
+
 	/**
 	 * creates and stores an event into the database
 	 * @param datastore datastore object
@@ -185,14 +222,19 @@ public class EventsDatabaseManagement {
 		//Generate automatically a key
 		String eventJsonData = getPartString(httpRequest);
 		EventData et =null;
+		boolean editing=false;
 		long eventId=-1;
 		try {
 			et = Constants.g.fromJson(eventJsonData,EventData.class);
 			eventId	= et.getEventId();
+			if(eventId>0) {
+				editing=true;
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
 			LOG.severe(" SOMETHING WENT WRONG "+e.getLocalizedMessage());
 		}
+
 		EventLocationArgs location = Constants.g.fromJson(et.getLocation(),EventLocationArgs.class);
 		Response result;
 		Transaction txn=null;
@@ -202,7 +244,7 @@ public class EventsDatabaseManagement {
 			  com.google.cloud.datastore.Key eventKey;
 			  KeyFactory kf = datastore.newKeyFactory()
 						.setKind(EVENTS);
-			  if(eventId>Constants.ZERO) {
+			  if(editing) {
 				  eventKey = kf.newKey(eventId);
 				  ev = txn.get(eventKey);
 				  if(ev==null) {
@@ -210,7 +252,9 @@ public class EventsDatabaseManagement {
 				  }
 			  }else {
 				  eventKey=datastore.allocateId(kf.newKey());
-			  }		  
+			  }
+			eventId = eventKey.getId();
+
 		  //com.google.cloud.datastore.Key eventKey=datastore.newKeyFactory()
 					//.addAncestors(PathElement.of(USERS,email)).setKind(EVENTS).newKey(event);
 			LatLng coords = LatLng.of(location.getLoc().getLat(),location.getLoc().getLng());
@@ -230,7 +274,7 @@ public class EventsDatabaseManagement {
 					.set(EVENT_OWNER,userid);
 						
 			//handles the reports
-			if(eventId<=Constants.ZERO) {
+			if(!editing) {
 				builder.set(REPORTED_PROP,false);
 				builder.set(REPORT_TEXTS_PROPERTY,noIndexProperties(Constants.g.toJson(new ReportProperty())));
 			}else {
@@ -240,12 +284,33 @@ public class EventsDatabaseManagement {
 			}
 					
 			try {
+				Iterator<Part> images = httpRequest.getParts().iterator();
+				Part part;
+				ArrayList<String> imgs=null;
+			    if(editing) {
+			    	imgs = imagesToRemoveWhenEditing(httpRequest,eventId);
+			    }else {
+			    	imgs=new ArrayList<>();
+			    }
+				
+				long evk = eventKey.getId();
+				while(images.hasNext()) {
+					part = images.next();
+					if(!part.getName().equals(Constants.EVENT_FORMDATA_KEY)&&!part.getName().equals(EDITING_FORMDATA_KEY)) {
+						String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,evk+"/"+System.currentTimeMillis()+"",part.getInputStream());
+						eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
+						imgs.add(eventUrl);
+						//builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
+					}
+				}
+				builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(Constants.g.toJson(imgs)));
+				/*
 				Part p = httpRequest.getPart("img_cover");
 				if(p!=null) {
 					String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,System.currentTimeMillis()+"",p.getInputStream());
 					eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
 					builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
-				}
+				}*/
 			}catch(Exception e) {
 				e.printStackTrace();
 				LOG.severe(e.getLocalizedMessage());
@@ -253,21 +318,16 @@ public class EventsDatabaseManagement {
 			}
 			ev = builder.build();
 			ev = txn.put(ev);
-		    if(eventId<=Constants.ZERO) {
-		    	eventId=ev.getKey().getId();
-			    CountEventsUtils.makeUserEventCounterKind(userid, datastore,true,txn);
-			    /*
-			    if(EventParticipationMethods.addOrRemoveParticipation(userid,eventId,txn)==false) {
-			    	throw new Exception("Participation does not exist, it should be false!");
-			    }*/
-		    }else {
-		    	eventId=ev.getKey().getId();
+		    if(!editing) {
+		    	//eventId=ev.getKey().getId();
+			    CountEventsUtils.makeUserEventCounterKind(userid,datastore,true,txn);
 		    }
 		    txn.commit();
 		    EventData2 obj = getEvent(ev,userid,false);
 		    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
 		  }catch(Exception e) {
 			  StorageMethods.rollBack(txn);
+			  GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventId+"");
 			  result= Response.status(Status.BAD_REQUEST).build();
 			  LOG.severe("ERRRORR");
 			  LOG.severe(e.getLocalizedMessage());
@@ -350,7 +410,7 @@ public class EventsDatabaseManagement {
 				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
 			}
 			//data,cursor
-			return new Pair<String, String>(Constants.g.toJson(events),startCursor);
+			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
 		}catch(Exception e) {
 			Constants.LOG.severe("");
 			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());

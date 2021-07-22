@@ -502,6 +502,40 @@ function goToProfilePage(userid,btn){
     localStorage.setItem("ot",userid);
     btn.click();
 }
+function handleSlideShow(btn,before) {
+    let selectedClassStyle = "evmgblk";
+    let nextToBeSelected = null;
+    let selected = btn.parentElement.querySelector("."+selectedClassStyle);
+    //let childrenImgs = btn.parentElement.querySelectorAll("img");
+    selected.classList.remove(selectedClassStyle);
+    if(before){
+        nextToBeSelected = selected.previousElementSibling
+    }else{
+        nextToBeSelected = selected.nextElementSibling
+    }
+    if(nextToBeSelected&&nextToBeSelected.tagName=='IMG'){
+        selected = nextToBeSelected;
+    }
+    selected.classList.add(selectedClassStyle);
+}
+function imageHTMLstrgs(strUrls) {
+    let images=JSON.parse(strUrls);
+    let imagesHTMLstr="";
+    let displayFirstImage = "evmgblk";
+    
+    if(images.length>1){
+        imagesHTMLstr+=`<button onclick=handleSlideShow(this,${true})>L</button>`;
+    }
+    for (let index = 0; index < images.length; index++) {
+        const element = images[index];
+        imagesHTMLstr += `<img class='evmg ${displayFirstImage}' src=${element} alt='eventimage${index}'>`;
+        displayFirstImage="";
+    }
+    if(images.length>1){
+        imagesHTMLstr+=`<button onclick=handleSlideShow(this,${false})>R</button>`;
+    }
+    return imagesHTMLstr;
+}
 //NOTE: THIS FUNCTION MUST CALL removeEventButton(eventId,parent,eventObj,finished) TO REMOVE AND EDIT AN EVENT
 function makeShowInfoString(eventObj,where,ownEvents) {
     let goingText="";
@@ -535,7 +569,14 @@ function makeShowInfoString(eventObj,where,ownEvents) {
             <button onclick=deleteEvent(${eventObj.eventId},this)>Remove</button>
             ${canEdit}
         </div>`
-    }    
+    }
+    let imagesHTMLstr=imageHTMLstrgs(eventObj.images);
+    /*
+    let images=JSON.parse(eventObj.images);
+    for (let index = 0; index < images.length; index++) {
+        const element = images[index];
+        imagesHTMLstr += `<img class="" src=${element} alt='eventimage${index}'>`;
+    }*/
     return `<div class="one_ev">
                 <div class="evt_disp">
                     <div class="blk_desc">
@@ -567,7 +608,7 @@ function makeShowInfoString(eventObj,where,ownEvents) {
                             </div>
                         </div>
                     </div>
-                    <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventObj.images} alt="eventimage1"></div>
+                    <div class="dlfx imgs_dv evnts_pcs">${imagesHTMLstr}</div>
                 </div>
                 
                 <div class="cmt_mndv">
@@ -619,7 +660,9 @@ function makeShowInfoStringForSu(eventObj,where) {
     `<div class="rmv_evt">
         <button onclick=unreportEvent(${eventObj.eventId},this)>Unreport</button>
         <button onclick=deleteEvent(${eventObj.eventId},this)>Remove</button>
-    </div>`
+    </div>`;
+    let imagesHTMLstr=imageHTMLstrgs(eventObj.images);
+
     return `<div class="one_ev">
                 <div class="evt_disp">
                     <div class="blk_desc">
@@ -651,7 +694,7 @@ function makeShowInfoStringForSu(eventObj,where) {
                             </div>
                         </div>
                     </div>
-                    <div class="dlfx imgs_dv evnts_pcs"><img class="" src=${eventObj.images} alt="eventimage1"></div>
+                    ${imagesHTMLstr}
                 </div>
                 
                 <div class="cmt_mndv">

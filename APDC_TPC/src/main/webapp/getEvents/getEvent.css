@@ -70,15 +70,21 @@ display: flex;
     justify-self: flex-end;
 }
 .evnts_pcs{
+    margin-top: 100px;
     /*width: 300px;*/
-    width: 40%;
-    height: 300px;
-    /*overflow-y: scroll;*/
+    width: 50%;
+    /* height: 300px; */
+    height: 100%;
+    overflow-y: scroll;
 }
-.evnts_pcs img{
-    width: 100%;
+.evmg{
+    display: none;
+    width: 80%;
     height: auto;
     max-height: 100%;
+}
+.evmgblk{
+    display:block;
 }
 .vlt{
     display: flex;

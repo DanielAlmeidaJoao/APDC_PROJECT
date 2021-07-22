@@ -1,5 +1,5 @@
 const MAX_IMAGE_sIZE=1000000;
-const max_images=1;
+const max_images=5;
 
 const sbmt = document.getElementById("addEvt_frm");
 const hideMapClass="hdmap";
@@ -31,6 +31,7 @@ function cancelEventCreationEdition() {
             const element = directionInputs[index];
             element.value="";
         }
+        editingArray=null;
         //origin=null;
         destination=null;
         resetImagesDiv();
@@ -164,6 +165,7 @@ function uploadData(datas) {
     */
 }
 let eventImages=null;
+
 function makeImgDiv(result,caption,file) {
     let ppp = document.createElement("div");
  
@@ -176,11 +178,16 @@ function makeImgDiv(result,caption,file) {
     rmv.onclick=()=>{
         ppp.remove();
         eventImages.delete(caption);
+        if(editingArray){
+            editingArray.push(result);
+        }
     }
     ppp.appendChild(imgele);
     ppp.appendChild(rmv);
     ppp.setAttribute("class","admg");
-    eventImages.set(caption,file);
+    if(file){
+        eventImages.set(caption,file);
+    }
     return ppp;
 }
 let fil;
@@ -202,7 +209,7 @@ function handleImages(){
             const reader = new FileReader();
             const imgparnt = document.getElementById("imgs_dv");
             reader.onload=function () {
-                imgparnt.appendChild(makeImgDiv(this.result,file.name));
+                imgparnt.appendChild(makeImgDiv(this.result,file.name,file));
                 fil=file;
             }
             reader.readAsDataURL(file);
@@ -211,28 +218,28 @@ function handleImages(){
 }
 function makeFormData(evd){
 	let formData = new FormData();	
-    formData.append("img_cover",fil);
-    formData.append("evd",evd);
-    /*
-    let imgs = document.getElementById("imgs_dv").children;
-    let elem;
-
-    			
+    //formData.append("img_cover",fil);
+    
+    //let imgs = document.getElementById("imgs_dv").children;
+    //let elem;
 
     let x=0;
     console.log("GOING TO CREATE EVENT: "+eventImages.size);
-    if(eventImages.size==0){
+    
+    if(editingArray==null && eventImages.size==0){
         alert("Add An Image, please!");
         return null;
     }
     eventImages.forEach((v,k) => {
-        if(v.length>MAX_IMAGE_sIZE){
-            alert("Image is too big!");
-            return;
+        if(x<max_images){
+            formData.append("img_"+x,v);
+            x++;
         }
-        formData.append("img"+x,v);
-        x++;
-    });*/
+    });
+    formData.append("evd",evd);
+    if(editingArray){
+        formData.append("editing",JSON.stringify(editingArray));
+    }
     /*
     for(let x=0;x<imgs.length;x++){
         elem=imgs[x].firstChild;

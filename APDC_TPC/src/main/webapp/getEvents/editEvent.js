@@ -1,5 +1,7 @@
 //input fields of the form that creates elements
 const elems=document.getElementById("inp_data").querySelectorAll("input");
+let editingArray = null;
+
 function createEventFormIsFree(){
     for (let index = 0; index < elems.length; index++) {
         const element = elems[index];
@@ -25,11 +27,17 @@ function editEvent(btn){
         alert("There are unsaved events!");
         return;
     }
+    editingArray=[];
     /*
     String name, description, goals, location,
 	meetingPlace, startDate, endDate, organizer, startTime, endTime, images;
 	long eventId, volunteers;
     */
+    destination={
+        loc:eventObj.loc,
+        name:eventObj.eventAddress,
+    };
+    document.getElementById("pac-input2").value=destination.name;
     let descriptionTextarea=document.getElementById("desctxt");
     elems[1].value=eventObj.name;
     descriptionTextarea.value=eventObj.description;
@@ -39,7 +47,11 @@ function editEvent(btn){
     //elems[4].value=eventObj.name;
     //elems[5].value=eventObj.name;
     const imgparnt = document.getElementById("imgs_dv");
-    imgparnt.appendChild(makeImgDiv(eventObj.images,"eventimage"));
+    let images=JSON.parse(eventObj.images);
+    for (let index = 0; index < images.length; index++) {
+        const element = images[index];
+        imgparnt.appendChild(makeImgDiv(element,"eventimage"+index));
+    }
     
     //
     document.getElementById("addEvt_frm").setAttribute(dv.NAME,eventObj.eventId);
