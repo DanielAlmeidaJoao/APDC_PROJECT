@@ -173,7 +173,7 @@ function handleShowDivButtons() {
         document.getElementById("shw_rptdevts").classList.remove("shus");
         document.getElementById("shusddv").classList.remove("hidespdvs");
         document.getElementById("rptdmvd").classList.add("hidespdvs"); */
-        if(document.getElementById("rgtd_users").childElementCount==0){
+        if(document.getElementById("rgtd_users").childElementCount==1){
             document.getElementById("mr_rged_users").click();
         }
         handleShowDivButtonsAux("shw_users","shw_rptdevts","shusddv","rptdmvd");

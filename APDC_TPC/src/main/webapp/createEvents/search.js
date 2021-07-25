@@ -31,12 +31,13 @@ function clearMarkers() {
 
 let map;
 function initAutocomplete() {
+  areaToSearch={ lat: 38.5718676, lng: -8.8990022 };
+  currentMapLocation=areaToSearch;
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: -33.8688, lng: 151.2195 },
-    MAP_ZOOM: MAP_ZOOM,
+    zoom: MAP_ZOOM,
+    center: areaToSearch,
     mapTypeId: "roadmap",
-  });
-
+  });  
   navigator.geolocation.getCurrentPosition(function(position) {
     if(map){
       let lat=position.coords.latitude;
@@ -46,27 +47,18 @@ function initAutocomplete() {
       currentMapLocation=origin;
       map.setCenter(origin);
       geocodeLatLng(map,lat,lng);
-
-
-     /* const image = {
-        url: "https://storage.googleapis.com/profile_pics46335560256500/5715241090416640"
-        ,
-        // This marker is 20 pixels wide by 32 pixels high.
-        size: new google.maps.Size(50, 50),
-        // The origin for this image is (0, 0).
-        origin: new google.maps.Point(0, 0),
-        // The anchor for this image is the base of the flagpole at (0, 32).
-        anchor: new google.maps.Point(0, 32),
-      }; */
-      /*
-      new google.maps.Marker({
-        //icon:image,
-        title: "I AM HERE",
-        position: new google.maps.LatLng(lat,lng),
-        map: map
-      });*/
     }
   });
+
+  navigator.permissions && navigator.permissions.query({name: 'geolocation'})
+    .then(function(PermissionStatus) {
+        if (PermissionStatus.state == 'granted') {
+          console.log("DENIED 332");
+        } else {
+          pageRefreshed();
+        }
+    })
+
   // Create the search box and link it to the UI element.
   const input2 = document.getElementById("pac-input2");
   const input = document.getElementById("pac-input");

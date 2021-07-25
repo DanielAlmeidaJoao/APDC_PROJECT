@@ -57,6 +57,7 @@ public class LoginManager {
 	private static final Logger LOG = Logger.getLogger(LoginManager.class.getName());
 	
 	public static final String profilePictureBucketName="profile_pics46335560256500";
+	
 
 	//AUTHOR: DANIEL JOAO, COPYING IT WITHOUT MY CONSENT IS A CRIME, LEADING UP TO 7 YEARS IN JAIL	
 	private final Gson g = new Gson();

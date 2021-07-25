@@ -125,6 +125,8 @@ function showUserInfos(){
             }
             if(data.viewingOwnProfile){
                 document.getElementById("emlspn").textContent=data.email;
+            }else{
+                document.getElementById("prfpc_btns").remove();
             }
             handleEditBtn(data.viewingOwnProfile);
             handleEditName(data.viewingOwnProfile);

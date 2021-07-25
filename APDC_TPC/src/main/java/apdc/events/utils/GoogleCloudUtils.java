@@ -34,6 +34,7 @@ public class GoogleCloudUtils {
 	    Bucket bucket = storage.create(BucketInfo.of(bucketName));
 
 	    System.out.printf("Bucket %s created.%n", bucket.getName());
+	    makeBucketPublic(bucket.getName());
 	}
 	public static void makeBucketPublic(String bucketName) {
 	    // The ID of your GCP project

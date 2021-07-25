@@ -182,8 +182,8 @@ public class EventsDatabaseManagement {
 						.set(DESCRIPTION,event.getString(DESCRIPTION))
 						.set(DIFFICULTY,event.getString(DIFFICULTY))
 						.set(FORMATTED_ADDRESS_EVENT_PROP,event.getString(FORMATTED_ADDRESS_EVENT_PROP))
-						.set(START_DATE,event.getTimestamp(START_DATE))
-						.set(END_DATE,event.getTimestamp(END_DATE))
+						.set(START_DATE,event.getLong(START_DATE))
+						.set(END_DATE,event.getLong(END_DATE))
 						.set(VOLUNTEERS,event.getLong(VOLUNTEERS))
 						.set(EVENT_OWNER,event.getLong(EVENT_OWNER))
 						.set(Constants.EVENT_IMGS_PROP,event.getString(Constants.EVENT_IMGS_PROP))
@@ -270,7 +270,9 @@ public class EventsDatabaseManagement {
 			if(startDate<now||startDate>endDate) {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
-
+			if(et.getVolunteers()>Long.MAX_VALUE) {
+				et.setVolunteers(Long.MAX_VALUE);
+			}
 			Entity.Builder  builder =Entity.newBuilder(eventKey)
 					.set(NAME,et.getName())
 					.set(DESCRIPTION,et.getDescription())
@@ -405,7 +407,8 @@ public class EventsDatabaseManagement {
 		try {
 			Cursor cursorObject=null;
 			Query<ProjectionEntity> query=null;
-			Filter filter=PropertyFilter.gt(END_DATE,currentDate());
+			long now = currentDate();
+			Filter filter=PropertyFilter.ge(END_DATE,now);
 			Filter unreportedEventFilter= PropertyFilter.eq(REPORTED_PROP,false);
 			String code = getAreaPlusCode(args.getLat(),args.getLng());
 			Filter postalCodeFilter=PropertyFilter.eq(AREA_PLUS_CODE,code);
@@ -416,8 +419,14 @@ public class EventsDatabaseManagement {
 				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,LATLNG_EVENT_PROP)
 				    .setLimit(DatastoreConstants.getUpcomingEventsPagesize());
 			if(startCursor!=null && !startCursor.isEmpty()){
-				cursorObject = Cursor.fromUrlSafe(startCursor); 
-				dd=dd.setStartCursor(cursorObject);
+				try {
+					CursorHelper ch =  Constants.g.fromJson(startCursor,CursorHelper.class);
+					if(code.equals(ch.areaCode)) {
+						//startCursor = ch.getCursor();
+						cursorObject = Cursor.fromUrlSafe(ch.getCursor()); 
+						dd=dd.setStartCursor(cursorObject);
+					}
+				}catch(Exception e) {}
 			}
 			query=dd.build();
 			
@@ -430,10 +439,11 @@ public class EventsDatabaseManagement {
 				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
 			}
 			//data,cursor
-			return new Pair<String, String>(Constants.g.toJson(events),tasks.getCursorAfter().toUrlSafe());
+			CursorHelper ch =  new CursorHelper();
+			ch.setAreaCode(code);
+			ch.setCursor(tasks.getCursorAfter().toUrlSafe());
+			return new Pair<String, String>(Constants.g.toJson(events),Constants.g.toJson(ch));
 		}catch(Exception e) {
-			Constants.LOG.severe("");
-			Constants.LOG.severe("GETTING EVENTS "+e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 		
@@ -646,7 +656,7 @@ public class EventsDatabaseManagement {
 			Cursor startcursor=null;
 			Query<Entity> query=null;
 			//Timestamp.no
-			Filter filter=PropertyFilter.lt(END_DATE,Timestamp.now());
+			Filter filter=PropertyFilter.lt(END_DATE,currentDate());
 			Builder b=Query.newEntityQueryBuilder()
 				    .setKind(EVENTS).setFilter(filter)
 				    .setLimit(pageSize);

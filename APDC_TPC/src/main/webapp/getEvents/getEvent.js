@@ -717,7 +717,7 @@ function makeShowInfoStringForSu(eventObj,where) {
                             </div>
                         </div>
                     </div>
-                    ${imagesHTMLstr}
+                    <div class="dlfx imgs_dv evnts_pcs">${imagesHTMLstr}</div>
                 </div>
                 
                 <div class="cmt_mndv">

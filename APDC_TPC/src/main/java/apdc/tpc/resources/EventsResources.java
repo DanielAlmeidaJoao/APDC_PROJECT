@@ -42,11 +42,12 @@ public class EventsResources {
 	@Context
 	private HttpServletRequest httpRequest;
 	
-	public static final String bucketName = "daniel1624401699897";
+	//public static final String bucketName = "daniel1624401699897";
+	public static final String bucketName = "events_photoes_bucket";
+
 	private static final Logger LOG = Logger.getLogger(EventsResources.class.getName());
 
-	public EventsResources() {
-	}
+	public EventsResources() {}
 	/**
 	 * creates a new event
 	 * @param data JSON object with the information to create a new event
