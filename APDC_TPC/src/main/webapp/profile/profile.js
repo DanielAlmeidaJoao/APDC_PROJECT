@@ -44,10 +44,18 @@ function selectNavBarButton(btn){
                 cursor = data[1];
                 data = JSON.parse(data[0]);
                 let chld;
-                for(let x=0; x<data.length;x++){
-                    chld =  eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
-                    dispBlock.appendChild(chld);
+                if(endpoint=="interested"){
+                    for(let x=0; x<data.length;x++){
+                        chld =  eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                        dispBlock.appendChild(chld);
+                    }
+                }else{
+                    for(let x=0; x<data.length;x++){
+                        chld =  eventDivBlock2(data[x],false); //singleEventBlock(data[x],false);
+                        dispBlock.appendChild(chld);
+                    }
                 }
+
             }
         }
         ).catch((error) => {
@@ -67,8 +75,8 @@ function selectNavBarButton(btn){
         loadEvents();
     }
 }
-function eventDivBlock(eventObj,ownEvents) {
-    let str = makeShowInfoString(eventObj,eventObj.eventAddress,ownEvents);
+function eventDivBlock2(eventObj,ownEvents) {
+    let str = makeProjectionEventDiv(eventObj,ownEvents); //makeShowInfoString(eventObj,eventObj.eventAddress,ownEvents);
     return stringToHTML(str);
 }
 
@@ -91,6 +99,9 @@ function showUserInfos(){
             return response.json();
         }else if(response.status==404){
             alert("User No Longer Exists!");
+        }else if(response.status==401){
+            alert("No Authorization!");
+            window.location.href="/";
         }
         return null;
     }).then(data => {
@@ -126,5 +137,5 @@ function showUserInfos(){
 }
 showUserInfos();
 showAboutDiv();
-handleNumberOfEventsButton("num_evts","shusevnts","myevents","load_mr_user_evnts"); //show events made by the user
+handleNumberOfEventsButton("num_evts","shusevnts","myevents2","load_mr_user_evnts"); //show events made by the user
 handleNumberOfEventsButton("intrdevts","shusevntsitrd","interested","load_mr_itrstd"); //show events the user has interests

@@ -49,7 +49,7 @@ function resetCookies() {
 }
 function pageRefreshed(){
     if (performance.navigation.type == performance.navigation.TYPE_RELOAD||localStorage.getItem("email")!=null) {
-        resetCookies()
+        resetCookies();
     }else{
         document.getElementById("vwmrpnt").click();
     }
@@ -97,7 +97,27 @@ function loadEvents(path,finished,divBlock) {
 function loadFinishedEvents() {
     let mainBlock = document.getElementById("fnd_evnts_blk");
     let path = `/rest/events/view/finished`;
-    loadEvents(path,true,mainBlock);
+    //loadEvents(path,true,mainBlock);
+    fetch(path)
+    .then(response => {
+        if(response.ok){
+            return response.json();
+        }else{
+            alert("Unexpected Error!");
+        }})
+    .then( data => {
+        if(data){
+            for(let x=0; x<data.length;x++){
+                
+                let chld = eventDivBlock(data[x],false); //singleEventBlock(data[x],false);
+                mainBlock.appendChild(chld);
+                /*
+                let str = makeProjectionEventDiv(data[x],false); //makeShowInfoString(eventObj,eventObj.eventAddress,ownEvents);
+                let chld = stringToHTML(str);
+                mainBlock.appendChild(chld); */
+            }
+        }
+    })
 }
 
 function loadUpcomingEvents() {
@@ -519,21 +539,24 @@ function handleSlideShow(btn,before) {
     selected.classList.add(selectedClassStyle);
 }
 function imageHTMLstrgs(strUrls) {
-    let images=JSON.parse(strUrls);
     let imagesHTMLstr="";
-    let displayFirstImage = "evmgblk";
+    try {
+        let images=JSON.parse(strUrls);
+        let displayFirstImage = "evmgblk";
+        
+        if(images.length>1){
+            imagesHTMLstr+=`<button onclick=handleSlideShow(this,${true})>L</button>`;
+        }
+        for (let index = 0; index < images.length; index++) {
+            const element = images[index];
+            imagesHTMLstr += `<img class='evmg ${displayFirstImage}' src=${element} alt='eventimage${index}'>`;
+            displayFirstImage="";
+        }
+        if(images.length>1){
+            imagesHTMLstr+=`<button onclick=handleSlideShow(this,${false})>R</button>`;
+        }
+    } catch (error) {}
     
-    if(images.length>1){
-        imagesHTMLstr+=`<button onclick=handleSlideShow(this,${true})>L</button>`;
-    }
-    for (let index = 0; index < images.length; index++) {
-        const element = images[index];
-        imagesHTMLstr += `<img class='evmg ${displayFirstImage}' src=${element} alt='eventimage${index}'>`;
-        displayFirstImage="";
-    }
-    if(images.length>1){
-        imagesHTMLstr+=`<button onclick=handleSlideShow(this,${false})>R</button>`;
-    }
     return imagesHTMLstr;
 }
 //NOTE: THIS FUNCTION MUST CALL removeEventButton(eventId,parent,eventObj,finished) TO REMOVE AND EDIT AN EVENT
@@ -714,7 +737,44 @@ function makeShowInfoStringForSu(eventObj,where) {
                 ${reportBtn}
             </div>`;
 }
-
+function makeProjectionEventDiv(eventObj,ownEvents) {
+    let imagesHTMLstr=imageHTMLstrgs(eventObj.images);
+    return `<div class="one_ev">
+                <div class="evt_disp">
+                    <div class="blk_desc">
+                        <div class="dlfx mgpd abt_evt">
+                            <h2 class="">${eventObj.eventName}</h2>
+                            <div class="dlfx mgpd abt_evt">
+                                <div class="mrd plc">
+                                    <div class="mrdso">Where:</div>
+                                    <div class="mrdso">${eventObj.place}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dlfx imgs_dv evnts_pcs nomrgtp">${imagesHTMLstr}</div>
+                </div>
+                <button onclick=loadEvent(this,${eventObj.eventId},${ownEvents})>More Details</button>
+            </div>`;
+}
+function loadEvent(button,eventid,ownEvents) {
+    let path=`/rest/events/event/${eventid}`;
+    fetch(path).then(response => {
+        if(response.ok){
+            return response.json();
+        }else if(response.status==404){
+            alert("Event Not Found!");
+            return null;
+        }
+    }).then(event=>{
+        if(event){
+            let str = makeShowInfoString(event,event.eventAddress,ownEvents);
+            let domElement = stringToHTML(str);
+            let parent = button.parentElement;
+            parent.parentElement.replaceChild(domElement,parent);
+        }
+    });
+}
 /**
  * Convert a template string into HTML DOM nodes
  * @param  {String} str The template string

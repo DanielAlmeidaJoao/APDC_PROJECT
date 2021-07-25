@@ -11,7 +11,6 @@ display: flex;
     display: flex;
     flex-direction: column;
     align-content: center;
-    border: 2px solid blue;
     height: auto;
 }
 
@@ -26,7 +25,9 @@ display: flex;
     display: flex;
     align-items: center;
     flex-direction: column;
-    border: 2px solid green;
+    border: 1px dotted #00000087;
+    margin-bottom: 10px;
+    border-radius: 5px;
 }
 .blk_desc{
     width: 60%;
@@ -76,6 +77,9 @@ display: flex;
     /* height: 300px; */
     height: 100%;
     overflow-y: scroll;
+}
+.nomrgtp{
+    margin-top: 0px;
 }
 .evmg{
     display: none;

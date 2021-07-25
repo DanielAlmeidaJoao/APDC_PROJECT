@@ -142,7 +142,12 @@ function loadReportedEvents() {
 function superUser() {
     let superUser = document.getElementById("superu");
     superUser.style.display="block";
+    let clicked = false;
     superUser.onclick=()=>{
+        if(clicked==false){
+            document.getElementById("mr_rged_users");
+            clicked=true;
+        }
         hideAllBlocksButOne("suplc_blk");
         hideMap();
         selectNavBarButton(superUser);

@@ -8,6 +8,11 @@
     border: 1px solid red;
     margin: 10px 10px;
     padding: 10px 10px;
+    width: 600px;
+}
+.labels{
+    font-weight: bolder;
+    font-size: 20px;
 }
 .users_d{
     display: flex;

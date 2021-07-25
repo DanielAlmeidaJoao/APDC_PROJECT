@@ -43,9 +43,14 @@ function editEvent(btn){
     descriptionTextarea.value=eventObj.description;
     elems[2].value=eventObj.difficulty;
     elems[3].value=eventObj.volunteers;
-    //elems[3].value=eventObj.name;
-    //elems[4].value=eventObj.name;
-    //elems[5].value=eventObj.name;
+
+    let start = eventObj.startDate.split(" ");
+    let end = eventObj.endDate.split(" ");
+    elems[4].value=start[0]; //start date
+    elems[5].value=end[0]; //end date
+    elems[6].value=start[1]; //start time
+    elems[7].value=end[1]; //end time
+    
     const imgparnt = document.getElementById("imgs_dv");
     let images=JSON.parse(eventObj.images);
     for (let index = 0; index < images.length; index++) {

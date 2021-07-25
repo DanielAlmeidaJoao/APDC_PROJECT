@@ -22,7 +22,7 @@ public class DatastoreConstants {
 	private static final String FINISHED_EVENTS_PAGESIZE = "FINISHED_EVENTS_PAGESIZE";
 	private static final String UPCOMING_EVENTS_PAGESIZE = "UPCOMING_EVENTS_PAGESIZE";
 	private static final String REPORTED_EVENTS_PAGESIZE = "REPORTED_EVENTS_PAGESIZE";
-	private static final String FETCH_USERS_EVENTS_PAGESIZE = "FETCH_USERS_PAGESIZE";
+	private static final String FETCH_USERS_PAGESIZE = "FETCH_USERS_PAGESIZE";
 	
 	private static final String VERIFICATION_CODE_COOKIE_TIME = "VERIFICATION_COOKIE_TIME";
 
@@ -98,8 +98,8 @@ public class DatastoreConstants {
 		return getProperty(REPORTED_EVENTS_PAGESIZE);
 	}
 
-	public static int getFetchUsersEventsPagesize() {
-		return getProperty(FETCH_USERS_EVENTS_PAGESIZE);
+	public static int getFetchUsersPagesize() {
+		return getProperty(FETCH_USERS_PAGESIZE);
 	}
 
 	public static int getMaxPasswordLength() {

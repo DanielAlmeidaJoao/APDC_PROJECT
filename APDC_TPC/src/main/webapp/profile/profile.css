@@ -18,8 +18,8 @@ body{
     font-size: 18px;
 }
 .qttxt{
-    font-style: italic;
-    font-weight: bold;
+    font-weight: bolder;
+    font-size: 20px;
 }
 .txt_pm{
     padding: 5px 5px;
@@ -106,7 +106,6 @@ body{
     align-items: center;
 }
 .scr_tg{
-    font-style: italic;
     font-weight: bold;
     border-bottom: 1px dotted #00000005;
 }
@@ -129,4 +128,23 @@ body{
 }
 .shwtxa{
     display: block;
+}
+.mgnp{
+    opacity: 0;
+}
+.lbgpf{
+    cursor: pointer;
+    background-color: #556e6c;
+    padding: 10px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    width: 40%;
+    text-align: center;
+}
+@media (max-width: 900px)
+{
+  .user_plc{
+      flex-direction: column-reverse;
+  }
 }

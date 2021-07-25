@@ -14,3 +14,10 @@ indexes:
   - name: NAME
   - name: FORMATTED_ADDRESS
   - name: LATLNG
+  
+- kind: EVENTS
+  properties:
+  - name: OWNER
+  - name: FORMATTED_ADDRESS
+  - name: NAME
+  - name: imgs

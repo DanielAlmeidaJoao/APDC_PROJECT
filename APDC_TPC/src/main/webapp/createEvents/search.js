@@ -14,10 +14,12 @@
   // The anchor for this image is the base of the flagpole at (0, 32).
   anchor: new google.maps.Point(0, 32),
 }; */
+let iconUrl="https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/geocode-71.png";
+let currentMapLocation=null;
 let destination=null;
 let origin=null;
 let markers1 = [];
-const MAP_ZOOM=15;
+const MAP_ZOOM=12;
 const fields =["place_id","plus_code"];
 function clearMarkers() {
   // Clear out the old markers.
@@ -41,6 +43,7 @@ function initAutocomplete() {
       let lng=position.coords.longitude;
         
       origin={lat:lat, lng: lng};
+      currentMapLocation=origin;
       map.setCenter(origin);
       geocodeLatLng(map,lat,lng);
 
@@ -71,28 +74,54 @@ function initAutocomplete() {
   const searchBox = new google.maps.places.SearchBox(input);
   //searchBox.setFields(fields);
   const searchBox2 = new google.maps.places.SearchBox(input2);
-  /*
+
+  
   let mapZoom;
-  let startLocation
+  let startLocation;
   new google.maps.event.addListener(map, 'click', function(event) {
     mapZoom = map.getZoom();
     startLocation = event.latLng;
-    //setTimeout(placeMarker, 600);
-    placeMarker();
-    console.log(startLocation.lat(), startLocation.lng());
-    geocodeLatLng(map,startLocation.lat(),startLocation.lng()); 
+    map.panTo(startLocation);
+
+    //let marker;
+    clearMarkers();
+    if(mapZoom == map.getZoom()){
+      geocodeLatLng(map,startLocation.lat(),startLocation.lng(),placeMarker); 
+    }
   });
 
-  function placeMarker() {
-    let marker;
-    if(mapZoom == map.getZoom()){
-      marker =  new google.maps.Marker({position: startLocation, map: map});
-      infowindow = new google.maps.InfoWindow({content:`<button>Do You Wish To Create An Event On This Location?</button>`,maxWidth:"800px"});
-      infowindow.open(map, marker);
+  google.maps.event.addListener(map, 'idle', ()=>{
+    //if(currentMapLocation!=null&&( currentMapLocation.lat!=map.center.lat()||currentMapLocation.lng!=map.center.lng())){
+    if(!equalsCenter(currentMapLocation)){
+      /*
+      currentMapLocation = {
+        lat: map.center.lat(),
+        lng: map.center.lng()
+      }
+      document.getElementById("vwmrpnt").click();*/
+      console.log("OKOK ");
+      handleLoadEventsOnIdle();
     }
-  }
-  **/
+  });
 
+  //${address},${startLocation}
+  function placeMarker(address) {
+    //let marker;
+    clearMarkers();
+    //marker =  new google.maps.Marker({position: startLocation, map: map});
+
+    let contentString = `<div class='dvifn'>
+                            <div class='psifn'>
+                              <span>Address: </span>
+                              <span class='darn8'>${address}</span>
+                            </div>
+                            <button class='psibtn' name='${address}' onclick=handleMakeEventOnTheMap(this,${startLocation.lat()},${startLocation.lng()})>Create Event</button>
+                          </div>`
+    /* infowindow = new google.maps.InfoWindow({content:contentString,maxWidth:"800px"});
+    infowindow.open(map, marker);
+    markers1.push(marker); */
+    makeMarkerAux(startLocation.lat(),startLocation.lng(),null,contentString);
+  }
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
   // Bias the SearchBox results towards current map's viewport.
@@ -103,6 +132,16 @@ function initAutocomplete() {
   // Listen for the event fired when the user selects a prediction and retrieve
   handleSearchBox(searchBox,searchEventParams);
   handleSearchBox(searchBox2,validPlace);
+}
+function handleMakeEventOnTheMap(button,lat,lng){
+  getMaxImagesNumber();
+  let address = button.getAttribute("name");
+  document.getElementById("addEvt_frm").classList.remove("hidfrm");
+  document.getElementById("pac-input2").value = address;
+  destination={
+    loc:{lat:lat,lng:lng},
+    name:address,
+  };
 }
 function handleSearchBox(searchBox,func){
   //searchBox.bindTo("bounds",map);
@@ -130,6 +169,7 @@ function handleSearchBox(searchBox,func){
         anchor: new google.maps.Point(17, 34),
         scaledSize: new google.maps.Size(25, 25),
       };
+      console.log(place.icon);
       // Create a marker for each place.
       markers1.push(
         new google.maps.Marker({
@@ -145,11 +185,21 @@ function handleSearchBox(searchBox,func){
       } else {
         bounds.extend(place.geometry.location);
       }
-      console.log(place);
       func(place);
     });
     map.fitBounds(bounds);
   });
+}
+function equalsCenter(location) {
+  return location!=null&&location.lat==map.center.lat()&&location.lng==map.center.lng();
+}
+function handleLoadEventsOnIdle() {
+  currentMapLocation = {
+    lat: map.center.lat(),
+    lng: map.center.lng()
+  }
+  areaToSearch = currentMapLocation;
+  document.getElementById("vwmrpnt").click();
 }
 function validPlace(place){
   let newDiv = stringToDom(`<div>${place.adr_address}</div>`);
@@ -157,7 +207,7 @@ function validPlace(place){
   let locality=newDiv.querySelector(".locality");
   let countryName = newDiv.querySelector(".country-name");
   //let street_address = newDiv.querySelector(".street-address");
-  console.log(newDiv);
+  //console.log(newDiv);
 
   if(postalCode==undefined || locality==undefined || countryName==undefined){
     alert("The Address must have a street address, postal code, locality and a country name!");
@@ -172,11 +222,11 @@ function validPlace(place){
 }
 
 function searchEventParams(place) {
-  areaToSearch = {
-    lat: place.geometry.location.lat(),
-    lng: place.geometry.location.lng()
+  if(!equalsCenter(currentMapLocation)){
+    handleLoadEventsOnIdle();
+    console.log("12 " );
+    console.log(currentMapLocation);
   }
-  document.getElementById("vwmrpnt").click();
 }
 function getPlaceName(place){
   let name;
@@ -188,7 +238,7 @@ function getPlaceName(place){
   return name;
 }
   // Functions to compute distance between two points on earth's surface
-Rad = function(x) {return x*Math.PI/180;}
+function Rad(x) {return x*Math.PI/180;}
 
 DistHaversine = function(p1, p2) {
   var R = 6371; // earth's mean radius in km
@@ -218,7 +268,6 @@ function makeMarker(eventObj) {
   let contentString = null;
   let infowindow = null;
   marker.addListener('click', function() {
-    console.log("MARKER CLICKED "+clicked);
     if(clicked==false){
       console.log(" AHAHA");
       let path=`/rest/events/event/${marker.id}`;
@@ -232,14 +281,14 @@ function makeMarker(eventObj) {
           infowindow = new google.maps.InfoWindow({content: contentString,maxWidth:"800px"});
           infowindow.open(map, marker);
           distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
+          distDiv.textContent+=" KM";
         }
-      }).catch(err=>{
-        console.log("ERROR "+err);
-      })
+      });
     }
     else{
       infowindow.open(map, marker);
       distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
+      distDiv.textContent+=" KM";
     }
   });
 }
@@ -264,28 +313,39 @@ function makeMarker2(eventObj) {
     distDiv.textContent=DistHaversine(origin, { lat: loc.lat, lng: loc.lng });
   });
 }
-let pps;
-function geocodeLatLng(map,lat,lng) {
+function geocodeLatLng(map,lat,lng,func) {
   const geocoder = new google.maps.Geocoder();
-  const infowindow = new google.maps.InfoWindow();
+  //const infowindow = new google.maps.InfoWindow();
   const latlng = {
     lat: parseFloat(lat),
     lng: parseFloat(lng),
   };
-  areaToSearch=latlng;
   geocoder
     .geocode({ location: latlng })
     .then((response) => {
-        pps = response.results[0].address_components;
-        console.log(response.results[0]);
       if (response.results[0]) {
+        areaToSearch=latlng;
+        //pps = response.results[0].address_components;
+        if(func){
+          func(response.results[0].formatted_address);
+          return;
+        }else{
+          pageRefreshed();
+        }
         map.setZoom(MAP_ZOOM);
-        pageRefreshed();
         /*
+        const icon = {
+          url: iconUrl,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25),
+        };
         const marker = new google.maps.Marker({
+          map:map,
+          icon:icon,
           title: response.results[0].formatted_address,
-          position: new google.maps.LatLng(lat,lng),
-          map: map,
+          position: new google.maps.LatLng(lat,lng)
         });
         markers1.push(marker);
         infowindow.setContent(response.results[0].formatted_address);
@@ -293,9 +353,34 @@ function geocodeLatLng(map,lat,lng) {
         marker.addListener('click', function() {
           infowindow.open(map, marker);
         });*/
+        let title = response.results[0].formatted_address;
+        makeMarkerAux(lat,lng,title,title);
       } else {
         window.alert("Invalid Coordinates!");
       }
     })
     .catch((e) => window.alert("Geocoder failed due to: " + e));
+}
+
+function makeMarkerAux(lat,lng,title,infoContent) {
+  const infowindow = new google.maps.InfoWindow();
+  const icon = {
+    url: iconUrl,
+    size: new google.maps.Size(71, 71),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(17, 34),
+    scaledSize: new google.maps.Size(25, 25),
+  };
+  const marker = new google.maps.Marker({
+    map:map,
+    icon:icon,
+    title:title,
+    position: new google.maps.LatLng(lat,lng)
+  });
+  markers1.push(marker);
+  infowindow.setContent(infoContent);
+  infowindow.open(map, marker);
+  marker.addListener('click', function() {
+    infowindow.open(map, marker);
+  });
 }

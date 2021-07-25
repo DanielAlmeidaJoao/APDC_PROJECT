@@ -168,9 +168,40 @@ public class EventsResources {
 		Response resp;
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
-			Pair<String,String> pair = EventsDatabaseManagement.getEvents(cursor,userid,true,DatastoreConstants.getFinishedEventsPagesize());
+			Pair<String,String> pair = EventsDatabaseManagement.getEventsFinishedEvents(cursor,userid,DatastoreConstants.getFinishedEventsPagesize());
 			NewCookie nk = HandleTokens.makeCookie(Constants.FINISHED_EVENTS_CURSOR_CK,pair.getV2(),token.getDomain());
 			resp = Response.ok().cookie(nk).entity(pair.getV1()).build();
+		}catch(Exception e) {
+			Constants.LOG.severe(e.getLocalizedMessage());
+			resp = Response.status(Status.FORBIDDEN).build();
+		}
+		return resp;
+	}
+	/**
+	 * This method is using projection, and it is the one to be used, the other one with the same name will be removed later
+	 * once the Android team implements this one. 
+	 * @param value offset value stored in the specified cookie
+	 * @param token session token stored in the specified token
+	 * @return if success returns an array with the events array and the database cursor
+	 */
+	@GET
+	@Path("/view/myevents2")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response loggedUserEvents2(@CookieParam(Constants.COOKIE_TOKEN) Cookie token, @QueryParam("userid") String user, @QueryParam("cursor") String cursor) {
+		//@CookieParam(Constants.USER_EVENTS_CURSOR_CK) String cursor
+		Response resp;
+		String result [] =null;
+		try {
+			long userid = HandleTokens.validateToken(token.getValue());
+			try {
+				System.out.println("I AM USER ID "+user);
+				userid = Long.parseLong(user);
+			}catch(Exception e) {}
+			Constants.LOG.severe(userid+"");
+			result = EventsDatabaseManagement.getUserEvents(cursor,userid); //EventsDatabaseManagement.getLoggedUserEvents(cursor,userid);
+			//NewCookie nk = HandleTokens.makeCookie(Constants.USER_EVENTS_CURSOR_CK,result[1],token.getDomain());
+			resp = Response.ok().entity(Constants.g.toJson(result)).build();
 		}catch(Exception e) {
 			Constants.LOG.severe(e.getLocalizedMessage());
 			resp = Response.status(Status.FORBIDDEN).build();
@@ -306,5 +337,28 @@ public class EventsResources {
 			status=Status.FORBIDDEN;
 		}
 		return Response.status(status).build();
+	}
+	
+	/**
+	 * loads the events in which the user in the url is interested in.
+	 * @param value offset value stored in the specified cookie
+	 * @param token session token stored in the specified token
+	 * @return if success returns an array with the events array and the database cursor
+	 */
+	@GET
+	@Path("/consts/mgn")
+	@Consumes(MediaType.APPLICATION_JSON +";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON +";charset=utf-8")
+	public Response getMaxNumberOfImagesPerEvent(@CookieParam(Constants.COOKIE_TOKEN) Cookie token) {
+		Response resp;
+		try {
+			HandleTokens.validateToken(token.getValue());
+			int number = DatastoreConstants.getMaxNImagesUploads();
+			resp = Response.ok().entity(number).build();
+		}catch(Exception e) {
+			Constants.LOG.severe(e.getLocalizedMessage());
+			resp = Response.status(Status.FORBIDDEN).build();
+		}
+		return resp;
 	}
 }

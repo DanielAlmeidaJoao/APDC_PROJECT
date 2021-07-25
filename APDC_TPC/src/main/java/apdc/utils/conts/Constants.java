@@ -25,7 +25,7 @@ public interface Constants {
 	public static final String EVENT_ID = "eventId";
 	
 	public static final String EVENT_FORMDATA_KEY="evd";
-	public static final String EVENT_PICS_FORMDATA_KEY="imgs";
+	public static final String EVENT_IMGS_PROP="imgs";
 	
 	public static final int MAX_IMAGES_PER_EVENTS=5;
 

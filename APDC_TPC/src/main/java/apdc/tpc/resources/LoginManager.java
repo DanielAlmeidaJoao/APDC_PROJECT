@@ -108,8 +108,16 @@ public class LoginManager {
 		}
 		return response;
 	}
-	
+    private boolean containsNumbersAndLetters(String s) {
+        String n = ".*[0-9].*"; //numbers
+        String a = ".*[A-Z].*"; //upper case letters
+        String b = ".*[a-z].*"; //lower case letters
+        return s.matches(n) && (s.matches(a)||s.matches(b));
+    }
 	private boolean invalidPassword(String password) {
+		if(!containsNumbersAndLetters(password)) {
+			return false;
+		}
 		return password.length()<DatastoreConstants.getMinPasswordLength()||password.length()>DatastoreConstants.getMaxPasswordLength();
 	}
 	@POST

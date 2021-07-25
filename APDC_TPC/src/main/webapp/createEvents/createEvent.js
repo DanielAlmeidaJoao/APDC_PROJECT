@@ -1,11 +1,48 @@
 const MAX_IMAGE_sIZE=1000000;
-const max_images=5;
+let max_images=1;
 
 const sbmt = document.getElementById("addEvt_frm");
 const hideMapClass="hdmap";
+
+let getMaxImagesNumber = (function() {
+    var executed = false;
+    return function() {
+        if (!executed) {
+            executed = true;
+            fetch("../rest/events/consts/mgn").then(response => {
+                if(response.ok){
+                    return response.json();
+                }
+            }).then(data =>{
+                if(data){
+                    max_images=data;
+                    console.log(data);
+                }
+            });
+        }
+    };
+})();
+
 function toggleCreateEventForm() {
+    //let clicked=false;
     document.getElementById("tgl_crtevt").onclick=()=>{
+        getMaxImagesNumber();
+        /*
+        if(clicked==false){
+            fetch("../rest/events/consts/mgn").then(response => {
+                if(response.ok){
+                    return response.json();
+                }
+            }).then(data =>{
+                if(data){
+                    max_images=data;
+                    console.log(data);
+                }
+            });
+        }
+        clicked=true;*/
         document.getElementById("addEvt_frm").classList.toggle("hidfrm");
+
     }
 }
 function showMap(){
@@ -47,11 +84,17 @@ function validDate() {
     let endInp=document.getElementById("endDate");
     let startTime=document.getElementById("startTime");
     let endTime=document.getElementById("endTime");
+    let today = new Date();
+    let startDate = new Date(startInp.value+" "+startTime.value);
+    if(startDate>today){
+        return true;
+    }
     if(startInp.valueAsNumber<endInp.valueAsNumber){
         return true;
     }else if(startInp.valueAsNumber===endInp.valueAsNumber&&startTime.valueAsNumber<endTime.valueAsNumber){
         return true;
     }else{
+        
         return false;
     }
 }
@@ -65,7 +108,6 @@ function handleCreateEventSubmitForm() {
         }
         const okd = new FormData(e.target);
         let data = Object.fromEntries(okd.entries());
-        console.log(data);
         data["location"]=JSON.stringify(destination);
         //data["meetingPlace"]=JSON.stringify(origin);
         let eventId=sbmt.getAttribute(dv.NAME);
@@ -190,7 +232,6 @@ function makeImgDiv(result,caption,file) {
     }
     return ppp;
 }
-let fil;
 function handleImages(){
     let uploadImg = document.getElementById("gtimg");
     let caption = document.getElementById("cpt");
@@ -199,7 +240,7 @@ function handleImages(){
     uploadImg.onchange=function(){
         const file = this.files[0];
         if(eventImages.size==max_images){
-            alert("Only 5 images allowed!");
+            alert(`Only ${max_images} images allowed!`);
             return;
         }
         if(file){
@@ -210,7 +251,7 @@ function handleImages(){
             const imgparnt = document.getElementById("imgs_dv");
             reader.onload=function () {
                 imgparnt.appendChild(makeImgDiv(this.result,file.name,file));
-                fil=file;
+                file;
             }
             reader.readAsDataURL(file);
         }
@@ -218,11 +259,6 @@ function handleImages(){
 }
 function makeFormData(evd){
 	let formData = new FormData();	
-    //formData.append("img_cover",fil);
-    
-    //let imgs = document.getElementById("imgs_dv").children;
-    //let elem;
-
     let x=0;
     console.log("GOING TO CREATE EVENT: "+eventImages.size);
     
@@ -240,20 +276,7 @@ function makeFormData(evd){
     if(editingArray){
         formData.append("editing",JSON.stringify(editingArray));
     }
-    /*
-    for(let x=0;x<imgs.length;x++){
-        elem=imgs[x].firstChild;
-        if(elem.tagName=='IMG'){
-            arr.push(elem.getAttribute("src"));
-        }else{
-            alert("INVALID DATA!");
-            return null;
-        }
-    }
-    if(arr.length>0){
-        arr = JSON.stringify(arr);
-        formData.append("imgs",arr);
-    }*/
+
 	return formData;
 }
 showCreateEventBlock();
