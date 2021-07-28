@@ -145,7 +145,7 @@ function superUser() {
     let clicked = false;
     superUser.onclick=()=>{
         if(clicked==false){
-            document.getElementById("mr_rged_users");
+            document.getElementById("mr_rged_users").click();
             clicked=true;
         }
         hideAllBlocksButOne("suplc_blk");

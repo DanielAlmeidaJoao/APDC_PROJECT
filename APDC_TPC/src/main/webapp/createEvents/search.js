@@ -19,14 +19,22 @@ let currentMapLocation=null;
 let destination=null;
 let origin=null;
 let markers1 = [];
+
+function getPointsTextAreas() {
+  return morePointsObj.txtas;
+}
+function getPointsCoordinates() {
+  return morePointsObj.tracks;
+}
 const MAP_ZOOM=12;
 const fields =["place_id","plus_code"];
-function clearMarkers() {
+
+function clearMarkers(markers) {
   // Clear out the old markers.
-  markers1.forEach((marker) => {
+  markers.forEach((marker) => {
     marker.setMap(null);
   });
-  markers1 = [];
+  markers = [];
 }
 
 let map;
@@ -49,7 +57,6 @@ function initAutocomplete() {
       geocodeLatLng(map,lat,lng);
     }
   });
-
   navigator.permissions && navigator.permissions.query({name: 'geolocation'})
     .then(function(PermissionStatus) {
         if (PermissionStatus.state == 'granted') {
@@ -64,7 +71,6 @@ function initAutocomplete() {
   const input = document.getElementById("pac-input");
 
   const searchBox = new google.maps.places.SearchBox(input);
-  //searchBox.setFields(fields);
   const searchBox2 = new google.maps.places.SearchBox(input2);
 
   
@@ -76,22 +82,14 @@ function initAutocomplete() {
     map.panTo(startLocation);
 
     //let marker;
-    clearMarkers();
+    //clearMarkers(markers1);
     if(mapZoom == map.getZoom()){
       geocodeLatLng(map,startLocation.lat(),startLocation.lng(),placeMarker); 
     }
   });
 
   google.maps.event.addListener(map, 'idle', ()=>{
-    //if(currentMapLocation!=null&&( currentMapLocation.lat!=map.center.lat()||currentMapLocation.lng!=map.center.lng())){
     if(!equalsCenter(currentMapLocation)){
-      /*
-      currentMapLocation = {
-        lat: map.center.lat(),
-        lng: map.center.lng()
-      }
-      document.getElementById("vwmrpnt").click();*/
-      console.log("OKOK ");
       handleLoadEventsOnIdle();
     }
   });
@@ -99,19 +97,16 @@ function initAutocomplete() {
   //${address},${startLocation}
   function placeMarker(address) {
     //let marker;
-    clearMarkers();
-    //marker =  new google.maps.Marker({position: startLocation, map: map});
-
-    let contentString = `<div class='dvifn'>
-                            <div class='psifn'>
-                              <span>Address: </span>
-                              <span class='darn8'>${address}</span>
-                            </div>
-                            <button class='psibtn' name='${address}' onclick=handleMakeEventOnTheMap(this,${startLocation.lat()},${startLocation.lng()})>Create Event</button>
-                          </div>`
-    /* infowindow = new google.maps.InfoWindow({content:contentString,maxWidth:"800px"});
-    infowindow.open(map, marker);
-    markers1.push(marker); */
+    let contentString;
+    contentString = `
+      <div class='dvifn'>
+        <div class='psifn'>
+          <span>Meeting Point: </span>
+          <span class='darn8'>${address}</span>
+        </div>
+        <button class='psibtn' name='${address}' onclick=handleMakeEventOnTheMap(this,${startLocation.lat()},${startLocation.lng()})>Create Event</button>
+      </div>`
+    clearMarkers(markers1);
     makeMarkerAux(startLocation.lat(),startLocation.lng(),null,contentString);
   }
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
@@ -126,14 +121,31 @@ function initAutocomplete() {
   handleSearchBox(searchBox2,validPlace);
 }
 function handleMakeEventOnTheMap(button,lat,lng){
+  button.remove();
   getMaxImagesNumber();
   let address = button.getAttribute("name");
   document.getElementById("addEvt_frm").classList.remove("hidfrm");
   document.getElementById("pac-input2").value = address;
+  let loc = {lat:lat,lng:lng};
   destination={
-    loc:{lat:lat,lng:lng},
+    loc:loc,
     name:address,
   };
+}
+function addPointToTrackEvent(button,lat,lng){
+  let address = button.getAttribute("name");
+  let newDiv = `<div>
+                  <textarea name='tracks' placeholder='About this point'></textarea>
+                </div>`;
+  let htmlEle = stringToDom(newDiv);
+  button.parentElement.appendChild(htmlEle);
+  let loc = {lat:lat,lng:lng};
+  destination={
+    loc:loc,
+    name:address,
+  };
+  button.remove();
+  makeTrack();
 }
 function handleSearchBox(searchBox,func){
   //searchBox.bindTo("bounds",map);
@@ -145,7 +157,7 @@ function handleSearchBox(searchBox,func){
     }else{
       console.log("PLACES LENGTH "+places.length);
     }
-    clearMarkers();
+    clearMarkers(markers1);
     // For each place, get the icon, name and location.
     const bounds = new google.maps.LatLngBounds();
     places.forEach((place) => {
@@ -259,11 +271,9 @@ function makeMarker(eventObj) {
   
   let contentString = null;
   let infowindow = null;
-  marker.addListener('click', function() {
+  marker.addListener('click',function() {
     if(clicked==false){
-      console.log(" AHAHA");
       let path=`/rest/events/event/${marker.id}`;
-      console.log("I AM PATHH "+path);
       fetch(path).then(response => {
         return response.json();
       }).then(event=>{
@@ -283,6 +293,15 @@ function makeMarker(eventObj) {
       distDiv.textContent+=" KM";
     }
   });
+
+  let trackPoints=eventObj.trackPoints;
+  if(trackPoints){
+    trackPoints = JSON.parse(trackPoints);
+    for (let index = 0; index < trackPoints.length; index++) {
+      const element = trackPoints[index];
+      geocodeLatLng(map,element.loc.lat,element.loc.lng,undefined,`<div>DESCRIPTION: ${element.desc}</div>`);
+    }
+  }
 }
 
 function makeMarker2(eventObj) {
@@ -295,7 +314,7 @@ function makeMarker2(eventObj) {
       map: map
   });
   marker.id=eventObj.eventId;
-  currentPoints.push(marker);
+  //currentPoints.push(marker);
   let clicked=false;
   
   let contentString = makeShowInfoString(eventObj,eventObj.eventAddress,true);
@@ -325,26 +344,6 @@ function geocodeLatLng(map,lat,lng,func) {
           pageRefreshed();
         }
         map.setZoom(MAP_ZOOM);
-        /*
-        const icon = {
-          url: iconUrl,
-          size: new google.maps.Size(71, 71),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(17, 34),
-          scaledSize: new google.maps.Size(25, 25),
-        };
-        const marker = new google.maps.Marker({
-          map:map,
-          icon:icon,
-          title: response.results[0].formatted_address,
-          position: new google.maps.LatLng(lat,lng)
-        });
-        markers1.push(marker);
-        infowindow.setContent(response.results[0].formatted_address);
-        infowindow.open(map, marker);
-        marker.addListener('click', function() {
-          infowindow.open(map, marker);
-        });*/
         let title = response.results[0].formatted_address;
         makeMarkerAux(lat,lng,title,title);
       } else {
@@ -353,7 +352,6 @@ function geocodeLatLng(map,lat,lng,func) {
     })
     .catch((e) => window.alert("Geocoder failed due to: " + e));
 }
-
 function makeMarkerAux(lat,lng,title,infoContent) {
   const infowindow = new google.maps.InfoWindow();
   const icon = {

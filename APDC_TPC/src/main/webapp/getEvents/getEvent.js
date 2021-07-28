@@ -167,43 +167,7 @@ function me(ele,className,txt){
     }
     return d;
 }
-/**
- * creates the div that will keep the organizer's name and profile picture
- * @param {*} name - name of the organizer
- * @param {*} parent - parent html of the event that will be created
- */
-/**
-function organizerDiv(name,parent,url){
-    let d=me(dv.DIV,"dlfx mgpd abt_orzr");
-    let imgP = document.createElement("img");
-    imgP.setAttribute("class","nav_img_prfl");
-    imgP.setAttribute("src",url);
-    imgP.setAttribute("alt","profile-pic");
-    let dp=me(dv.DIV,"orgd");
-    dp.appendChild(imgP);
-    /*
-    TODO : the part related to viewing the users profile picture
-    */
-/*
-    let dnm = me(dv.DIV,"orgd",name);
-    d.appendChild(dp);
-    d.appendChild(dnm);
-    parent.appendChild(d);
-}
 
-/**
- * creates the div that will keep the event description and title
- * @param {*} title title of the event
- * @param {*} txt text description of the event
- * @param {*} parent html parent element of the div being created
- */
-/**
-function eventDescDiv(title,txt,parent){
-    let hh = me(dv.H2,"",title);
-    let dt = me(dv.DIV,"txtDesc",txt);
-    parent.appendChild(hh);
-    parent.appendChild(dt);
-} */
 /**
  * creates a div to represent date or the place where the event is taking place
  * @param {*} className html class name for css
@@ -313,66 +277,7 @@ function participatingButtons(parent,isGoing,eventid) {
         //remove from datastore
     }
 }
-/**
- * is going to create a div block to have the information about the volunteers in the event
- * @param {number of valunteers need to take part in the event} volunteers 
- * @param {html parent element} parent 
- */
-/*
-function volunteersDiv(volunteers,currentNum,parent,isOwner,eventid,participating,finished){
-    let mnd = me(dv.DIV,"mgpd");
-    let son1 = volunteersDivAux(volunteers,"vlt","vlts1 vlts","vlts1 vlts","Voluntarios:"); 
-    let interestedDiv = volunteersDivAux(currentNum,"vlt","vlts","vlts","Interested:");            
-    /*
-    if(!finished && !isOwner){
-        participatingButtons(interestedDiv,participating,eventid);
-    }*/
-    /*
-    mnd.appendChild(son1);
-    mnd.appendChild(interestedDiv);
-    parent.appendChild(mnd);
-}
-/**
- * the div containing the date and location of the event
- * @param {*} where where the event is taking place
- * @param {*} when when the event is taking place
- * @param {*} grdpa parent element that will contain the new created div
- */
-/*
-function eventDateLocationDiv(where,when,grdpa){
-    //from = JSON.parse(from);
-    where =JSON.parse(where);
-    //let vonMap = showOnTheMapButton(from,where);
-    //from=from.name;
-    where=where.name;
-    let parent = me(dv.DIV,"dlfx mgpd abt_evt");
-    //let dt0 =  littleDetails("mrd plc",from,"From (optional):");
-    let dt =  littleDetails("mrd plc",where,"Where:");
-    let dt2 = littleDetails("mrd dte",when,"When:");
-    //parent.appendChild(dt0);
-    parent.appendChild(dt);
-    //parent.appendChild(vonMap);
-    parent.appendChild(dt2);
-    grdpa.appendChild(parent);
-}*/
 
-/**
- * div that will have the images associated with this event on the time of creation
- * @param {*} parent parent element that will contain the new created div
- */
-/*
-function eventsImagesDiv(parent,imgArr){
-    let d = me(dv.DIV,"dlfx imgs_dv evnts_pcs");
-    //let im= me(dv.IMG,"");
-    //im.setAttribute("src","../imgs/Screen-Shot-2015-07-13-at-1.53.34-PM.png");
-    //imgArr = JSON.parse(imgArr);
-    let im;
-    im = me(dv.IMG,"");
-    im.setAttribute("src",imgArr);
-    im.setAttribute("alt","eventimage1");
-    d.appendChild(im);  
-    parent.appendChild(d);
-}*/
 /**
  * async method to remove the event from the database
  * @param {*} eventId id of the event to be removed
@@ -433,56 +338,6 @@ function removeEventButton(eventId,parent,eventObj,finished) {
     }
 }
 
-/**
- * creates a div to display an event
- * @param {*} organiser organizer of the event
- * @param {*} title title
- * @param {*} txt text description
- * @param {*} where location
- * @param {*} when date
- * @param {*} eventId id of the event
- */
-   /*
-function singleEventBlock(eventObj,finished){
-        /**
- * eventObj.name)
- * eventObj.description
- * eventObj.goals
- * ,eventObj.location
- * eventObj.meetingPlace
- * eventObj.startDate
- * eventObj.endDate
- * eventObj.eventId
- */
-    //let organizerAndDescParent = me(dv.DIV,"blk_desc");
-    //organizerDiv(eventObj.organizer,organizerAndDescParent,eventObj.imgUrl);
-
-    //let descriptionBlock = me(dv.DIV,"dlfx mgpd abt_evt");
-    //eventDescDiv(eventObj.name,eventObj.description,descriptionBlock);
-    //eventDateLocationDiv(eventObj.location,eventObj.startDate+" Until "+eventObj.endDate,descriptionBlock)
-
-    //volunteersDiv(eventObj.volunteers,eventObj.currentParticipants,descriptionBlock,eventObj.owner,eventObj.eventId,eventObj.participating,finished);
-
-    //organizerAndDescParent.appendChild(descriptionBlock);
-
-    //let organizerAndDescParentGrandPa=me(dv.DIV,"dlfx evt_disp");
-    //organizerAndDescParentGrandPa.appendChild(organizerAndDescParent);
-    //eventsImagesDiv(organizerAndDescParentGrandPa,eventObj.images);
-
-    //let mainS1 = me(dv.DIV,"one_ev");
-
-    //mainS1.setAttribute("id",HTML_EVENT_ID_SUFFIX+eventObj.eventId);
-    //mainS1.appendChild(organizerAndDescParentGrandPa);
- 
-    /*
-    if(eventObj.owner){
-        removeEventButton(eventObj.eventId,mainS1,eventObj,finished);
-    }
-    let frag = document.createDocumentFragment();
-    frag.appendChild(mainS1);
-    return frag;    
-}
-*/
 function reportEvent(btn){
     btn.parentElement.children[1].classList.toggle("hiderptdv");
 }

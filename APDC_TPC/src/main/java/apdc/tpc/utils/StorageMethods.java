@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
@@ -12,10 +13,13 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
+import com.google.cloud.datastore.EntityQuery.Builder;
 
 import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.GoogleCloudUtils;
+import apdc.events.utils.Pair;
 import apdc.events.utils.moreAttributes.AdditionalAttributesOperations;
+import apdc.events.utils.superuser.FrontEndUserObject;
 import apdc.tpc.resources.LoginManager;
 import apdc.utils.conts.Constants;
 
@@ -132,7 +136,7 @@ public class StorageMethods {
 		updateUser(userKey,e,data);
 		GoogleCloudUtils.deleteObject(LoginManager.profilePictureBucketName,oldobjectName);
 	}
-	public static void updatePassword(String email,String password) {
+	public static void updatePassword(String email,String password) {		
 		Datastore datastore=Constants.datastore;
 		Entity user = getUser(datastore, email);
 		if(!user.getString(PASSWORD).equals(password)) {
@@ -191,6 +195,67 @@ public class StorageMethods {
 			ex.printStackTrace();
 		}
 	}
+	/*
+	private static String doubleDigitInt(int n) {
+		String nn = n+"";
+		if(nn.length()==1) {
+			nn = "0"+n;
+		}
+		return nn;
+	}
+	private static void addUsersForTestingPurposes() {
+		Datastore datastore = Constants.datastore;
+		Transaction txn =null;
+		String USERNAME1="enduser";
+		String PASSWORD1 = "uPassword$";
+		
+		String USERNAME2="docente";
+		String PASSWORD2 = "dPassword$";
+		
+		String BACKOFFICE_NAME = "boffice";
+		String BACKOFFICE_PASSWORD="bPassword$";
+		
+		USERNAME1=BACKOFFICE_NAME;
+		PASSWORD1=BACKOFFICE_PASSWORD;
+		
+		String role = USER;
+		try {
+			txn = datastore.newTransaction();
+			for(int i=1;i<=6;i++) {
+				String number = doubleDigitInt(i);
+				String name = USERNAME1+number;
+				String password = PASSWORD1+number;
+				String email = name+"@gmail.com";
+				RegisterData data = new RegisterData();
+				data.setEmail(email);
+				data.setName(name);
+				data.setPassword(LoginManager.hashPassword(password));
+				
+				data.setProfilePictureUrl("/imgs/Profile_avatar_placeholder_large.png");
+				System.out.printf(" USERNAME: %s, EMAIL: %s, PASSWORD: %s\n",data.getName(),data.getEmail(),data.getPassword());
+				KeyFactory kf = datastore.newKeyFactory().setKind(USERS_KIND);
+				com.google.cloud.datastore.Key userKey = datastore.allocateId(kf.newKey());
+				Entity person = datastore.get(userKey);
+				if(person==null) {
+				    person = Entity.newBuilder(userKey)
+				    		.set(EMAIL_PROP,data.getEmail())
+							.set(PASSWORD,data.getPassword())
+							.set(NAME_PROPERTY,data.getName())
+							.set(ROLE_PROP,role)
+							.set(STATE_PROP,ENABLED)
+							.set(PROFILE_PICTURE_URL_PROP,data.getProfilePictureUrl())
+							.build();
+					txn.put(person);
+				}
+			}
+		    txn.commit();
+		  }catch(Exception e) {
+			  	e.printStackTrace();
+				LOG.severe(e.getLocalizedMessage());
+				rollBack(txn);
+		  }
+	}
+	*/
 	public static long addUser(Datastore datastore, RegisterData data) {
 		Transaction txn =null;
 		long userid=0L;

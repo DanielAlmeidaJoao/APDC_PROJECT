@@ -3,7 +3,7 @@ const elems=document.getElementById("inp_data").querySelectorAll("input");
 let editingArray = null;
 
 function createEventFormIsFree(){
-    for (let index = 0; index < elems.length; index++) {
+    for (let index = 2; index < elems.length; index++) {
         const element = elems[index];
         if(element.value.trim()!=""){
             return false;
@@ -21,6 +21,7 @@ function createEventFormIsFree(){
  * @returns void
  */
 function editEvent(btn){
+    getMaxImagesNumber();
     let eventObj =  JSON.parse(btn.getAttribute("data-obj"));
     btn.removeAttribute("data-obj");
     if(!createEventFormIsFree()){

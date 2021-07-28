@@ -20,4 +20,3 @@ indexes:
   - name: OWNER
   - name: FORMATTED_ADDRESS
   - name: NAME
-  - name: imgs

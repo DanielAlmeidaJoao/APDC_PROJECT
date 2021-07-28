@@ -16,7 +16,6 @@ let getMaxImagesNumber = (function() {
             }).then(data =>{
                 if(data){
                     max_images=data;
-                    console.log(data);
                 }
             });
         }
@@ -69,7 +68,6 @@ function cancelEventCreationEdition() {
             element.value="";
         }
         editingArray=null;
-        //origin=null;
         destination=null;
         resetImagesDiv();
         sbmt.removeAttribute("name");
@@ -130,10 +128,36 @@ function handleCreateEventSubmitForm() {
             alert("Date is Invalid! Start Date must be before End Date!");
             return false;
         }
+        /*
+        if(simple==false){
+            let textareas = getPointsTextAreas();
+            let coords = getPointsCoordinates();
+            if(coords.length>6){
+                alert("Only 5 Complementary points are allowed!");
+                return false;
+            }
+            let complementaryPoints=[];
+            for (let index = 0; index < textareas.length; index++) {
+                const element = textareas[index];
+                if(element&&element.value.trim()==""){
+                    alert("Every complementary track point must have a description!");
+                    return false;
+                }else if(element){
+                    complementaryPoints.push({
+                        loc:coords[index],
+                        desc: element.value
+                    });
+                }
+            }
+            if(complementaryPoints.length>0){
+                data["trackPoints"]=JSON.stringify(complementaryPoints);
+            }
+        } */
+        let eventName = data.name;
         data = JSON.stringify(data);
         data = makeFormData(data);
         if(data!=null){
-            uploadData(data);
+            uploadData(data,eventName,eventId);
         }
         return false;
     }
@@ -160,8 +184,8 @@ function updateNumberOfElements(elementid,inc,element) {
  * creates a new event or update with the information in the json object 'datas', if the event already exist
  * @param {*} datas 
  */
-function uploadData(datas) {
-    
+function uploadData(datas,eventName,eventId) {
+    let dest = destination;
     fetch('/rest/events/create', {
     method: 'POST', // or 'PUT'
     body:datas
@@ -186,9 +210,14 @@ function uploadData(datas) {
                 updateNumberOfElements("evt_counter",true);
                 eventBlock.parentElement.replaceChild(singleEventBlock(data,false),eventBlock);
             }*/
-            deleteMarker(data.eventId);
-            clearMarkers();
-            makeMarker2(data);
+            //deleteMarker(data.eventId);
+            clearMarkers(markers1);
+            let eventObj = {
+                loc:dest.loc,
+                name: eventName,
+                eventId: data,
+              }
+            makeMarker(eventObj);
         }
     })
     .catch((error) => {
@@ -259,9 +288,7 @@ function handleImages(){
 }
 function makeFormData(evd){
 	let formData = new FormData();	
-    let x=0;
-    console.log("GOING TO CREATE EVENT: "+eventImages.size);
-    
+    let x=0;    
     if(editingArray==null && eventImages.size==0){
         alert("Add An Image, please!");
         return null;

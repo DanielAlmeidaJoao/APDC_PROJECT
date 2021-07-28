@@ -27,6 +27,7 @@ import com.google.cloud.datastore.Transaction;
 
 import apdc.events.utils.EventParticipationMethods;
 import apdc.events.utils.EventsDatabaseManagement;
+import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.Pair;
 import apdc.events.utils.jsonclasses.EventData2;
 import apdc.events.utils.jsonclasses.ReportEventArgs;
@@ -196,7 +197,6 @@ public class EventsResources {
 		try {
 			long userid = HandleTokens.validateToken(token.getValue());
 			try {
-				System.out.println("I AM USER ID "+user);
 				userid = Long.parseLong(user);
 			}catch(Exception e) {}
 			Constants.LOG.severe(userid+"");

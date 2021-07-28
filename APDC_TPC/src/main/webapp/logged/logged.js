@@ -138,30 +138,8 @@ function showProfilePage(){
         }
     }
 }
-//isLogged();
+isLogged();
 showProfilePage();
 updateNavAttribues();
 logOff();
 removeAccount();
-
-/*
-function blablablaT(eventObj) {
-    let imagesHTMLstr=imageHTMLstrgs(eventObj.images);
-    return `<div class="one_ev">
-                <div class="evt_disp">
-                    <div class="blk_desc">
-                        <div class="dlfx mgpd abt_evt">
-                            <h2 class="">${eventObj.eventName}</h2>
-                            <div class="dlfx mgpd abt_evt">
-                                <div class="mrd plc">
-                                    <div class="mrdso">Where:</div>
-                                    <div class="mrdso">${eventObj.place}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dlfx imgs_dv evnts_pcs">${imagesHTMLstr}</div>
-                </div>
-            </div>`;
-}
-*/

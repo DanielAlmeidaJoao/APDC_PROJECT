@@ -1,12 +1,16 @@
 package apdc.events.utils;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -15,6 +19,8 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.google.api.gax.paging.Page;
+import com.google.api.services.storage.Storage.Buckets.List;
 import com.google.cloud.Identity;
 import com.google.cloud.Policy;
 
@@ -82,7 +88,6 @@ public class GoogleCloudUtils {
 		    //storage.create(blobInfo, Files.readAllBytes(Paths.get("files/"+objectName)));
 		    Blob b = storage.create(blobInfo,IOUtils.toByteArray(in));
 		    storage.createAcl(blobId,Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-
 		    //Blob com.google.cloud.storage.Storage.get(BlobId blob)
 //		    System.out.println(
 //		    "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName);
@@ -127,6 +132,22 @@ public class GoogleCloudUtils {
 	    System.out.println("DOWNLOAD STUFF "+g);
 	    return b.getContent();
 	}
+	public static ArrayList<String> listFolderElements(String bucketName,long eventId) {
+		Storage storage = StorageOptions.getDefaultInstance().getService();
+	    ArrayList<String> images=new ArrayList<String>(10);
+		try {
+			
+	        Page<Blob> blobs = storage.list(bucketName, Storage.BlobListOption.currentDirectory(), Storage.BlobListOption.prefix(eventId+"/"));
+		    for (Blob blob : blobs.iterateAll()) {
+		      String urlString = publicURL(bucketName, blob.getName());
+		      images.add(urlString);
+		    }
+		}catch(Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		}
+
+	   return images;
+	}
 	public static void saveAvatarPicture(String bucketName, String objectName) {
 		try {
 			/*
@@ -153,7 +174,14 @@ public class GoogleCloudUtils {
 		}catch(Exception e) {
 			System.out.println(e.getLocalizedMessage());
 		}
-		
+	}
+	public static void deleteBatch(java.util.List<BlobId> blodis) {
+		try {
+			Storage storage = StorageOptions.getDefaultInstance().getService();
+		    storage.delete(blodis);
+		}catch(Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		}
 	}
 	public static String publicURL(String bucketName, String objectName) {
 		return String.format("https://storage.googleapis.com/%s/%s",bucketName,objectName);

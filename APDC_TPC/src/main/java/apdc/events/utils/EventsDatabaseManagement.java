@@ -2,8 +2,6 @@ package apdc.events.utils;
 
 import com.google.cloud.datastore.Entity;
 
-
-
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.LatLng;
@@ -14,6 +12,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.storage.BlobId;
 import com.google.openlocationcode.OpenLocationCode;
 import com.google.cloud.datastore.Transaction;
 
@@ -49,7 +48,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 
-import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 
@@ -103,9 +101,8 @@ public class EventsDatabaseManagement {
 		return null;
 	}
 	@SuppressWarnings("unchecked")
-	private static ArrayList<String> imagesToRemoveWhenEditing(HttpServletRequest httpRequest, long eventid){
+	private static void imagesToRemoveWhenEditing(HttpServletRequest httpRequest, long eventid){
 		ArrayList<String> urls;
-		ArrayList<String> savedUrls=null;
 		try {
 			Part p = httpRequest.getPart(EDITING_FORMDATA_KEY);
 			/*
@@ -117,29 +114,23 @@ public class EventsDatabaseManagement {
 			urls = Constants.g.fromJson(h,ArrayList.class);
 			String imageName =null;
 			String splitted [] = null;
-			
+			/*
 			try {
-				com.google.cloud.datastore.Key eventKey = Constants.datastore.newKeyFactory().setKind(EVENTS).newKey(eventid);
-				Entity ev = Constants.datastore.get(eventKey);
-				savedUrls = Constants.g.fromJson(ev.getString(Constants.EVENT_IMGS_PROP),ArrayList.class);
-			}catch(Exception e) {
-				savedUrls = new ArrayList<>();
-			}
+				savedUrls = GoogleCloudUtils.listFolderElements(EventsResources.bucketName,eventid);
+			}catch(Exception e){}*/
 			Iterator<String> it = urls.iterator();
+			java.util.List<BlobId> blodis = new ArrayList<>(10);
 			while(it.hasNext()) {
 				String toRemove = it.next();
 				splitted = toRemove.split("/");
-				if(savedUrls!=null) {
-					System.out.println(savedUrls.remove(toRemove)+" <-------- REMOVED ---");
-				}
 				imageName = splitted[splitted.length-1];
-				GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventid+"/"+imageName);
-				System.out.println("REMOVING IMAGE ---- > "+imageName);
+				BlobId blobId = BlobId.of(EventsResources.bucketName,eventid+"/"+imageName);
+			    blodis.add(blobId);
+				GoogleCloudUtils.deleteBatch(blodis);
 			}
 		} catch (IOException | ServletException e) {
 			e.printStackTrace();
 		}
-		return savedUrls;
 	}
 	
 	public static EventData2 getEvent(long eventid,Datastore datastore,long userid) {
@@ -284,10 +275,7 @@ public class EventsDatabaseManagement {
 					.set(START_DATE,startDate)
 					.set(END_DATE,endDate)
 					.set(VOLUNTEERS,et.getVolunteers())
-					.set(EVENT_OWNER,userid);
-			
-			
-						
+					.set(EVENT_OWNER,userid);		
 			//handles the reports
 			if(!editing) {
 				builder.set(REPORTED_PROP,false);
@@ -297,36 +285,31 @@ public class EventsDatabaseManagement {
 				builder.set(REPORTED_PROP,event.getBoolean(REPORTED_PROP));
 				builder.set(REPORT_TEXTS_PROPERTY,noIndexProperties(event.getString(REPORT_TEXTS_PROPERTY)));
 			}
-					
+	
 			try {
-				Iterator<Part> images = httpRequest.getParts().iterator();
-				Part part;
-				ArrayList<String> imgs=null;
 			    if(editing) {
-			    	imgs = imagesToRemoveWhenEditing(httpRequest,eventId);
-			    }else {
-			    	imgs=new ArrayList<>();
+			    	imagesToRemoveWhenEditing(httpRequest,eventId);
 			    }
-				
-				long evk = eventKey.getId();
-				while(images.hasNext()&&max_nr_images>0) {
-					part = images.next();
-					if(!part.getName().equals(Constants.EVENT_FORMDATA_KEY)&&!part.getName().equals(EDITING_FORMDATA_KEY)) {
-						String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,evk+"/"+System.currentTimeMillis()+"",part.getInputStream());
-						eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
-						imgs.add(eventUrl);
-						max_nr_images--;
-						//builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
-					}
-				}
-				builder = builder.set(Constants.EVENT_IMGS_PROP,Constants.g.toJson(imgs));
-				/*
-				Part p = httpRequest.getPart("img_cover");
-				if(p!=null) {
-					String eventUrl = GoogleCloudUtils.uploadObject(EventsResources.bucketName,System.currentTimeMillis()+"",p.getInputStream());
-					eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
-					builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
-				}*/
+			   	Thread thread = new Thread(() ->{
+			   		try {
+			   			long evk = eventKey.getId();
+						Iterator<Part> images = httpRequest.getParts().iterator();
+				   		while(images.hasNext()&&max_nr_images>0) {
+							Part part = images.next();
+							if(!part.getName().equals(Constants.EVENT_FORMDATA_KEY)&&!part.getName().equals(EDITING_FORMDATA_KEY)) {
+								GoogleCloudUtils.uploadObject(EventsResources.bucketName,evk+"/"+System.currentTimeMillis()+"",part.getInputStream());
+								/*String eventUrl = */ 
+								/*
+								eventUrl=GoogleCloudUtils.publicURL(EventsResources.bucketName,eventUrl); //url
+								imgs.add(eventUrl);
+								max_nr_images--;*/
+								//builder = builder.set(Constants.EVENT_PICS_FORMDATA_KEY,noIndexProperties(eventUrl));
+							}
+						}
+			   		}catch(Exception e) {}	
+			   	});
+			    thread.start();				
+				//builder = builder.set(Constants.EVENT_IMGS_PROP,Constants.g.toJson(imgs));
 			}catch(Exception e) {
 				e.printStackTrace();
 				LOG.severe(e.getLocalizedMessage());
@@ -339,8 +322,10 @@ public class EventsDatabaseManagement {
 			    CountEventsUtils.makeUserEventCounterKind(userid,datastore,true,txn);
 		    }
 		    txn.commit();
-		    EventData2 obj = getEvent(ev,userid);
-		    result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
+		    //EventData2 obj = getEvent(ev,userid);
+		    //result=Response.status(Status.OK).entity(Constants.g.toJson(obj)).build();
+		    result=Response.status(Status.OK).entity(eventId).build();
+
 		  }catch(Exception e) {
 			  StorageMethods.rollBack(txn);
 			  GoogleCloudUtils.deleteObject(EventsResources.bucketName,eventId+"");
@@ -436,7 +421,8 @@ public class EventsDatabaseManagement {
 			while(tasks.hasNext()){
 				e = tasks.next();
 				LatLng coords = e.getLatLng(LATLNG_EVENT_PROP);
-				events.add(new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude())));
+				EventLocationResponse event = new EventLocationResponse(e.getString(FORMATTED_ADDRESS_EVENT_PROP),e.getKey().getId(),e.getString(NAME),new Coords(coords.getLatitude(),coords.getLongitude()));			
+				events.add(event);
 			}
 			//data,cursor
 			CursorHelper ch =  new CursorHelper();
@@ -556,7 +542,6 @@ public class EventsDatabaseManagement {
 			ed.setEventAddress(e.getLocalizedMessage());
 		}
 		
-		
 		ed.setName(en.getString(NAME));
 		long startDate = en.getLong(START_DATE);
 		ed.setStartDate(revertTimeStamp(startDate));
@@ -568,6 +553,7 @@ public class EventsDatabaseManagement {
 		}catch(Exception e) {
 			
 		}
+		
 		try {//In case the user owner was removed
 			ed.setOrganizer(parentEntity.getString(StorageMethods.NAME_PROPERTY));
 			ed.setOwner(userid==ownerid);
@@ -590,7 +576,8 @@ public class EventsDatabaseManagement {
 		LOG.severe("GOING TO FETCH THE IMAGES ");
 		try {
 			//String.format("https://storage.googleapis.com/%s/%s",EventsResources.bucketName,en.getString(Constants.EVENT_PICS_FORMDATA_KEY));
-			ed.setImages(en.getString(Constants.EVENT_IMGS_PROP));
+			//ed.setImages(en.getString(Constants.EVENT_IMGS_PROP));
+			ed.setImages(Constants.g.toJson(GoogleCloudUtils.listFolderElements(EventsResources.bucketName,ed.getEventId())));
 		}catch(Exception e){LOG.severe("ERRROR: "+e.getLocalizedMessage());}
 		return ed;
 	}
@@ -742,7 +729,7 @@ public class EventsDatabaseManagement {
 			com.google.cloud.datastore.ProjectionEntityQuery.Builder dd = Query.newProjectionEntityQueryBuilder()
 				    .setKind(EVENTS).setFilter(com.google.cloud.datastore.StructuredQuery.CompositeFilter
 				    		.and(filter))
-				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP,Constants.EVENT_IMGS_PROP)
+				    .setProjection(NAME,FORMATTED_ADDRESS_EVENT_PROP)
 				    .setLimit(pagesige);
 			if(startCursor!=null && !startCursor.isEmpty()){
 				cursorObject = Cursor.fromUrlSafe(startCursor); 
@@ -757,7 +744,7 @@ public class EventsDatabaseManagement {
 				e = tasks.next();
 				EventData3 event = new EventData3();
 				event.setEventName(e.getString(NAME));
-				event.setImages(e.getString(Constants.EVENT_IMGS_PROP));
+				event.setImages(Constants.g.toJson(GoogleCloudUtils.listFolderElements(EventsResources.bucketName,e.getKey().getId())));
 				event.setPlace(e.getString(FORMATTED_ADDRESS_EVENT_PROP));
 				event.setEventId(e.getKey().getId());
 				events.add(event);
