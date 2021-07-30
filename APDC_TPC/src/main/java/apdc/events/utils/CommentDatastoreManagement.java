@@ -1,6 +1,7 @@
 package apdc.events.utils;
 
 import java.util.LinkedList;
+
 import java.util.List;
 
 import com.google.cloud.Timestamp;
@@ -15,10 +16,8 @@ import com.google.cloud.datastore.Transaction;
 import com.google.cloud.datastore.EntityQuery.Builder;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 
-import apdc.events.utils.jsonclasses.CommentObject;
 import apdc.events.utils.jsonclasses.CommentObject2;
 import apdc.events.utils.jsonclasses.LoadCommentsResponse;
-import apdc.tpc.resources.LoginManager;
 import apdc.tpc.utils.StorageMethods;
 import apdc.utils.conts.Constants;
 

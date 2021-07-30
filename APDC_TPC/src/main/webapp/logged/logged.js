@@ -59,11 +59,7 @@ function disableInfoEditions(value) {
 function logOff() {
     let legoffButton = document.getElementById("logoff");
     legoffButton.onclick=()=>{
-        console.log("CLIKED");
         sendLogOff();
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href="/";
     }
 }
 function removeAccount() {
@@ -100,14 +96,24 @@ function removeAccount() {
 }
 
 function sendLogOff() {
+    /*
     let spanText= document.getElementById("rs_sn");
     let xmlHttpReq = getHttpXmlRequest();
     xmlHttpReq.onreadystatechange = function(){
-        if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){}
+        if(xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200){
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href="/";
+        }
     }
     xmlHttpReq.open("GET","../rest/login/op7",true);
-    xmlHttpReq.setRequestHeader("Content-Type", "application/json");
-    xmlHttpReq.send();
+    xmlHttpReq.setRequestHeader("Content-Type","application/json");
+    xmlHttpReq.send();*/
+    fetch("../rest/login/op7").then(response =>{
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href="/";
+    });
 }
 
 function isLogged() {

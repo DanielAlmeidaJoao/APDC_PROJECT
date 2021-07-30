@@ -63,6 +63,11 @@ function handleShowCommentsButton(btn,eventid){
 }
 function publishComment(btn,eventid){
     let textArea = btn.parentElement.children[0];
+    if(textArea.value.trim()==""){
+        alert("Write Something!");
+        return;
+    }
+
     fetch("/rest/comments/create",{
         method:"POST",
         headers:{

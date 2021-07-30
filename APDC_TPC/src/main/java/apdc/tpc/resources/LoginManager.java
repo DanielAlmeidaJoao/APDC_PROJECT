@@ -1,6 +1,7 @@
 package apdc.tpc.resources;
 
 import java.util.Iterator;
+
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -31,7 +32,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.Entity;
 import com.google.gson.Gson;
 
-import apdc.events.utils.EventsDatabaseManagement;
 import apdc.events.utils.GoogleCloudUtils;
 import apdc.events.utils.jsonclasses.ChangeEmailArgs;
 import apdc.events.utils.jsonclasses.ChangePasswordArgs;

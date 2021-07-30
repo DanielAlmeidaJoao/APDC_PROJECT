@@ -2,6 +2,7 @@ package apdc.tpc.resources;
 
 import javax.ws.rs.Consumes;
 
+
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,13 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import apdc.events.utils.CommentDatastoreManagement;
-import apdc.events.utils.EventsDatabaseManagement;
-import apdc.events.utils.Pair;
 import apdc.events.utils.jsonclasses.CommentObject;
 import apdc.events.utils.jsonclasses.CommentObject2;
 import apdc.tpc.utils.tokens.HandleTokens;
